@@ -1,0 +1,475 @@
+---
+title: "Statistical Analysis and Data Display(Incomplete)"
+subtitle : "A ggplot2 approach"
+author: "Qingyang(Kevin) Liu"
+date: "May 3, 2018"
+output:
+  html_document:
+    toc: true
+    toc_depth: 4
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.align='center')
+```
+
+#Load Packages
+
+```{r load_packages, message=FALSE}
+library(tidyverse)
+library(gridExtra)
+library(grid)
+library(cowplot)
+```
+
+#Chapter2
+There is only one figure within Chapter2. All data comes from `HH` package.
+
+##Fig2.1
+
+```{r, warning=FALSE, fig.align='center', fig.height=5, fig.width=5}
+library(ggplot2)
+
+abcd <- data.frame(x=c(1, 2, NA, 4, 5, 6, 7, 8),
+                   y=c(6, 5, 8, NA, 10, 9, 12, 11),
+                   ch=c("NA", "N", "O", "P", "Q", "R", "S", "T"),
+                   colour = rep(c("red","blue"),4),
+                   stringsAsFactors=FALSE)
+abcd$colour <- factor(abcd$colour,levels = c("red","blue"))
+
+fig2.1 <- ggplot(abcd, aes(x = x, y = y, colour = colour)) + 
+          geom_text(aes(label = ch), size = 5) +
+          theme_bw() +
+          theme(legend.position = "none")
+
+fig2.1
+```
+
+<br>
+
+#Chapter3
+There are total 24 figures within chapter 3.
+
+##Tab3.2
+
+In book, table 3.2 is combined by LaTeX. Here is just a example that using `tableGrob` function can generate simple Table. 
+
+```{r, warning=FALSE, fig.align='center', fig.height=2}
+library(ggplot2)
+library(gridExtra)
+library(grid)
+library(cowplot)
+
+df3.2 <- data.frame(x=factor(0:2), y=c(.25, .50, .25))
+
+fig3.2 <- ggplot(df3.2, aes( x = x, y = y)) + 
+          geom_col(colour = "black", fill = "red") +
+          ylab ("P(X = x)")
+
+tab3.2 <- tableGrob(df3.2, row = NULL, cols = c("x","P(X = x)"))
+plot_grid(tab3.2, fig3.2, nrow = 1, axis = "t")
+```
+
+##Tab3.3
+Same as table 3.2, table 3.3 is combined by LaTeX. I like the ideas using mosaic plots to showing probability mass function.
+
+```{r, fig.align='center', fig.height=3, fig.width=5}
+pmf <- matrix(c(0.10,0.2,0.30,0.05,0.1,0.25), nrow = 6)
+pmf <- data.frame(pmf)
+pmf$X <- rep(c("x=1","x=2"),each = 3)
+pmf$Y <- as.character(rep(0:2,2))
+
+fig3.3.1 <- ggplot(pmf,aes(x = Y, y = pmf)) + 
+            geom_col(colour = "black", fill = "red") + 
+            facet_grid(X~., switch = "y") + 
+            scale_x_discrete(position = "top") +
+            theme_bw()
+fig3.3.1
+```
+
+Orignal figure in second row of table 3.3 has no white space between each row. I have not found function to make such change in `ggmosaic`. Same thing for figure in third row. I think the minor difference is acceptable.
+```{r,fig.align='center', fig.height=3, fig.width=5, message=FALSE}
+library(ggmosaic)
+pmf <- matrix(c(0.10,0.2,0.30,0.05,0.1,0.25), nrow = 6)
+pmf <- data.frame(pmf)
+pmf$X <- rep(c("x=1","x=2"),each = 3)
+pmf$X <- factor(pmf$X, levels = c("x=2","x=1"))
+pmf$Y <- as.character(rep(0:2,2))
+pmf$Y <- factor(pmf$Y, levels = c("0","1","2"))
+
+fig3.3.2  <- ggplot(pmf) + 
+             geom_mosaic(aes(weight = pmf, x = product(X,Y), fill = factor(X)), colour = "black") +
+             scale_x_productlist(name = "y", position = "top") +
+             scale_y_continuous(name = "x", 
+                                breaks = c(1/6,2/3), 
+                                minor_breaks = NULL,
+                                labels = c("2","1")) +
+             scale_fill_manual(values = c("red","#ff8888")) +
+             theme_classic() +
+             theme(legend.position = "none", 
+                   axis.title.y = element_text(angle = 180, vjust = 0.5, face = "bold"),
+                   axis.title.x = element_text(face = "bold"),
+                   axis.line = element_blank())
+  
+fig3.3.2
+```
+
+```{r,fig.align='center', fig.height=3, fig.width=5, message=FALSE}
+fig3.3.3  <- ggplot(pmf) + 
+             geom_mosaic(aes(weight = pmf, x = product(Y,X), fill = factor(Y)), colour = "black") + 
+             coord_flip() + 
+             scale_fill_manual(values = c("#ff8888","#ffBBBB","red")) +
+             scale_x_productlist(name = "x", labels = c("2","1")) +
+             scale_y_continuous(name = "y",
+                                position = "right",
+                                breaks = c(1/12,1/6+1/6,1/2+1/4),
+                                minor_breaks = NULL,
+                                labels = c("0","1","2")) +
+             theme_classic() +
+             theme(legend.position = "none", 
+                   axis.title.y = element_text(angle = 180, vjust = 0.5, face = "bold"),
+                   axis.title.x = element_text(face = "bold"),
+                   axis.line = element_blank())
+
+fig3.3.3
+```
+
+##Fig3.2
+Probability density function.
+
+```{r,fig.align='center', fig.height=3, fig.width=5}
+xx <- seq(-3, 6, .025)
+dd <- (dnorm(xx, mean=0, sd=1) + dnorm(xx, mean=2.5, sd=1.1))/2
+pr <- (pnorm(c(2,4), mean=0, sd=1) + pnorm(c(2,4), mean=2.5, sd=1.1))/2
+df3.2 <- data.frame(x = xx,y = dd)
+df3.2b <- subset(df3.2, x > 2 & x <4)
+fig3.2 <- ggplot(df3.2, aes(x = x ,y = y)) + geom_line(colour = "#3366FF") + 
+          geom_area(data = df3.2b, aes(x = x ,y = y), fill = "grey60") +
+          geom_hline(yintercept = 0, colour = "grey60", size = 1) +
+          theme_bw()+
+          labs(y = "f(x)", title = "Prob(2<X<4) = 0.306") +
+          theme(axis.title.y = element_text(angle = 0, vjust = 0.5), 
+                plot.title = element_text(hjust = 0.5, face = "bold"))
+
+fig3.2
+```
+
+##Fig3.3
+Skewed and Symmetric Distribution
+
+```{r,fig.align='center', fig.height=3.5*0.625, fig.width=8*0.625}
+pp <- ppoints(101)
+zz.norm <- qnorm(pp, s=2.2)
+dd.norm <- dnorm(zz.norm, s=2.2)
+xx.chisq4 <- c(0,qchisq(pp, 4))
+xx.chisq4 <- xx.chisq4[-102]
+dd.chisq4 <- dchisq(xx.chisq4, 4)
+df3.3 <- data.frame(x1 = zz.norm, x2 = xx.chisq4, x3 = -rev(xx.chisq4), 
+                    y1 = dd.norm, y2= dd.chisq4, y3 = rev(dd.chisq4),
+                    z1 = rep("symmetric",101), 
+                    z2 = rep("positively skewed",101),
+                    z3 = rep("negatively skewed",101))
+df3.3 <- data.frame(x = c(df3.3$x1,df3.3$x2,df3.3$x3),
+                    y = c(df3.3$y1,df3.3$y2,df3.3$y3),
+                    z = c(as.character(df3.3$z1),
+                          as.character(df3.3$z2),
+                          as.character(df3.3$z3)))
+df3.3$z <- factor(df3.3$z, levels = c("negatively skewed",
+                                      "symmetric",
+                                      "positively skewed"))
+df.temp <- data.frame(x = c(-15,15),
+                      y = c(0,0),
+                      z = factor(c("negatively skewed","positively skewed"), 
+                                 levels = c("negatively skewed",
+                                            "symmetric",
+                                            "positively skewed")))
+df3.3 <- rbind(df3.3,df.temp)
+
+fig3.3 <- ggplot(df3.3,aes(x = x, y = y)) + 
+            geom_line(colour = "#3366FF") + 
+            geom_hline(yintercept = 0, colour = "grey70", size = 1) +
+            facet_grid(.~z,scales = "free_x") +
+            theme_bw() +
+            scale_y_continuous( name = "density",
+                                sec.axis = sec_axis(~., 
+                                                    breaks = c(0,0.05,0.1,0.15), 
+                                                    labels = (rep("",4)))) +
+            theme(strip.background = element_rect(fill = "pink"),
+                  panel.grid.major = element_blank(),
+                  panel.grid.minor = element_blank())
+
+fig3.3
+```
+
+##Fig3.4
+
+The second axis title on right of original figure is vertical aligened and should be readed from bottom to up. I decide to change that. Second axis title on right of current figure is also vertical aligened, however, should be readed from top to bottom.
+
+```{r,fig.align='center', fig.height=3.5*0.625, fig.width=8*0.625, message=FALSE}
+library(HH)
+data(tv)
+tmp <- as.matrix(table(cut(tv$male.life.exp, breaks=seq(49.5,79.5,5))))
+dimnames(tmp) <-
+  list("Male Life Expectancy"=
+         c("50--54","55--59","60--64","65--69","70--74","75--79"),
+       " "="Frequency")
+tmp <- data.frame(tmp)
+tmp$Proportion <- tmp$Frequency/sum(tmp$Frequency)
+tmp$x <- rownames(tmp)
+Proportion <- as.character(tmp$Proportion)
+fig3.4 <- ggplot(tmp, aes(x = x)) + 
+          geom_col(aes(y = Frequency), fill = "grey70", colour = "black") +
+          theme_bw() +
+          xlab("male.life.exp") +
+          scale_y_continuous(breaks = seq(0,10,2),
+                             name = "Count",
+                             sec.axis = sec_axis(trans = ~./40, 
+                                                 breaks = seq(0,10,2)/40,
+                                                 name = "Proportion"))
+          ## theme(axis.title.y.right = element_text(angle = 90))
+          ## change angle of title on second y axis. not necesscary
+
+fig3.4
+```
+
+##Fig3.5
+
+```{r,fig.align='center', fig.height=2.5, fig.width=7, message=FALSE}
+df3.5 <- data.frame()
+df3.5[1:40,"y"] <- as.numeric(tv$male.life.exp)
+df3.5$x <- "male.life.exp"
+fig3.5 <- ggplot(df3.5,aes(x = x, y = y)) + 
+          geom_boxplot(fill = "white", colour = "#3366FF") + 
+          scale_x_discrete(name = element_blank(), 
+                           label = element_blank(), 
+                           breaks = element_blank()) +
+          scale_y_continuous(name = "male.life.exp", 
+                             breaks = seq(50,75,5)) +
+          theme_bw() +
+          theme(panel.grid.minor = element_blank()) +
+          coord_flip()
+
+fig3.5
+```
+
+##Fig3.6
+
+```{r,fig.align='center', fig.height=4.5, fig.width=7, message=FALSE}
+pp <- ppoints(100)
+pp <- c(0, pp[1:25], .25, pp[26:50], .50, pp[51:75], .75, pp[76:100])
+q.pp <- qf(pp, df1=3, df2=36)
+dd <- df(q.pp, df1=3, df2=36)
+df3.6 <- data.frame( x = q.pp, y = dd)
+
+x2 <- qf(0.25, df1=3, df2=36)
+x2 <- seq(0,x2,0.005)
+y2 <- df(x2, df1=3, df2=36)
+df.temp1 <- data.frame(x = x2, y = y2)
+
+x3.min <- qf(0.5, df1=3, df2=36)
+x3.max <- qf(0.75, df1=3, df2=36)
+x3 <- seq(x3.min,x3.max,0.005)
+y3 <- df(x3, df1=3, df2=36)
+df.temp2 <- data.frame(x = x3, y = y3)
+
+fig3.6 <- ggplot(df3.6, aes(x = x, y = y)) + 
+          geom_hline(yintercept = 0, colour = "grey70", size = 1) +
+          geom_area(data = df.temp1, fill = "grey60") +
+          geom_area(data = df.temp2, fill = "grey60") +
+          geom_line(data = df3.6,colour = "#3366FF") + 
+          scale_x_continuous(breaks = c(0,
+                                        qf(0.25, df1=3, df2=36),
+                                        qf(0.5, df1=3, df2=36),
+                                        1,
+                                        qf(0.75, df1=3, df2=36),
+                                        2:5),
+                             labels = c("0", "0.41 \n Q1","0.8 \n Med","1","1.43 \n Q3",paste0(2:5)),
+                             minor_breaks = NULL) +
+          theme_bw() +
+          ggtitle("Quartiles of F(3,36)") +
+          xlab("quantile") + 
+          ylab("density") + 
+          theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 15),
+                axis.title = element_text(size = 10))
+
+fig3.6
+```
+
+##Fig3.7
+
+```{r,fig.align='center', fig.height=3, fig.width=7, message=FALSE, warning = FALSE}
+sym <- rnorm(100)
+neg <- sym[sym<0]
+pos <- sym[sym>0]
+neg.skew <- c(-neg^2, pos^.5)
+pos.skew <- c(-(-neg)^.5, pos^2)
+skew.levels <- c("negatively skewed", "symmetric", "positively skewed")
+skew.df <- data.frame(y=c(neg.skew, sym, pos.skew),
+                      dist=ordered(rep(skew.levels, c(100,100,100)),
+                                   levels=skew.levels))
+
+df3.7 <- skew.df
+colnames(df3.7) <- c("y","x")
+
+fig3.7 <- ggplot(df3.7, aes(x = x, y = y)) + 
+          geom_boxplot(colour = "#3366FF") +
+          coord_flip() +
+          scale_x_discrete(name = element_blank()) +
+          scale_y_continuous(name = element_blank(), 
+                             limits = c(-8,7),
+                             breaks = seq(-5,5,5), 
+                             labels = paste0(seq(-5,5,5))) +
+          theme_bw()
+
+fig3.7
+```
+
+##Fig3.11
+
+```{r,fig.align='center', fig.height=4.5, fig.width=6.5, message=FALSE, warning = FALSE}
+qq <- 0:15
+yy <- dbinom(qq,size=15, prob=.4)
+df3.11 <- data.frame(x = qq, y = yy)
+df3.11[8:16,"colour"] <- "light"
+df3.11[1:6,"colour"] <- "darker"
+df3.11[7,"colour"] <- "darkest"
+
+x <- seq(0,15,0.005)
+y <- dnorm(x,mean = 6,sd=sqrt(15*.4*(1-.4)))
+
+df.temp <- data.frame(x = x, y = y)
+
+x1 <- qnorm(0.025, mean = 6,sd=sqrt(15*.4*(1-.4)))
+x2 <- qnorm(1-0.025, mean = 6,sd=sqrt(15*.4*(1-.4)))
+
+df.temp1 <- data.frame(x = seq(x1,x2,0.05))
+df.temp1$y <- dnorm(df.temp1$x, mean = 6,sd=sqrt(15*.4*(1-.4)))
+
+df.text <- data.frame( x = c(5.5,6.5),
+                       y = c(-0.01,-0.01),
+                       z = c("5.5","6.5"))
+
+fig3.11 <- ggplot(df3.11, aes(x = x, y = y)) +
+           geom_hline(yintercept = 0, colour = "grey50") +
+           geom_area(data = df.temp1 , aes(x = x, y = y), fill = "green2") + 
+           geom_vline(xintercept = c(x1,x2), linetype = "longdash",colour = "grey50") +
+           geom_vline(xintercept = 6, colour = "green2", size = 1, linetype = "dotted") +
+           geom_vline(xintercept = c(5.5,6.5), linetype = "dashed", colour = "grey50") +
+           geom_line(data = df.temp , aes(x = x, y = y), colour = "black") +
+           geom_col(colour = "black", aes(fill = colour), width = 1) +
+           scale_fill_manual(values = c("skyblue3","darkblue","skyblue1")) +
+           geom_text(data = df.text, aes(x = x, y = y, label = factor(z))) +
+           ggtitle("dbinom(x, size = 15, prob = 0.4)") +
+           theme_bw() +
+           scale_x_continuous(breaks = 0:15, labels = paste0(0:15)) +
+           scale_y_continuous(limits = c(-0.01,0.23), name = element_blank()) +
+           theme(legend.position = "none",
+                 panel.grid = element_blank(),
+                 plot.title = element_text(hjust = 0.5, face = "bold"))
+
+fig3.11
+```
+
+##Fig3.12
+
+```{r,fig.align='center', fig.height=6.5, fig.width=6.5, message=FALSE, warning = FALSE}
+pp <- ppoints(100)
+xx <- qnorm(pp)
+yy <- dnorm(xx)
+cc <- pnorm(xx)
+
+df3.12.1 <- data.frame(x = xx, y = yy, class = as.character(expression("Density"~phi(z))))
+df3.12.2 <- data.frame(x = xx, y = cc, class = as.character(expression("probability CDF"~phi(z))))
+
+qnorm(0.95)
+
+df3.12.1.area1 <- df3.12.1[df3.12.1$x <= 1.645,c("x","y")]
+df.comb <- data.frame(x = seq(1.600,1.645, 0.005))
+df.comb$y <- dnorm(df.comb$x)
+df3.12.1.area1 <- rbind(df3.12.1.area1,df.comb)
+
+df3.12.1.area2 <- df3.12.1[! df3.12.1$x < 1.645,c("x","y")]
+df.comb <- data.frame(x = seq(1.645,1.695, 0.005))
+df.comb$y <- dnorm(df.comb$x)
+df3.12.1.area2 <- rbind(df.comb, df3.12.1.area2)
+
+fig3.12.1 <- ggplot(df3.12.1, aes(x = x, y = y)) +
+             geom_hline(yintercept = 0.1031, linetype = "dashed", colour = "grey50") +
+             geom_area(data = df3.12.1.area1, aes(x =x, y = y), fill = "skyblue3") + 
+             geom_area(data = df3.12.1.area2, aes(x =x, y = y), fill = "skyblue1") + 
+             geom_line() +
+             facet_grid(class~., switch = "y", labeller = label_parsed) +
+             scale_x_continuous( expand = c(0,0),
+                                 name = element_blank()) + 
+             scale_y_continuous( expand = c(0,0), 
+                                 limits = c(0,0.405),
+                                 breaks = c(0,0.2,0.4),
+                                 labels = paste0(c("0.0",0.2,0.4)),
+                                 sec.axis = sec_axis(~., breaks = 0.1031)) + 
+             theme_bw() +
+             theme(strip.background = element_rect(fill = "lightpink"),
+                   axis.title.y = element_blank(),
+                   panel.grid.minor = element_blank(),
+                   axis.text.x = element_blank(),
+                   axis.ticks.x = element_blank())
+
+df3.12.2.area <- data.frame(x = c(rep(1.645-.03,2),rep(1.645+.03,2)),
+                            y = rep(c(1,0.95),2)) 
+
+
+fig3.12.2 <- ggplot(df3.12.2, aes(x = x, y = y)) + 
+             geom_hline(yintercept = 0.95, linetype = "dashed", colour = "grey50") +
+             geom_ribbon(data = df3.12.2.area, aes(x = x,ymin = 0.95, ymax = 1), fill = "skyblue1") +
+             geom_ribbon(data = df3.12.2.area, aes(x = x,ymin = 0, ymax = 0.95), fill = "skyblue3") +
+             geom_line() +
+             facet_grid(class~., switch = "y", labeller = label_parsed) +
+             scale_x_continuous(expand = c(0,0),
+                                breaks = sort(c(seq(-2,2,1),1.645)),
+                                labels = paste0(sort(c(seq(-2,2,1),1.645))),
+                                name = "z") + 
+             scale_y_continuous(breaks = seq(0,1,0.2), 
+                                labels = c("0.0","0.2","0.4","0.6","0.8","1.0"),
+                                expand = c(0,0),
+                                sec.axis = sec_axis(~., breaks = 0.95)) + 
+             theme_bw() + 
+             theme(strip.background = element_rect(fill = "lightpink"),
+                   axis.title.y = element_blank(),
+                   panel.grid.minor = element_blank())
+
+
+plot_grid(fig3.12.1, fig3.12.2, align = "v", nrow = 2, rel_heights = c(0.65,0.35))
+```
+
+##Fig3.13
+
+It is tedious to complete mimic figure 3.13 in the book. I decide to take a different approach. Since this plot, I begin to use `dplyr` package for data manipulation.
+
+```{r, fig.width=7, fig.height=5.5}
+pp <- ppoints(1000)
+xx <- qnorm(pp, mean = 100, sd = 5)
+yy <- dnorm(xx, mean = 100, sd = 5)
+df3.13 <- tibble(x = xx, y = yy)
+area1 <- df3.13 %>%
+  filter(x <= 108.224)
+area2 <- df3.13 %>%
+  filter(x >= 108.224)
+
+fig3.13 <- ggplot(df3.13, aes(x = x, y = y)) +
+  geom_line(colour = "grey50") +
+  geom_area(data = area1, aes(x = x, y = y), fill = "skyblue1") +
+  geom_area(data = area2, aes(x = x, y = y), fill = "skyblue3") +
+  geom_vline(xintercept = 108.224,linetype = "dashed",colour = "grey50") +
+  geom_hline(yintercept = 0,colour = "grey50") +
+  annotate("text",x = 110.5, y = 0.002, label = "paste(alpha, \" = 0.05\")", parse = TRUE, size = 3, colour = "red") +
+  annotate("text",x = 109, y = 0.06, label = "paste(W[c], \" = 108.224\")", parse = TRUE, size = 3, colour = "red") +
+  scale_x_continuous(expand = c(0,0), 
+                     limits = c(75,125), 
+                     sec.axis = sec_axis(~., labels = c("-4","-2","0","2","4"), name = "z")) +
+  xlab(expression("w="~bar(x))) +
+  ylab(expression(~phi(z)/sigma[bar(x)])) +
+  ggtitle(expression(paste("normal:", sigma[x] == 5, ",",n == 1))) +
+  theme_bw() +
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5),
+        plot.title = element_text(hjust = 0))
+fig3.13
+```
