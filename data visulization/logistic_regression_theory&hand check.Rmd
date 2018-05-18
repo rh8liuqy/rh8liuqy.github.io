@@ -1,12 +1,12 @@
 ---
-title: "Logistic Regression"
-subtitle: "For Binary Data"
+title: "MLE of Logistic Regression"
 author: "Kevin Liu"
 date: "5/8/2018"
 output: 
   bookdown::html_document2:
     toc: true
     toc_depth: 4
+    self_contained: true
 ---
 
 ```{r setup, include=FALSE}
@@ -91,7 +91,8 @@ Combine equations \@ref(eq:loglikelihood) - \@ref(eq:debeta1)
 
 \begin{equation} 
 \begin{split}
-\frac{\partial \ell (\boldsymbol{\beta} | \mathbf{y} ; \mathbf{x})}{\partial \beta_0} & = \sum_{i=1}^{n}\frac{y_i}{p_i} \frac{\partial p_i}{\partial \beta_0} - \frac{1 - y_i}{1- p_i} \frac{\partial p_i}{\partial \beta_0} \\
+\frac{\partial \ell (\boldsymbol{\beta} | \mathbf{y} ; \mathbf{x})}{\partial \beta_0} & = \sum_{i=1}^{n} y_i \frac{\partial log(p_i)}{\partial p_i} \frac{\partial p_i}{\partial \beta_0} + (1-y_i) \frac{\partial log(1-p_i)}{\partial p_i} \frac{\partial p_i}{\partial \beta_0}\\
+& = \sum_{i=1}^{n}\frac{y_i}{p_i} \frac{\partial p_i}{\partial \beta_0} - \frac{1 - y_i}{1- p_i} \frac{\partial p_i}{\partial \beta_0} \\
 & = \sum_{i=1}^{n} y_i - p_i = 0
 \end{split}
 (\#eq:plog0)
@@ -99,7 +100,8 @@ Combine equations \@ref(eq:loglikelihood) - \@ref(eq:debeta1)
 
 \begin{equation} 
 \begin{split}
-\frac{\partial \ell (\boldsymbol{\beta} | \mathbf{y} ; \mathbf{x})}{\partial \beta_1} & = \sum_{i=1}^{n}\frac{y_i}{p_i} \frac{\partial p_i}{\partial \beta_1} - \frac{1 - y_i}{1- p_i} \frac{\partial p_i}{\partial \beta_1} \\
+\frac{\partial \ell (\boldsymbol{\beta} | \mathbf{y} ; \mathbf{x})}{\partial \beta_1} & = \sum_{i=1}^{n} y_i \frac{\partial log(p_i)}{\partial p_i} \frac{\partial p_i}{\partial \beta_1} + (1-y_i) \frac{\partial log(1-p_i)}{\partial p_i} \frac{\partial p_i}{\partial \beta_1}\\
+& = \sum_{i=1}^{n}\frac{y_i}{p_i} \frac{\partial p_i}{\partial \beta_1} - \frac{1 - y_i}{1- p_i} \frac{\partial p_i}{\partial \beta_1} \\
 & = \sum_{i=1}^{n} x_i (y_i - p_i) = 0
 \end{split}
 (\#eq:plog1)
@@ -164,7 +166,8 @@ Similarly, we have
 
 \begin{equation} 
 \begin{split}
-\frac{\partial \ell (\boldsymbol{\beta} | \mathbf{y} ; \mathbf{x})}{\partial \beta_0} & = \sum_{i=1}^{n}\frac{y_i}{p_i} \frac{\partial p_i}{\partial \beta_0} - \frac{1 - y_i}{1- p_i} \frac{\partial p_i}{\partial \beta_0} \\
+\frac{\partial \ell (\boldsymbol{\beta} | \mathbf{y} ; \mathbf{x})}{\partial \beta_0} & = \sum_{i=1}^{n} y_i \frac{\partial log(p_i)}{\partial p_i} \frac{\partial p_i}{\partial \beta_0} + (1-y_i) \frac{\partial log(1-p_i)}{\partial p_i} \frac{\partial p_i}{\partial \beta_0}\\
+& = \sum_{i=1}^{n}\frac{y_i}{p_i} \frac{\partial p_i}{\partial \beta_0} - \frac{1 - y_i}{1- p_i} \frac{\partial p_i}{\partial \beta_0} \\
 & = \sum_{i=1}^{n} \frac{y_i \varphi(\beta_0 + \beta_1 x_i)}{\Phi(\beta_0 + \beta_1 x_i)} - \frac{(1-y_i)\varphi(\beta_0 + \beta_1 x_i)}{1 - \Phi(\beta_0 + \beta_1 x_i)} \\
 & = \sum_{i=1}^{n} \frac{\varphi(\beta_0 + \beta_1 x_i)(y_i - \Phi(\beta_0 + \beta_1 x_i))}{\Phi(\beta_0 + \beta_1 x_i)(1-\Phi(\beta_0+\beta_1 x_i))}
 \end{split}
@@ -173,7 +176,8 @@ Similarly, we have
 
 \begin{equation} 
 \begin{split}
-\frac{\partial \ell (\boldsymbol{\beta} | \mathbf{y} ; \mathbf{x})}{\partial \beta_0} & = \sum_{i=1}^{n}\frac{y_i}{p_i} \frac{\partial p_i}{\partial \beta_1} - \frac{1 - y_i}{1- p_i} \frac{\partial p_i}{\partial \beta_1} \\
+\frac{\partial \ell (\boldsymbol{\beta} | \mathbf{y} ; \mathbf{x})}{\partial \beta_1} & = \sum_{i=1}^{n} y_i \frac{\partial log(p_i)}{\partial p_i} \frac{\partial p_i}{\partial \beta_1} + (1-y_i) \frac{\partial log(1-p_i)}{\partial p_i} \frac{\partial p_i}{\partial \beta_1}\\
+& = \sum_{i=1}^{n}\frac{y_i}{p_i} \frac{\partial p_i}{\partial \beta_1} - \frac{1 - y_i}{1- p_i} \frac{\partial p_i}{\partial \beta_1} \\
 & = \sum_{i=1}^{n} \frac{y_i \varphi(\beta_0 + \beta_1 x_i)x_i}{\Phi(\beta_0 + \beta_1 x_i)} - \frac{(1-y_i)\varphi(\beta_0 + \beta_1 x_i)x_i}{1 - \Phi(\beta_0 + \beta_1 x_i)} \\
 & = \sum_{i=1}^{n} \frac{\varphi(\beta_0 + \beta_1 x_i)(y_i - \Phi(\beta_0 + \beta_1 x_i))}{\Phi(\beta_0 + \beta_1 x_i)(1-\Phi(\beta_0+\beta_1 x_i))}x_i
 \end{split}
