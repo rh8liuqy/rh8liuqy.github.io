@@ -1,0 +1,233 @@
+---
+title: "Logistic Regression"
+subtitle: "For Binary Data"
+author: "Kevin Liu"
+date: "5/8/2018"
+output: 
+  bookdown::html_document2:
+    toc: true
+    toc_depth: 4
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.align='center')
+```
+
+#Maximum Likelihood Estimation in Logistic Regression (logit link)
+
+##Bernoulli distribution
+
+The pmf of bernoulli distributino is 
+\begin{equation} 
+P(Y=y) = p^{y} (1-p) ^{1-y}
+(\#eq:Bernoulli)
+\end{equation}
+where $y$ is $1$ or $0$.
+
+##Likelihood of Logistic Regression
+
+\begin{equation} 
+\begin{split}
+L(\boldsymbol{\beta} | \mathbf{y} ; \mathbf{x}) &= 
+L(\beta_0,\beta_1|(y_1,...,y_n);(x_1,...,x_n)) \\
+&= \prod^{n}_{i=1} p_{i}^{y_i}(1-p_i)^{1-y_i}
+\end{split}
+(\#eq:likelihood)
+\end{equation}
+
+##Log-likelihood of Logistic Regression
+
+\begin{equation} 
+\begin{split}
+\ell (\boldsymbol{\beta} | \mathbf{y} ; \mathbf{x}) & = log(\prod^{n}_{i=1} p_{i}^{y_i}(1-p_{i})^{1-y_i}) \\
+& = \sum_{i=1}^{n} log(p_{i}^{y_i}) + log((1-p_{i})^{1-y_i}) \\
+& = \sum_{i=1}^{n} y_{i} log(p_{i}) + (1-y_{i})log(1-p_{i})
+\end{split}
+(\#eq:loglikelihood)
+\end{equation}
+
+## Logit link
+
+\begin{equation} 
+\begin{split}
+logit(p_i) &= log(\frac{p_i}{1-p_i}) \\
+&= \beta_0 + \beta_1 x_1
+\end{split}
+(\#eq:logit)
+\end{equation}
+
+Obviously, $p_i$ is
+
+\begin{equation} 
+\begin{split}
+p_i &= \frac{exp(\beta_0+x_1 \beta_1)}{1 + exp(\beta_0+x_1 \beta_1)} 
+\end{split}
+(\#eq:pi)
+\end{equation}
+
+First partial derivative with respect to the variable $\beta_0$
+
+\begin{equation} 
+\begin{split}
+\frac{\partial p_i}{\partial \beta_0} &= \frac{exp(\beta_0+x_1 \beta_1)}{(1+exp(\beta_0+x_1 \beta_1))^2}\\
+&= p_i (1-p_i)
+\end{split}
+(\#eq:debeta0)
+\end{equation}
+
+Similiarly, we have 
+
+\begin{equation} 
+\begin{split}
+\frac{\partial p_i}{\partial \beta_1} &= \frac{x_1 exp(\beta_0+x_1 \beta_1)}{(1+exp(\beta_0+x_1 \beta_1))^2}\\
+&= x_1 p_i (1-p_i)
+\end{split}
+(\#eq:debeta1)
+\end{equation}
+
+## Partial Derivatives of log-likelihood function
+
+Combine equations \@ref(eq:loglikelihood) - \@ref(eq:debeta1)
+
+\begin{equation} 
+\begin{split}
+\frac{\partial \ell (\boldsymbol{\beta} | \mathbf{y} ; \mathbf{x})}{\partial \beta_0} & = \sum_{i=1}^{n}\frac{y_i}{p_i} \frac{\partial p_i}{\partial \beta_0} - \frac{1 - y_i}{1- p_i} \frac{\partial p_i}{\partial \beta_0} \\
+& = \sum_{i=1}^{n} y_i - p_i = 0
+\end{split}
+(\#eq:plog0)
+\end{equation}
+
+\begin{equation} 
+\begin{split}
+\frac{\partial \ell (\boldsymbol{\beta} | \mathbf{y} ; \mathbf{x})}{\partial \beta_1} & = \sum_{i=1}^{n}\frac{y_i}{p_i} \frac{\partial p_i}{\partial \beta_1} - \frac{1 - y_i}{1- p_i} \frac{\partial p_i}{\partial \beta_1} \\
+& = \sum_{i=1}^{n} x_i (y_i - p_i) = 0
+\end{split}
+(\#eq:plog1)
+\end{equation}
+
+#Maximum Likelihood Estimation in Logistic Regression (probit link)
+
+##Normal distribution
+
+We define $\varphi(x)$ as pdf function of **standard normal distribution** and define $\Phi(x)$ as cdf function of **standard normal distributino**. Here we don't need to show what exactly $\varphi(x)$ and $\Phi(x)$ are. 
+
+For this section, only relationship between $\varphi(x)$ and $\Phi(x)$ matters.
+
+\begin{equation} 
+\begin{split}
+\varphi(x) = \frac{d\Phi(x)}{dx}
+\end{split}
+(\#eq:pdf-cdf)
+\end{equation}
+
+##Likelihood and loglikelihood of Logistic Regression with probit link
+
+Likelihood and loglikelihood of Logistic Regression with probit link are as same as \@ref(eq:likelihood) and \@ref(eq:loglikelihood)
+
+##Probit link
+
+\begin{equation} 
+\begin{split}
+probit(p_i) = \Phi^{-1}(p_i) = \beta_0 + \beta_1 x_i
+\end{split}
+(\#eq:probit)
+\end{equation}
+
+Equivalently
+
+\begin{equation} 
+\begin{split}
+p_i = \Phi(\Phi^{-1}(p_i)) = \Phi(\beta_0+\beta_1 x_i)
+\end{split}
+(\#eq:p-probit)
+\end{equation}
+
+First partial derivative with respect to the variable $\beta_0$:
+
+\begin{equation} 
+\begin{split}
+\frac{\partial p_i}{\partial \beta_0} = \frac{\partial \Phi(\beta_0+\beta_1 x_i)}{\partial (\beta_0+\beta_1 x_i)} \frac{\partial (\beta_0+\beta_1 x_i)}{\partial \beta_0} = \varphi(\beta_0+\beta_1 x_i)
+\end{split}
+(\#eq:pdervative0-probit)
+\end{equation}
+
+Similarly, we have
+
+\begin{equation} 
+\begin{split}
+\frac{\partial p_i}{\partial \beta_1} = \frac{\partial \Phi(\beta_0+\beta_1 x_i)}{\partial (\beta_0+\beta_1 x_i)} \frac{\partial (\beta_0+\beta_1 x_i)}{\partial \beta_1} = \varphi(\beta_0+\beta_1 x_i) x_i
+\end{split}
+(\#eq:pdervative1-probit)
+\end{equation}
+
+##Partial Derivatives of log-likelihood function
+
+\begin{equation} 
+\begin{split}
+\frac{\partial \ell (\boldsymbol{\beta} | \mathbf{y} ; \mathbf{x})}{\partial \beta_0} & = \sum_{i=1}^{n}\frac{y_i}{p_i} \frac{\partial p_i}{\partial \beta_0} - \frac{1 - y_i}{1- p_i} \frac{\partial p_i}{\partial \beta_0} \\
+& = \sum_{i=1}^{n} \frac{y_i \varphi(\beta_0 + \beta_1 x_i)}{\Phi(\beta_0 + \beta_1 x_i)} - \frac{(1-y_i)\varphi(\beta_0 + \beta_1 x_i)}{1 - \Phi(\beta_0 + \beta_1 x_i)} \\
+& = \sum_{i=1}^{n} \frac{\varphi(\beta_0 + \beta_1 x_i)(y_i - \Phi(\beta_0 + \beta_1 x_i))}{\Phi(\beta_0 + \beta_1 x_i)(1-\Phi(\beta_0+\beta_1 x_i))}
+\end{split}
+(\#eq:pdervative0-loglikelihood-probit)
+\end{equation}
+
+\begin{equation} 
+\begin{split}
+\frac{\partial \ell (\boldsymbol{\beta} | \mathbf{y} ; \mathbf{x})}{\partial \beta_0} & = \sum_{i=1}^{n}\frac{y_i}{p_i} \frac{\partial p_i}{\partial \beta_1} - \frac{1 - y_i}{1- p_i} \frac{\partial p_i}{\partial \beta_1} \\
+& = \sum_{i=1}^{n} \frac{y_i \varphi(\beta_0 + \beta_1 x_i)x_i}{\Phi(\beta_0 + \beta_1 x_i)} - \frac{(1-y_i)\varphi(\beta_0 + \beta_1 x_i)x_i}{1 - \Phi(\beta_0 + \beta_1 x_i)} \\
+& = \sum_{i=1}^{n} \frac{\varphi(\beta_0 + \beta_1 x_i)(y_i - \Phi(\beta_0 + \beta_1 x_i))}{\Phi(\beta_0 + \beta_1 x_i)(1-\Phi(\beta_0+\beta_1 x_i))}x_i
+\end{split}
+(\#eq:pdervative1-loglikelihood-probit)
+\end{equation}
+
+#Packages and version information
+
+```{r load_packages, message=FALSE}
+library(tidyverse)
+library(cowplot)
+sessionInfo()
+```
+
+#Exercise 17.1
+
+## hand check logit link
+```{r exe17.1-logit}
+##Create a simple data frame
+df1 <- tibble(xx = 1:4,
+              y = c(1,0,1,0))
+df1
+
+##Build ordinary logistic regression
+glm1 <- glm(y ~ xx, data=df1, family=binomial)
+glm1$coefficients
+```
+
+Using equations \@ref(eq:plog0) and \@ref(eq:plog1), we can get same coefficients' estimation via `rootSolve::multiroot()`
+```{r MLE17.1-logit}
+library(rootSolve)
+##Check Maximum Likelihood Estimation
+model1 <- function(x) c(F1 = sum(df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx))),
+                        F2 = sum(df1$xx * (df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx))))
+                        )
+root1 <- multiroot(f = model1, start = c(2,-1), useFortran = TRUE)
+root1$root
+```
+
+## hand check probit link
+```{r exe17.1-probit}
+##Build probit logistic regression
+glm2 <- glm(y ~ xx, data=df1, family=binomial(link = "probit"))
+glm2$coefficients
+```
+
+```{r MLE17.1-probit}
+library(rootSolve)
+##Check Maximum Likelihood Estimation
+model2 <- function(x) c(F1 = sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
+                                   ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))),
+                        F2 = sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
+                                   ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))*df1$xx)
+                        )
+root2 <- multiroot(f = model2, start = c(2,-2), useFortran = TRUE)
+root2$root
+```
