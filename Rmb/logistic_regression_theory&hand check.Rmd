@@ -144,7 +144,7 @@ p_i = \Phi(\Phi^{-1}(p_i)) = \Phi(\beta_0+\beta_1 x_i)
 (\#eq:p-probit)
 \end{equation}
 
-First partial derivative with respect to the variable $\beta_0$:
+Based on equation \@ref(eq:pdf-cdf), $\frac{\partial \Phi(\beta_0 + \beta_1 x_i)}{\partial (\beta_0 + \beta_1 x_i)} = \varphi(\beta_0 + \beta_1 x_i)$. First partial derivative with respect to the variable $\beta_0$:
 
 \begin{equation} 
 \begin{split}
