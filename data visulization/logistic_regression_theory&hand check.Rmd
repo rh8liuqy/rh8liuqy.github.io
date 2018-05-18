@@ -109,7 +109,7 @@ Combine equations \@ref(eq:loglikelihood) - \@ref(eq:debeta1)
 
 ##Normal distribution
 
-We define $\varphi(x)$ as pdf function of **standard normal distribution** and define $\Phi(x)$ as cdf function of **standard normal distributino**. Here we don't need to show what exactly $\varphi(x)$ and $\Phi(x)$ are. 
+We define $\varphi(x)$ as pdf function of **standard normal distribution** and define $\Phi(x)$ as cdf function of **standard normal distribution**. Here we don't need to show what exactly $\varphi(x)$ and $\Phi(x)$ are. 
 
 For this section, only relationship between $\varphi(x)$ and $\Phi(x)$ matters.
 
