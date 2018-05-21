@@ -385,30 +385,27 @@ p_i = \Phi(\Phi^{-1}(p_i)) = \Phi(\beta_0+\beta_1 x_i)
 <h1><span class="header-section-number">3</span> Packages and version information</h1>
 <pre class="r"><code>library(tidyverse)
 library(cowplot)
+library(numDeriv)
 sessionInfo()</code></pre>
 <pre><code>## R version 3.4.4 (2018-03-15)
-## Platform: x86_64-pc-linux-gnu (64-bit)
-## Running under: Ubuntu 16.04.4 LTS
+## Platform: x86_64-apple-darwin15.6.0 (64-bit)
+## Running under: macOS High Sierra 10.13.4
 ## 
 ## Matrix products: default
-## BLAS: /usr/lib/libblas/libblas.so.3.6.0
-## LAPACK: /usr/lib/lapack/liblapack.so.3.6.0
+## BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
+## LAPACK: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRlapack.dylib
 ## 
 ## locale:
-##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
-##  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
-##  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
-##  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
-##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
-## [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
 ## 
 ## attached base packages:
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] rootSolve_1.7   cowplot_0.9.2   forcats_0.3.0   stringr_1.3.0  
-##  [5] dplyr_0.7.4     purrr_0.2.4     readr_1.1.1     tidyr_0.8.0    
-##  [9] tibble_1.4.2    ggplot2_2.2.1   tidyverse_1.2.1
+##  [1] numDeriv_2016.8-1 cowplot_0.9.2     forcats_0.3.0    
+##  [4] stringr_1.3.0     dplyr_0.7.4       purrr_0.2.4      
+##  [7] readr_1.1.1       tidyr_0.8.0       tibble_1.4.2     
+## [10] ggplot2_2.2.1     tidyverse_1.2.1  
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] xfun_0.1         reshape2_1.4.3   haven_1.1.1      lattice_0.20-35 
@@ -423,7 +420,7 @@ sessionInfo()</code></pre>
 ## [37] rprojroot_1.3-2  cli_1.0.0        tools_3.4.4      magrittr_1.5    
 ## [41] lazyeval_0.2.1   crayon_1.3.4     pkgconfig_2.0.1  xml2_1.2.0      
 ## [45] lubridate_1.7.4  assertthat_0.2.0 rmarkdown_1.9    httr_1.3.1      
-## [49] rstudioapi_0.7   R6_2.2.2         nlme_3.1-137     compiler_3.4.4</code></pre>
+## [49] rstudioapi_0.7   R6_2.2.2         nlme_3.1-131.1   compiler_3.4.4</code></pre>
 </div>
 <div id="exercise-17.1" class="section level1">
 <h1><span class="header-section-number">4</span> Exercise 17.1</h1>
@@ -445,15 +442,23 @@ glm1 &lt;- glm(y ~ xx, data=df1, family=binomial)
 glm1$coefficients</code></pre>
 <pre><code>## (Intercept)          xx 
 ##   2.2704607  -0.9081843</code></pre>
-<p>Using equations <a href="#eq:plog0">(1.8)</a> and <a href="#eq:plog1">(1.9)</a>, we can get same coefficients’ estimation via <code>rootSolve::multiroot()</code></p>
-<pre class="r"><code>library(rootSolve)
-##Check Maximum Likelihood Estimation
-model1 &lt;- function(x) c(F1 = sum(df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx))),
-                        F2 = sum(df1$xx * (df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx))))
-                        )
-root1 &lt;- multiroot(f = model1, start = c(2,-1), useFortran = TRUE)
-root1$root</code></pre>
-<pre><code>## [1]  2.2704607 -0.9081843</code></pre>
+<p>Using equations <a href="#eq:plog0">(1.8)</a> and <a href="#eq:plog1">(1.9)</a>, we can get same coefficients’ estimation via <a href="http://fourier.eng.hmc.edu/e161/lectures/ica/node13.html">Newton-Raphson Method</a>.</p>
+<pre class="r"><code>model1 &lt;- function(x) c(sum(df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx))),
+                        sum(df1$xx * (df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx)))))
+
+i &lt;- 1
+delta &lt;- matrix(1:2,nrow = 2)
+x &lt;- array(c(2,-1))
+
+while(abs(sum(delta)) &gt; 0.0001){
+  xx &lt;- x ##current x value
+  x &lt;- as.matrix(x) - solve(jacobian(model1, x = x)) %*% model1(x) ##new x value
+  delta &lt;- x - as.matrix(xx)
+}
+x</code></pre>
+<pre><code>##            [,1]
+## [1,]  2.2704607
+## [2,] -0.9081843</code></pre>
 </div>
 <div id="hand-check-probit-link" class="section level2">
 <h2><span class="header-section-number">4.2</span> hand check probit link</h2>
@@ -462,16 +467,25 @@ glm2 &lt;- glm(y ~ xx, data=df1, family=binomial(link = &quot;probit&quot;))
 glm2$coefficients</code></pre>
 <pre><code>## (Intercept)          xx 
 ##   1.4769772  -0.5907909</code></pre>
-<pre class="r"><code>library(rootSolve)
-##Check Maximum Likelihood Estimation
-model2 &lt;- function(x) c(F1 = sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
+<pre class="r"><code>model2 &lt;- function(x) c(sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
                                    ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))),
-                        F2 = sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
+                        sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
                                    ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))*df1$xx)
-                        )
-root2 &lt;- multiroot(f = model2, start = c(2,-2), useFortran = TRUE)
-root2$root</code></pre>
-<pre><code>## [1]  1.4770021 -0.5908008</code></pre>
+)
+
+i &lt;- 1
+delta &lt;- matrix(1:2,nrow = 2)
+x &lt;- array(c(2,-2))
+
+while(abs(sum(delta)) &gt; 0.0001){
+  xx &lt;- x ##current x value
+  x &lt;- as.matrix(x) - solve(jacobian(model2, x = x)) %*% model2(x) ##new x value
+  delta &lt;- x - as.matrix(xx)
+}
+x</code></pre>
+<pre><code>##           [,1]
+## [1,]  1.477002
+## [2,] -0.590801</code></pre>
 </div>
 </div>
 

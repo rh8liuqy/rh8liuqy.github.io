@@ -189,6 +189,7 @@ Similarly, we have
 ```{r load_packages, message=FALSE}
 library(tidyverse)
 library(cowplot)
+library(numDeriv)
 sessionInfo()
 ```
 
@@ -206,15 +207,21 @@ glm1 <- glm(y ~ xx, data=df1, family=binomial)
 glm1$coefficients
 ```
 
-Using equations \@ref(eq:plog0) and \@ref(eq:plog1), we can get same coefficients' estimation via `rootSolve::multiroot()`
+Using equations \@ref(eq:plog0) and \@ref(eq:plog1), we can get same coefficients' estimation via [Newton-Raphson Method](http://fourier.eng.hmc.edu/e161/lectures/ica/node13.html).
 ```{r MLE17.1-logit}
-library(rootSolve)
-##Check Maximum Likelihood Estimation
-model1 <- function(x) c(F1 = sum(df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx))),
-                        F2 = sum(df1$xx * (df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx))))
-                        )
-root1 <- multiroot(f = model1, start = c(2,-1), useFortran = TRUE)
-root1$root
+model1 <- function(x) c(sum(df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx))),
+                        sum(df1$xx * (df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx)))))
+
+i <- 1
+delta <- matrix(1:2,nrow = 2)
+x <- array(c(2,-1))
+
+while(abs(sum(delta)) > 0.0001){
+  xx <- x ##current x value
+  x <- as.matrix(x) - solve(jacobian(model1, x = x)) %*% model1(x) ##new x value
+  delta <- x - as.matrix(xx)
+}
+x
 ```
 
 ## hand check probit link
@@ -225,13 +232,20 @@ glm2$coefficients
 ```
 
 ```{r MLE17.1-probit}
-library(rootSolve)
-##Check Maximum Likelihood Estimation
-model2 <- function(x) c(F1 = sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
+model2 <- function(x) c(sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
                                    ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))),
-                        F2 = sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
+                        sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
                                    ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))*df1$xx)
-                        )
-root2 <- multiroot(f = model2, start = c(2,-2), useFortran = TRUE)
-root2$root
+)
+
+i <- 1
+delta <- matrix(1:2,nrow = 2)
+x <- array(c(2,-2))
+
+while(abs(sum(delta)) > 0.0001){
+  xx <- x ##current x value
+  x <- as.matrix(x) - solve(jacobian(model2, x = x)) %*% model2(x) ##new x value
+  delta <- x - as.matrix(xx)
+}
+x
 ```
