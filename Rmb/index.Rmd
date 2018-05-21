@@ -1,5 +1,5 @@
 ---
-title: "Homepage"
+title: "Table of Contents"
 ---
 
 > I built this website to help my dear wife to study in Biostatistcs program. I hope that she will find some context to be useful.

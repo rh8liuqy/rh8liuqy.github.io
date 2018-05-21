@@ -2,4 +2,4 @@
 title: "About This Website"
 ---
 
-More about this website.
+If you have questions or found error about this website, please contact author via [tug14939@temple.edu](`tug14939@temple.edu`).
