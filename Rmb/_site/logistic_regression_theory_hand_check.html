@@ -219,8 +219,10 @@ $(document).ready(function () {
 </ul></li>
 <li><a href="#packages-and-version-information"><span class="toc-section-number">3</span> Packages and version information</a></li>
 <li><a href="#exercise-17.1"><span class="toc-section-number">4</span> Exercise 17.1</a><ul>
-<li><a href="#hand-check-logit-link"><span class="toc-section-number">4.1</span> hand check logit link</a></li>
-<li><a href="#hand-check-probit-link"><span class="toc-section-number">4.2</span> hand check probit link</a></li>
+<li><a href="#mle-logit-link-via-newton-raphson"><span class="toc-section-number">4.1</span> MLE-logit link via Newton-Raphson</a></li>
+<li><a href="#mle-probit-link-via-newton-raphson"><span class="toc-section-number">4.2</span> MLE-probit link via Newton-Raphson</a></li>
+<li><a href="#mle-logit-link-via-fisher-socring"><span class="toc-section-number">4.3</span> MLE-logit link via Fisher Socring</a></li>
+<li><a href="#mle-probit-link-via-fisher-socring"><span class="toc-section-number">4.4</span> MLE-probit link via Fisher Socring</a></li>
 </ul></li>
 </ul>
 </div>
@@ -424,8 +426,8 @@ sessionInfo()</code></pre>
 </div>
 <div id="exercise-17.1" class="section level1">
 <h1><span class="header-section-number">4</span> Exercise 17.1</h1>
-<div id="hand-check-logit-link" class="section level2">
-<h2><span class="header-section-number">4.1</span> hand check logit link</h2>
+<div id="mle-logit-link-via-newton-raphson" class="section level2">
+<h2><span class="header-section-number">4.1</span> MLE-logit link via Newton-Raphson</h2>
 <pre class="r"><code>##Create a simple data frame
 df1 &lt;- tibble(xx = 1:4,
               y = c(1,0,1,0))
@@ -446,7 +448,6 @@ glm1$coefficients</code></pre>
 <pre class="r"><code>model1 &lt;- function(x) c(sum(df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx))),
                         sum(df1$xx * (df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx)))))
 
-i &lt;- 1
 delta &lt;- matrix(1:2,nrow = 2)
 x &lt;- array(c(2,-1))
 
@@ -460,8 +461,8 @@ x</code></pre>
 ## [1,]  2.2704607
 ## [2,] -0.9081843</code></pre>
 </div>
-<div id="hand-check-probit-link" class="section level2">
-<h2><span class="header-section-number">4.2</span> hand check probit link</h2>
+<div id="mle-probit-link-via-newton-raphson" class="section level2">
+<h2><span class="header-section-number">4.2</span> MLE-probit link via Newton-Raphson</h2>
 <pre class="r"><code>##Build probit logistic regression
 glm2 &lt;- glm(y ~ xx, data=df1, family=binomial(link = &quot;probit&quot;))
 glm2$coefficients</code></pre>
@@ -473,7 +474,6 @@ glm2$coefficients</code></pre>
                                    ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))*df1$xx)
 )
 
-i &lt;- 1
 delta &lt;- matrix(1:2,nrow = 2)
 x &lt;- array(c(2,-2))
 
@@ -486,6 +486,65 @@ x</code></pre>
 <pre><code>##           [,1]
 ## [1,]  1.477002
 ## [2,] -0.590801</code></pre>
+</div>
+<div id="mle-logit-link-via-fisher-socring" class="section level2">
+<h2><span class="header-section-number">4.3</span> MLE-logit link via Fisher Socring</h2>
+<pre class="r"><code>X &lt;- cbind(rep(1,4),df1$xx)
+X &lt;- as.matrix(X)
+
+func1 &lt;- function(x) {
+  x &lt;- X %*% matrix(c(x[1],x[2]), nrow = 2)
+  exp(x)/(1+exp(x))^2
+}
+
+model1 &lt;- function(x) c(sum(df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx))),
+                        sum(df1$xx * (df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx)))))
+
+delta &lt;- matrix(1:2,nrow = 2)
+x &lt;- array(c(2,-1))
+
+while (abs(sum(delta)) &gt; 0.0001) {
+  xx &lt;- x ##current x value
+  W &lt;- diag(array(func1(x = x)))
+  J &lt;- t(X) %*% W %*% X 
+  x &lt;- as.matrix(x) + solve(J) %*% model1(x)
+  delta &lt;- x - as.matrix(xx)
+}
+x</code></pre>
+<pre><code>##            [,1]
+## [1,]  2.2704607
+## [2,] -0.9081843</code></pre>
+</div>
+<div id="mle-probit-link-via-fisher-socring" class="section level2">
+<h2><span class="header-section-number">4.4</span> MLE-probit link via Fisher Socring</h2>
+<pre class="r"><code>X &lt;- cbind(rep(1,4),df1$xx)
+X &lt;- as.matrix(X)
+
+func2 &lt;- function(x) {
+  x &lt;- X %*% matrix(c(x[1],x[2]), nrow = 2)
+  dnorm(x)^2/(pnorm(x)*(1-pnorm(x)))
+}
+
+model2 &lt;- function(x) c(sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
+                                   ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))),
+                        sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
+                                   ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))*df1$xx)
+)
+
+delta &lt;- matrix(1:2,nrow = 2)
+x &lt;- array(c(2,-1))
+
+while (abs(sum(delta)) &gt; 0.0001) {
+  xx &lt;- x ##current x value
+  W &lt;- diag(array(func2(x = x)))
+  J &lt;- t(X) %*% W %*% X 
+  x &lt;- as.matrix(x) + solve(J) %*% model2(x)
+  delta &lt;- x - as.matrix(xx)
+}
+x</code></pre>
+<pre><code>##            [,1]
+## [1,]  1.4769988
+## [2,] -0.5907995</code></pre>
 </div>
 </div>
 

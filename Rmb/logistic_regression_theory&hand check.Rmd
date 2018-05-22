@@ -195,7 +195,7 @@ sessionInfo()
 
 #Exercise 17.1
 
-## hand check logit link
+## MLE-logit link via Newton-Raphson
 ```{r exe17.1-logit}
 ##Create a simple data frame
 df1 <- tibble(xx = 1:4,
@@ -208,11 +208,10 @@ glm1$coefficients
 ```
 
 Using equations \@ref(eq:plog0) and \@ref(eq:plog1), we can get same coefficients' estimation via [Newton-Raphson Method](http://fourier.eng.hmc.edu/e161/lectures/ica/node13.html).
-```{r MLE17.1-logit}
+```{r MLE17.1-logit-newton}
 model1 <- function(x) c(sum(df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx))),
                         sum(df1$xx * (df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx)))))
 
-i <- 1
 delta <- matrix(1:2,nrow = 2)
 x <- array(c(2,-1))
 
@@ -224,27 +223,81 @@ while(abs(sum(delta)) > 0.0001){
 x
 ```
 
-## hand check probit link
+## MLE-probit link via Newton-Raphson
 ```{r exe17.1-probit}
 ##Build probit logistic regression
 glm2 <- glm(y ~ xx, data=df1, family=binomial(link = "probit"))
 glm2$coefficients
 ```
 
-```{r MLE17.1-probit}
+```{r MLE17.1-probit-newton}
 model2 <- function(x) c(sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
                                    ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))),
                         sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
                                    ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))*df1$xx)
 )
 
-i <- 1
 delta <- matrix(1:2,nrow = 2)
 x <- array(c(2,-2))
 
 while(abs(sum(delta)) > 0.0001){
   xx <- x ##current x value
   x <- as.matrix(x) - solve(jacobian(model2, x = x)) %*% model2(x) ##new x value
+  delta <- x - as.matrix(xx)
+}
+x
+```
+
+## MLE-logit link via Fisher Socring
+```{r MLE17.1-logit-fisher}
+X <- cbind(rep(1,4),df1$xx)
+X <- as.matrix(X)
+
+func1 <- function(x) {
+  x <- X %*% matrix(c(x[1],x[2]), nrow = 2)
+  exp(x)/(1+exp(x))^2
+}
+
+model1 <- function(x) c(sum(df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx))),
+                        sum(df1$xx * (df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx)))))
+
+delta <- matrix(1:2,nrow = 2)
+x <- array(c(2,-1))
+
+while (abs(sum(delta)) > 0.0001) {
+  xx <- x ##current x value
+  W <- diag(array(func1(x = x)))
+  J <- t(X) %*% W %*% X 
+  x <- as.matrix(x) + solve(J) %*% model1(x)
+  delta <- x - as.matrix(xx)
+}
+x
+```
+
+## MLE-probit link via Fisher Socring
+```{r MLE17.1-probit-fisher}
+X <- cbind(rep(1,4),df1$xx)
+X <- as.matrix(X)
+
+func2 <- function(x) {
+  x <- X %*% matrix(c(x[1],x[2]), nrow = 2)
+  dnorm(x)^2/(pnorm(x)*(1-pnorm(x)))
+}
+
+model2 <- function(x) c(sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
+                                   ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))),
+                        sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
+                                   ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))*df1$xx)
+)
+
+delta <- matrix(1:2,nrow = 2)
+x <- array(c(2,-1))
+
+while (abs(sum(delta)) > 0.0001) {
+  xx <- x ##current x value
+  W <- diag(array(func2(x = x)))
+  J <- t(X) %*% W %*% X 
+  x <- as.matrix(x) + solve(J) %*% model2(x)
   delta <- x - as.matrix(xx)
 }
 x
