@@ -302,3 +302,77 @@ while (abs(sum(delta)) > 0.0001) {
 }
 x
 ```
+
+## MLE-logit link via IRLS
+The full name of IRLS is iteratively reweighted least squares.
+```{r MLE17.1-logit-IRLS}
+X <- cbind(rep(1,4),df1$xx)
+X <- as.matrix(X) #design matrix X
+
+func.mu <- function(x) {
+  upeta <- X %*% matrix(c(x[1],x[2]), nrow = 2)
+  return(exp(upeta)/(1+exp(upeta)))
+}
+
+func.W <- function(x) {
+  upeta <- X %*% matrix(c(x[1],x[2]), nrow = 2)
+  return(exp(upeta)/(1+exp(upeta))^2)
+}
+
+func.D <- function(x) {
+  upeta <- X %*% matrix(c(x[1],x[2]), nrow = 2)
+  return(exp(upeta)/(1+exp(upeta))^2)
+}
+
+delta <- matrix(1:2,nrow = 2)
+x <- array(c(2,-1)) #inital values for beta0 and beta1
+
+while (abs(sum(delta)) > 0.0001) {
+  xx <- x ##current x value
+  W <- diag(array(func.W(x = x)))
+  J <- t(X) %*% W %*% X
+  D <- diag(array(func.D(x = x)))
+  z <- X %*% x + solve(D) %*% (df1$y - func.mu(x))
+  x <- solve(J) %*% t(X) %*% W %*% z
+  delta <- x - as.matrix(xx)
+}
+x
+```
+
+## MLE-probit link via IRLS
+```{r MLE17.1-probit-IRLS}
+df1 <- data.frame(xx = 1:4,
+                  y = c(1,0,1,0))
+
+X <- cbind(rep(1,4),df1$xx)
+X <- as.matrix(X) #design matrix X
+
+func.mu <- function(x) {
+  upeta <- X %*% matrix(c(x[1],x[2]), nrow = 2)
+  return(pnorm(upeta))
+}
+
+func.W <- function(x) {
+  upeta <- X %*% matrix(c(x[1],x[2]), nrow = 2)
+  return((dnorm(upeta))^2/(pnorm(upeta)*(1-pnorm(upeta))))
+}
+
+func.D <- function(x) {
+  upeta <- X %*% matrix(c(x[1],x[2]), nrow = 2)
+  return(dnorm(upeta))
+}
+
+delta <- matrix(1:2,nrow = 2)
+x <- array(c(2,-1)) #inital values for beta0 and beta1
+
+while (abs(sum(delta)) > 0.0001) {
+  xx <- x ##current x value
+  W <- diag(array(func.W(x = x)))
+  J <- t(X) %*% W %*% X
+  D <- diag(array(func.D(x = x)))
+  z <- X %*% x + solve(D) %*% (df1$y - func.mu(x))
+  x <- solve(J) %*% t(X) %*% W %*% z
+  delta <- x - as.matrix(xx)
+}
+x
+```
