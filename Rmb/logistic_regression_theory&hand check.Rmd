@@ -7,6 +7,8 @@ output:
     toc: true
     toc_depth: 4
     self_contained: true
+bibliography: "bibliography.bib"
+link-citations: true
 ---
 
 ```{r setup, include=FALSE}
@@ -193,23 +195,79 @@ library(numDeriv)
 sessionInfo()
 ```
 
-#Exercise 17.1
+#MLE of logistic regression - Three Methods
+In this section, I will use three methods, Newton-Raphson, Fisher Scoring and IRLS(iteratively reweighted least squares) to estimate $\beta_0, \beta_1$. The data set used in this section came from execrise 17.1 of @HH2.
 
 ## MLE-logit link via Newton-Raphson
+
+Newton-Raphson's equation is 
+
+\begin{equation} 
+\begin{split}
+\boldsymbol{\beta}^{(t+1)} = \boldsymbol{\beta}^{(t)} - (\boldsymbol{H}^{(t)})^{-1}\boldsymbol{u}^{(t)}
+\end{split}
+(\#eq:Logit-Newton-Raphson)
+\end{equation}
+
+Where
+
+$\boldsymbol{\beta}^{(t)} = 
+\begin{bmatrix}
+\beta_{0}^{(t)}\\
+\beta_{1}^{(t)}
+\end{bmatrix}$
+
+From equation \@ref(eq:plog0) and \@ref(eq:plog1), we have
+
+$\boldsymbol{u}^{(t)} = 
+\begin{bmatrix}
+u_{0}^{(t)}\\
+u_{1}^{(t)}
+\end{bmatrix} = 
+\begin{bmatrix}
+\frac{\partial \boldsymbol{\ell} (\boldsymbol(\beta)^{(t)}|\boldsymbol{y};\boldsymbol{x})}{\partial \beta_0}\\
+\frac{\partial \boldsymbol{\ell} (\boldsymbol(\beta)^{(t)}|\boldsymbol{y};\boldsymbol{x})}{\partial \beta_1}
+\end{bmatrix} = 
+\begin{bmatrix}
+\sum_{i=1}^{n} y_i - p_i^{(t)}\\
+\sum_{i=1}^{n} x_i(y_i - p_i^{(t)})
+\end{bmatrix}$
+
+From equation \@ref(eq:loglikelihood), we have
+
+$\ell (\boldsymbol{\beta}^{(t)} | \mathbf{y} ; \mathbf{x}) = \sum_{i=1}^{n} y_{i} log(p_{i}^{(t)}) + (1-y_{i})log(1-p_{i}^{(t)})$
+
+From equation \@ref(eq:pi), we have
+
+$p_{i}^{(t)} = \frac{exp(\beta_{0}^{(t)}+x_1 \beta_{1}^{(t)})}{1 + exp(\beta_{0}^{(t)}+x_{1} \beta_{1}^{(t)})}$
+
+$\boldsymbol{H}^{(t)}$ can be considered as Jacobian matrix of $\boldsymbol{u}(\cdot)$,
+
+$\boldsymbol{H}^{(t)} = 
+\begin{bmatrix}
+\frac{\partial u_{0}^{(t)}}{\partial \beta_0} & \frac{\partial u_{0}^{(t)}}{\partial \beta_1}\\
+\frac{\partial u_{1}^{(t)}}{\partial \beta_0} & \frac{\partial u_{1}^{(t)}}{\partial \beta_1}
+\end{bmatrix}$
+
+Last, $\boldsymbol{H}^{(t)}$ can also be considered as Hessian matrix of $\boldsymbol{\ell}(\cdot)$,
+
+$\boldsymbol{H}^{(t)} = 
+\begin{bmatrix}
+\frac{\partial^2 \boldsymbol{\ell}(\boldsymbol{\beta}^{(t)} | \boldsymbol{y};\boldsymbol{x})}{\partial \beta_0^2} & \frac{\partial^2 \boldsymbol{\ell}(\boldsymbol{\beta}^{(t)} | \boldsymbol{y};\boldsymbol{x})}{\partial \beta_0 \beta_1} \\
+\frac{\partial^2 \boldsymbol{\ell}(\boldsymbol{\beta}^{(t)} | \boldsymbol{y};\boldsymbol{x})}{\partial \beta_0 \beta_1} & \frac{\partial^2 \boldsymbol{\ell}(\boldsymbol{\beta}^{(t)} | \boldsymbol{y};\boldsymbol{x})}{\partial \beta_1^2}
+\end{bmatrix}$
+
+
 ```{r exe17.1-logit}
 ##Create a simple data frame
 df1 <- tibble(xx = 1:4,
               y = c(1,0,1,0))
 df1
-
-##Build ordinary logistic regression
-glm1 <- glm(y ~ xx, data=df1, family=binomial)
-glm1$coefficients
 ```
 
 Using equations \@ref(eq:plog0) and \@ref(eq:plog1), we can get same coefficients' estimation via [Newton-Raphson Method](http://fourier.eng.hmc.edu/e161/lectures/ica/node13.html).
 ```{r MLE17.1-logit-newton}
-model1 <- function(x) c(sum(df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx))),
+func.u <- function(x) c(sum(df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx))),
                         sum(df1$xx * (df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx)))))
 
 delta <- matrix(1:2,nrow = 2)
@@ -217,38 +275,44 @@ x <- array(c(2,-1))
 
 while(abs(sum(delta)) > 0.0001){
   xx <- x ##current x value
-  x <- as.matrix(x) - solve(jacobian(model1, x = x)) %*% model1(x) ##new x value
-  delta <- x - as.matrix(xx)
-}
-x
-```
-
-## MLE-probit link via Newton-Raphson
-```{r exe17.1-probit}
-##Build probit logistic regression
-glm2 <- glm(y ~ xx, data=df1, family=binomial(link = "probit"))
-glm2$coefficients
-```
-
-```{r MLE17.1-probit-newton}
-model2 <- function(x) c(sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
-                                   ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))),
-                        sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
-                                   ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))*df1$xx)
-)
-
-delta <- matrix(1:2,nrow = 2)
-x <- array(c(2,-2))
-
-while(abs(sum(delta)) > 0.0001){
-  xx <- x ##current x value
-  x <- as.matrix(x) - solve(jacobian(model2, x = x)) %*% model2(x) ##new x value
+  x <- as.matrix(x) - solve(jacobian(func.u, x = x)) %*% func.u(x) ##new x value
   delta <- x - as.matrix(xx)
 }
 x
 ```
 
 ## MLE-logit link via Fisher Socring
+
+Fisher Socring's equation is 
+
+\begin{equation} 
+\begin{split}
+\boldsymbol{\beta}^{(t+1)} = \boldsymbol{\beta}^{(t)} + (\boldsymbol{J}^{(t)})^{-1}\boldsymbol{u}^{(t)}
+\end{split}
+(\#eq:Logit-Fisher-Socring)
+\end{equation}
+
+Where
+
+$\boldsymbol{J}^{(t)} = \boldsymbol{X}^{T} \boldsymbol{W}^{(t)} \boldsymbol{X}$, $\boldsymbol{X}$ is design matrix.
+
+$\boldsymbol{W}^{(t)} = \text{diag} ((\frac{\partial \mu_i^{(t)}}{\partial (\beta_0 + x_i\beta_1)})^2 \frac{1}{\text{var}(y_i)})$
+
+$\frac{\partial \mu_i^{(t)}}{\partial (\beta_0 + x_i\beta_1)} = \frac{exp(\beta_0 + x_i\beta_1)^{(t)}}{(1+exp(\beta_0 + x_i\beta_1)^{(t)})^2}$
+
+From eq \@ref(eq:pi), we have
+
+$\text{var}(y_i) = p_i(1-p_i) = \frac{exp(\beta_0 + x_i\beta_1)^{(t)}}{(1+exp(\beta_0 + x_i\beta_1)^{(t)})^2}$
+
+So
+
+$(\frac{\partial \mu_i^{(t)}}{\partial (\beta_0 + x_i\beta_1)})^2 \frac{1}{\text{var}(y_i)} = \frac{exp(\beta_0 + x_i\beta_1)^{(t)}}{(1+exp(\beta_0 + x_i\beta_1)^{(t)})^2}$
+
+Eventually, we have
+
+$\boldsymbol{W}^{(t)} = \text{diag}(\frac{exp(\beta_0 + x_i\beta_1)}{(1+exp(\beta_0 + x_i\beta_1))^2})^{(t)}$
+
+
 ```{r MLE17.1-logit-fisher}
 X <- cbind(rep(1,4),df1$xx)
 X <- as.matrix(X)
@@ -274,37 +338,23 @@ while (abs(sum(delta)) > 0.0001) {
 x
 ```
 
-## MLE-probit link via Fisher Socring
-```{r MLE17.1-probit-fisher}
-X <- cbind(rep(1,4),df1$xx)
-X <- as.matrix(X)
-
-func2 <- function(x) {
-  x <- X %*% matrix(c(x[1],x[2]), nrow = 2)
-  dnorm(x)^2/(pnorm(x)*(1-pnorm(x)))
-}
-
-model2 <- function(x) c(sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
-                                   ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))),
-                        sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
-                                   ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))*df1$xx)
-)
-
-delta <- matrix(1:2,nrow = 2)
-x <- array(c(2,-1))
-
-while (abs(sum(delta)) > 0.0001) {
-  xx <- x ##current x value
-  W <- diag(array(func2(x = x)))
-  J <- t(X) %*% W %*% X 
-  x <- as.matrix(x) + solve(J) %*% model2(x)
-  delta <- x - as.matrix(xx)
-}
-x
-```
-
 ## MLE-logit link via IRLS
-The full name of IRLS is iteratively reweighted least squares.
+
+Iteratively reweighted least squares' equation is
+
+\begin{equation} 
+\begin{split}
+\boldsymbol{\beta}^{(t+1)} = (\boldsymbol{J}^{(t)})^{-1}\boldsymbol{X}^{T}\boldsymbol{W}^{(t)}\boldsymbol{Z}^{(t)}
+\end{split}
+(\#eq:Logit-IRLS)
+\end{equation}
+
+Where
+
+$\boldsymbol{Z}^{(t)} = \boldsymbol{X} \boldsymbol{\beta}^{(t)} + (\boldsymbol{D}^{(t)})^{-1}(\boldsymbol{y} - \boldsymbol{p}^{(t)})$
+
+$\boldsymbol{D}^{(t)} = \text{ diag }(\frac{\partial \mu_i ^{(t)}}{\partial (\beta_0 + \beta_1x_i)}) = \text{diag}(\frac{exp(\beta_0 + x_i\beta_1)}{(1+exp(\beta_0 + x_i\beta_1))^2})^{(t)}$
+
 ```{r MLE17.1-logit-IRLS}
 X <- cbind(rep(1,4),df1$xx)
 X <- as.matrix(X) #design matrix X
@@ -339,7 +389,115 @@ while (abs(sum(delta)) > 0.0001) {
 x
 ```
 
+## MLE-probit link via Newton-Raphson
+
+Probit link Newton-Raphson equation looks as same as \@ref(eq:Logit-Newton-Raphson)
+
+\begin{equation} 
+\begin{split}
+\boldsymbol{\beta}^{(t+1)} = \boldsymbol{\beta}^{(t)} - (\boldsymbol{H}^{(t)})^{-1}\boldsymbol{u}^{(t)}
+\end{split}
+(\#eq:Probit-Newton-Raphson)
+\end{equation}
+
+However, $\boldsymbol{u}^{(t)}$ is acutally different so is $\boldsymbol{H}^{(t)}$.
+
+$\boldsymbol{u}^{(t)} = \begin{bmatrix}
+\frac{\partial \boldsymbol{\ell} (\boldsymbol(\beta)^{(t)}|\boldsymbol{y};\boldsymbol{x})}{\partial \beta_0}\\
+\frac{\partial \boldsymbol{\ell} (\boldsymbol(\beta)^{(t)}|\boldsymbol{y};\boldsymbol{x})}{\partial \beta_1}
+\end{bmatrix}$, $\frac{\partial \boldsymbol{\ell} (\cdot) }{\partial \beta_0}$ and $\frac{\partial \boldsymbol{\ell} (\cdot) }{\partial \beta_1}$ are as same as equations \@ref(eq:pdervative0-loglikelihood-probit) and \@ref(eq:pdervative1-loglikelihood-probit).
+
+$\boldsymbol{H}^{(t)} = 
+\begin{bmatrix}
+\frac{\partial^2 \boldsymbol{\ell}(\boldsymbol{\beta}^{(t)} | \boldsymbol{y};\boldsymbol{x})}{\partial \beta_0^2} & \frac{\partial^2 \boldsymbol{\ell}(\boldsymbol{\beta}^{(t)} | \boldsymbol{y};\boldsymbol{x})}{\partial \beta_0 \beta_1} \\
+\frac{\partial^2 \boldsymbol{\ell}(\boldsymbol{\beta}^{(t)} | \boldsymbol{y};\boldsymbol{x})}{\partial \beta_0 \beta_1} & \frac{\partial^2 \boldsymbol{\ell}(\boldsymbol{\beta}^{(t)} | \boldsymbol{y};\boldsymbol{x})}{\partial \beta_1^2}
+\end{bmatrix}$, $\boldsymbol{H}^{(t)}$ are determined by $\boldsymbol{u}^{(t)}$, hence will be different from [equations from MLE-logit section] [MLE-logit link via Newton-Raphson].
+
+```{r MLE17.1-probit-newton}
+model2 <- function(x) c(sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
+                                   ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))),
+                        sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
+                                   ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))*df1$xx)
+)
+
+delta <- matrix(1:2,nrow = 2)
+x <- array(c(2,-2))
+
+while(abs(sum(delta)) > 0.0001){
+  xx <- x ##current x value
+  x <- as.matrix(x) - solve(jacobian(model2, x = x)) %*% model2(x) ##new x value
+  delta <- x - as.matrix(xx)
+}
+x
+```
+
+## MLE-probit link via Fisher Socring
+
+Fisher Socring's equation is 
+
+\begin{equation} 
+\begin{split}
+\boldsymbol{\beta}^{(t+1)} = \boldsymbol{\beta}^{(t)} + (\boldsymbol{J}^{(t)})^{-1}\boldsymbol{u}^{(t)}
+\end{split}
+(\#eq:Probit-Fisher-Socring)
+\end{equation}
+
+Where
+$\boldsymbol{J}^{(t)} = \boldsymbol{X}^{T} \boldsymbol{W}^{(t)} \boldsymbol{X}$
+
+$\boldsymbol{W}^{(t)} = \text{ diag }((\frac{\partial \mu_i^{(t)}}{\partial (\beta_0 + x_i\beta_1)})^2 \frac{1}{\text{var}(y_i)})$
+
+$\frac{\partial \mu_i}{\partial \beta_0 + x_1\beta_1} = \frac{\partial p_i}{\partial \beta_0 + x_1\beta_1} = \varphi(\beta_0 + x_1\beta_1)$
+
+$\text{Var}(y_i) = p_i (1-p_i) = \Phi(\beta_0 + x_1\beta_1)(1-\Phi(\beta_0 + x_1\beta_1))$
+
+$\boldsymbol{W}^{(t)} = \text{ diag }(\frac{\varphi^2(\beta_0 + x_1\beta_1)}{\Phi(\beta_0 + x_1\beta_1)(1-\Phi(\beta_0 + x_1\beta_1))})^{(t)}$
+
+```{r MLE17.1-probit-fisher}
+X <- cbind(rep(1,4),df1$xx)
+X <- as.matrix(X)
+
+func2 <- function(x) {
+  x <- X %*% matrix(c(x[1],x[2]), nrow = 2)
+  dnorm(x)^2/(pnorm(x)*(1-pnorm(x)))
+}
+
+model2 <- function(x) c(sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
+                                   ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))),
+                        sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
+                                   ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))*df1$xx)
+)
+
+delta <- matrix(1:2,nrow = 2)
+x <- array(c(2,-1))
+
+while (abs(sum(delta)) > 0.0001) {
+  xx <- x ##current x value
+  W <- diag(array(func2(x = x)))
+  J <- t(X) %*% W %*% X 
+  x <- as.matrix(x) + solve(J) %*% model2(x)
+  delta <- x - as.matrix(xx)
+}
+x
+```
+
 ## MLE-probit link via IRLS
+
+Iteratively reweighted least squares' equation is
+
+\begin{equation} 
+\begin{split}
+\boldsymbol{\beta}^{(t+1)} = (\boldsymbol{J}^{(t)})^{-1}\boldsymbol{X}^{T}\boldsymbol{W}^{(t)}\boldsymbol{Z}^{(t)}
+\end{split}
+(\#eq:Probit-IRLS)
+\end{equation}
+
+Where
+
+$\boldsymbol{Z}^{(t)} = \boldsymbol{X} \boldsymbol{\beta}^{(t)} + (\boldsymbol{D}^{(t)})^{-1}(\boldsymbol{y} - \boldsymbol{p}^{(t)})$
+
+$\boldsymbol{D}^{(t)} = \text{ diag }(\frac{\partial \mu_i ^{(t)}}{\partial (\beta_0 + \beta_1x_i)}) = \text{diag }(\varphi(\beta_0 + \beta_1x_i))^{(t)}$
+
 ```{r MLE17.1-probit-IRLS}
 df1 <- data.frame(xx = 1:4,
                   y = c(1,0,1,0))
@@ -376,3 +534,26 @@ while (abs(sum(delta)) > 0.0001) {
 }
 x
 ```
+
+##R `glm` output
+
+Using 'stats::glm' function we have identical estimations comparing from [MLE-logit link via Newton-Raphson][MLE-logit link via Newton-Raphson] to [MLE-logit link via IRLS][MLE-logit link via IRLS]. 
+
+However, for probit link, estimations we have from [MLE-probit link via Newton-Raphson][MLE-probit link via Newton-Raphson] to [MLE-probit link via IRLS][MLE-probit link via IRLS] are slightly different from estimations via 'stats::glm' function. There must be hiden secret that I don't know. It will be inteseting to find out how exactly `stats::glm` do estimation for logistic regression.
+
+
+```{r func.glm.logit}
+##Logit logistic regression
+glm1 <- glm(y ~ xx, data=df1, family=binomial)
+glm1$coefficients
+```
+
+```{r exe17.1-probit}
+##Build probit logistic regression
+glm2 <- glm(y ~ xx, data=df1, family=binomial(link = "probit"))
+glm2$coefficients
+```
+
+`r if (knitr::is_html_output()) '# References {-}'`
+@FLGLM
+@HH2

@@ -218,14 +218,16 @@ $(document).ready(function () {
 <li><a href="#partial-derivatives-of-log-likelihood-function-1"><span class="toc-section-number">2.4</span> Partial Derivatives of log-likelihood function</a></li>
 </ul></li>
 <li><a href="#packages-and-version-information"><span class="toc-section-number">3</span> Packages and version information</a></li>
-<li><a href="#exercise-17.1"><span class="toc-section-number">4</span> Exercise 17.1</a><ul>
+<li><a href="#mle-of-logistic-regression---three-methods"><span class="toc-section-number">4</span> MLE of logistic regression - Three Methods</a><ul>
 <li><a href="#mle-logit-link-via-newton-raphson"><span class="toc-section-number">4.1</span> MLE-logit link via Newton-Raphson</a></li>
-<li><a href="#mle-probit-link-via-newton-raphson"><span class="toc-section-number">4.2</span> MLE-probit link via Newton-Raphson</a></li>
-<li><a href="#mle-logit-link-via-fisher-socring"><span class="toc-section-number">4.3</span> MLE-logit link via Fisher Socring</a></li>
-<li><a href="#mle-probit-link-via-fisher-socring"><span class="toc-section-number">4.4</span> MLE-probit link via Fisher Socring</a></li>
-<li><a href="#mle-logit-link-via-irls"><span class="toc-section-number">4.5</span> MLE-logit link via IRLS</a></li>
+<li><a href="#mle-logit-link-via-fisher-socring"><span class="toc-section-number">4.2</span> MLE-logit link via Fisher Socring</a></li>
+<li><a href="#mle-logit-link-via-irls"><span class="toc-section-number">4.3</span> MLE-logit link via IRLS</a></li>
+<li><a href="#mle-probit-link-via-newton-raphson"><span class="toc-section-number">4.4</span> MLE-probit link via Newton-Raphson</a></li>
+<li><a href="#mle-probit-link-via-fisher-socring"><span class="toc-section-number">4.5</span> MLE-probit link via Fisher Socring</a></li>
 <li><a href="#mle-probit-link-via-irls"><span class="toc-section-number">4.6</span> MLE-probit link via IRLS</a></li>
+<li><a href="#r-glm-output"><span class="toc-section-number">4.7</span> R <code>glm</code> output</a></li>
 </ul></li>
+<li><a href="#references">References</a></li>
 </ul>
 </div>
 
@@ -431,10 +433,30 @@ sessionInfo()</code></pre>
 ## [45] lubridate_1.7.4  assertthat_0.2.0 rmarkdown_1.9    httr_1.3.1      
 ## [49] rstudioapi_0.7   R6_2.2.2         nlme_3.1-137     compiler_3.4.4</code></pre>
 </div>
-<div id="exercise-17.1" class="section level1">
-<h1><span class="header-section-number">4</span> Exercise 17.1</h1>
+<div id="mle-of-logistic-regression---three-methods" class="section level1">
+<h1><span class="header-section-number">4</span> MLE of logistic regression - Three Methods</h1>
+<p>In this section, I will use three methods, Newton-Raphson, Fisher Scoring and IRLS(iteratively reweighted least squares) to estimate <span class="math inline">\(\beta_0, \beta_1\)</span>. The data set used in this section came from execrise 17.1 of <span class="citation">Richard M. Heiberger (<a href="#ref-HH2">2015</a>)</span>.</p>
 <div id="mle-logit-link-via-newton-raphson" class="section level2">
 <h2><span class="header-section-number">4.1</span> MLE-logit link via Newton-Raphson</h2>
+<p>Newton-Raphson’s equation is</p>
+<span class="math display" id="eq:Logit-Newton-Raphson">\[\begin{equation} 
+\begin{split}
+\boldsymbol{\beta}^{(t+1)} = \boldsymbol{\beta}^{(t)} - (\boldsymbol{H}^{(t)})^{-1}\boldsymbol{u}^{(t)}
+\end{split}
+\tag{4.1}
+\end{equation}\]</span>
+<p>Where</p>
+<p><span class="math inline">\(\boldsymbol{\beta}^{(t)} = \begin{bmatrix} \beta_{0}^{(t)}\\ \beta_{1}^{(t)} \end{bmatrix}\)</span></p>
+<p>From equation <a href="#eq:plog0">(1.8)</a> and <a href="#eq:plog1">(1.9)</a>, we have</p>
+<p><span class="math inline">\(\boldsymbol{u}^{(t)} = \begin{bmatrix} u_{0}^{(t)}\\ u_{1}^{(t)} \end{bmatrix} = \begin{bmatrix} \frac{\partial \boldsymbol{\ell} (\boldsymbol(\beta)^{(t)}|\boldsymbol{y};\boldsymbol{x})}{\partial \beta_0}\\ \frac{\partial \boldsymbol{\ell} (\boldsymbol(\beta)^{(t)}|\boldsymbol{y};\boldsymbol{x})}{\partial \beta_1} \end{bmatrix} = \begin{bmatrix} \sum_{i=1}^{n} y_i - p_i^{(t)}\\ \sum_{i=1}^{n} x_i(y_i - p_i^{(t)}) \end{bmatrix}\)</span></p>
+<p>From equation <a href="#eq:loglikelihood">(1.3)</a>, we have</p>
+<p><span class="math inline">\(\ell (\boldsymbol{\beta}^{(t)} | \mathbf{y} ; \mathbf{x}) = \sum_{i=1}^{n} y_{i} log(p_{i}^{(t)}) + (1-y_{i})log(1-p_{i}^{(t)})\)</span></p>
+<p>From equation <a href="#eq:pi">(1.5)</a>, we have</p>
+<p><span class="math inline">\(p_{i}^{(t)} = \frac{exp(\beta_{0}^{(t)}+x_1 \beta_{1}^{(t)})}{1 + exp(\beta_{0}^{(t)}+x_{1} \beta_{1}^{(t)})}\)</span></p>
+<p><span class="math inline">\(\boldsymbol{H}^{(t)}\)</span> can be considered as Jacobian matrix of <span class="math inline">\(\boldsymbol{u}(\cdot)\)</span>,</p>
+<p><span class="math inline">\(\boldsymbol{H}^{(t)} = \begin{bmatrix} \frac{\partial u_{0}^{(t)}}{\partial \beta_0} &amp; \frac{\partial u_{0}^{(t)}}{\partial \beta_1}\\ \frac{\partial u_{1}^{(t)}}{\partial \beta_0} &amp; \frac{\partial u_{1}^{(t)}}{\partial \beta_1} \end{bmatrix}\)</span></p>
+<p>Last, <span class="math inline">\(\boldsymbol{H}^{(t)}\)</span> can also be considered as Hessian matrix of <span class="math inline">\(\boldsymbol{\ell}(\cdot)\)</span>,</p>
+<p><span class="math inline">\(\boldsymbol{H}^{(t)} = \begin{bmatrix} \frac{\partial^2 \boldsymbol{\ell}(\boldsymbol{\beta}^{(t)} | \boldsymbol{y};\boldsymbol{x})}{\partial \beta_0^2} &amp; \frac{\partial^2 \boldsymbol{\ell}(\boldsymbol{\beta}^{(t)} | \boldsymbol{y};\boldsymbol{x})}{\partial \beta_0 \beta_1} \\ \frac{\partial^2 \boldsymbol{\ell}(\boldsymbol{\beta}^{(t)} | \boldsymbol{y};\boldsymbol{x})}{\partial \beta_0 \beta_1} &amp; \frac{\partial^2 \boldsymbol{\ell}(\boldsymbol{\beta}^{(t)} | \boldsymbol{y};\boldsymbol{x})}{\partial \beta_1^2} \end{bmatrix}\)</span></p>
 <pre class="r"><code>##Create a simple data frame
 df1 &lt;- tibble(xx = 1:4,
               y = c(1,0,1,0))
@@ -446,13 +468,8 @@ df1</code></pre>
 ## 2     2    0.
 ## 3     3    1.
 ## 4     4    0.</code></pre>
-<pre class="r"><code>##Build ordinary logistic regression
-glm1 &lt;- glm(y ~ xx, data=df1, family=binomial)
-glm1$coefficients</code></pre>
-<pre><code>## (Intercept)          xx 
-##   2.2704607  -0.9081843</code></pre>
 <p>Using equations <a href="#eq:plog0">(1.8)</a> and <a href="#eq:plog1">(1.9)</a>, we can get same coefficients’ estimation via <a href="http://fourier.eng.hmc.edu/e161/lectures/ica/node13.html">Newton-Raphson Method</a>.</p>
-<pre class="r"><code>model1 &lt;- function(x) c(sum(df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx))),
+<pre class="r"><code>func.u &lt;- function(x) c(sum(df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx))),
                         sum(df1$xx * (df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx)))))
 
 delta &lt;- matrix(1:2,nrow = 2)
@@ -460,7 +477,7 @@ x &lt;- array(c(2,-1))
 
 while(abs(sum(delta)) &gt; 0.0001){
   xx &lt;- x ##current x value
-  x &lt;- as.matrix(x) - solve(jacobian(model1, x = x)) %*% model1(x) ##new x value
+  x &lt;- as.matrix(x) - solve(jacobian(func.u, x = x)) %*% func.u(x) ##new x value
   delta &lt;- x - as.matrix(xx)
 }
 x</code></pre>
@@ -468,34 +485,25 @@ x</code></pre>
 ## [1,]  2.2704607
 ## [2,] -0.9081843</code></pre>
 </div>
-<div id="mle-probit-link-via-newton-raphson" class="section level2">
-<h2><span class="header-section-number">4.2</span> MLE-probit link via Newton-Raphson</h2>
-<pre class="r"><code>##Build probit logistic regression
-glm2 &lt;- glm(y ~ xx, data=df1, family=binomial(link = &quot;probit&quot;))
-glm2$coefficients</code></pre>
-<pre><code>## (Intercept)          xx 
-##   1.4769772  -0.5907909</code></pre>
-<pre class="r"><code>model2 &lt;- function(x) c(sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
-                                   ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))),
-                        sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
-                                   ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))*df1$xx)
-)
-
-delta &lt;- matrix(1:2,nrow = 2)
-x &lt;- array(c(2,-2))
-
-while(abs(sum(delta)) &gt; 0.0001){
-  xx &lt;- x ##current x value
-  x &lt;- as.matrix(x) - solve(jacobian(model2, x = x)) %*% model2(x) ##new x value
-  delta &lt;- x - as.matrix(xx)
-}
-x</code></pre>
-<pre><code>##           [,1]
-## [1,]  1.477002
-## [2,] -0.590801</code></pre>
-</div>
 <div id="mle-logit-link-via-fisher-socring" class="section level2">
-<h2><span class="header-section-number">4.3</span> MLE-logit link via Fisher Socring</h2>
+<h2><span class="header-section-number">4.2</span> MLE-logit link via Fisher Socring</h2>
+<p>Fisher Socring’s equation is</p>
+<span class="math display" id="eq:Logit-Fisher-Socring">\[\begin{equation} 
+\begin{split}
+\boldsymbol{\beta}^{(t+1)} = \boldsymbol{\beta}^{(t)} + (\boldsymbol{J}^{(t)})^{-1}\boldsymbol{u}^{(t)}
+\end{split}
+\tag{4.2}
+\end{equation}\]</span>
+<p>Where</p>
+<p><span class="math inline">\(\boldsymbol{J}^{(t)} = \boldsymbol{X}^{T} \boldsymbol{W}^{(t)} \boldsymbol{X}\)</span>, <span class="math inline">\(\boldsymbol{X}\)</span> is design matrix.</p>
+<p><span class="math inline">\(\boldsymbol{W}^{(t)} = \text{diag} ((\frac{\partial \mu_i^{(t)}}{\partial (\beta_0 + x_i\beta_1)})^2 \frac{1}{\text{var}(y_i)})\)</span></p>
+<p><span class="math inline">\(\frac{\partial \mu_i^{(t)}}{\partial (\beta_0 + x_i\beta_1)} = \frac{exp(\beta_0 + x_i\beta_1)^{(t)}}{(1+exp(\beta_0 + x_i\beta_1)^{(t)})^2}\)</span></p>
+<p>From eq <a href="#eq:pi">(1.5)</a>, we have</p>
+<p><span class="math inline">\(\text{var}(y_i) = p_i(1-p_i) = \frac{exp(\beta_0 + x_i\beta_1)^{(t)}}{(1+exp(\beta_0 + x_i\beta_1)^{(t)})^2}\)</span></p>
+<p>So</p>
+<p><span class="math inline">\((\frac{\partial \mu_i^{(t)}}{\partial (\beta_0 + x_i\beta_1)})^2 \frac{1}{\text{var}(y_i)} = \frac{exp(\beta_0 + x_i\beta_1)^{(t)}}{(1+exp(\beta_0 + x_i\beta_1)^{(t)})^2}\)</span></p>
+<p>Eventually, we have</p>
+<p><span class="math inline">\(\boldsymbol{W}^{(t)} = \text{diag}(\frac{exp(\beta_0 + x_i\beta_1)}{(1+exp(\beta_0 + x_i\beta_1))^2})^{(t)}\)</span></p>
 <pre class="r"><code>X &lt;- cbind(rep(1,4),df1$xx)
 X &lt;- as.matrix(X)
 
@@ -522,40 +530,18 @@ x</code></pre>
 ## [1,]  2.2704607
 ## [2,] -0.9081843</code></pre>
 </div>
-<div id="mle-probit-link-via-fisher-socring" class="section level2">
-<h2><span class="header-section-number">4.4</span> MLE-probit link via Fisher Socring</h2>
-<pre class="r"><code>X &lt;- cbind(rep(1,4),df1$xx)
-X &lt;- as.matrix(X)
-
-func2 &lt;- function(x) {
-  x &lt;- X %*% matrix(c(x[1],x[2]), nrow = 2)
-  dnorm(x)^2/(pnorm(x)*(1-pnorm(x)))
-}
-
-model2 &lt;- function(x) c(sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
-                                   ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))),
-                        sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
-                                   ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))*df1$xx)
-)
-
-delta &lt;- matrix(1:2,nrow = 2)
-x &lt;- array(c(2,-1))
-
-while (abs(sum(delta)) &gt; 0.0001) {
-  xx &lt;- x ##current x value
-  W &lt;- diag(array(func2(x = x)))
-  J &lt;- t(X) %*% W %*% X 
-  x &lt;- as.matrix(x) + solve(J) %*% model2(x)
-  delta &lt;- x - as.matrix(xx)
-}
-x</code></pre>
-<pre><code>##            [,1]
-## [1,]  1.4769988
-## [2,] -0.5907995</code></pre>
-</div>
 <div id="mle-logit-link-via-irls" class="section level2">
-<h2><span class="header-section-number">4.5</span> MLE-logit link via IRLS</h2>
-<p>The full name of IRLS is iteratively reweighted least squares.</p>
+<h2><span class="header-section-number">4.3</span> MLE-logit link via IRLS</h2>
+<p>Iteratively reweighted least squares’ equation is</p>
+<span class="math display" id="eq:Logit-IRLS">\[\begin{equation} 
+\begin{split}
+\boldsymbol{\beta}^{(t+1)} = (\boldsymbol{J}^{(t)})^{-1}\boldsymbol{X}^{T}\boldsymbol{W}^{(t)}\boldsymbol{Z}^{(t)}
+\end{split}
+\tag{4.3}
+\end{equation}\]</span>
+<p>Where</p>
+<p><span class="math inline">\(\boldsymbol{Z}^{(t)} = \boldsymbol{X} \boldsymbol{\beta}^{(t)} + (\boldsymbol{D}^{(t)})^{-1}(\boldsymbol{y} - \boldsymbol{p}^{(t)})\)</span></p>
+<p><span class="math inline">\(\boldsymbol{D}^{(t)} = \text{ diag }(\frac{\partial \mu_i ^{(t)}}{\partial (\beta_0 + \beta_1x_i)}) = \text{diag}(\frac{exp(\beta_0 + x_i\beta_1)}{(1+exp(\beta_0 + x_i\beta_1))^2})^{(t)}\)</span></p>
 <pre class="r"><code>X &lt;- cbind(rep(1,4),df1$xx)
 X &lt;- as.matrix(X) #design matrix X
 
@@ -591,8 +577,92 @@ x</code></pre>
 ## [1,]  2.2704607
 ## [2,] -0.9081843</code></pre>
 </div>
+<div id="mle-probit-link-via-newton-raphson" class="section level2">
+<h2><span class="header-section-number">4.4</span> MLE-probit link via Newton-Raphson</h2>
+<p>Probit link Newton-Raphson equation looks as same as <a href="#eq:Logit-Newton-Raphson">(4.1)</a></p>
+<span class="math display" id="eq:Probit-Newton-Raphson">\[\begin{equation} 
+\begin{split}
+\boldsymbol{\beta}^{(t+1)} = \boldsymbol{\beta}^{(t)} - (\boldsymbol{H}^{(t)})^{-1}\boldsymbol{u}^{(t)}
+\end{split}
+\tag{4.4}
+\end{equation}\]</span>
+<p>However, <span class="math inline">\(\boldsymbol{u}^{(t)}\)</span> is acutally different so is <span class="math inline">\(\boldsymbol{H}^{(t)}\)</span>.</p>
+<p><span class="math inline">\(\boldsymbol{u}^{(t)} = \begin{bmatrix} \frac{\partial \boldsymbol{\ell} (\boldsymbol(\beta)^{(t)}|\boldsymbol{y};\boldsymbol{x})}{\partial \beta_0}\\ \frac{\partial \boldsymbol{\ell} (\boldsymbol(\beta)^{(t)}|\boldsymbol{y};\boldsymbol{x})}{\partial \beta_1} \end{bmatrix}\)</span>, <span class="math inline">\(\frac{\partial \boldsymbol{\ell} (\cdot) }{\partial \beta_0}\)</span> and <span class="math inline">\(\frac{\partial \boldsymbol{\ell} (\cdot) }{\partial \beta_1}\)</span> are as same as equations <a href="#eq:pdervative0-loglikelihood-probit">(2.6)</a> and <a href="#eq:pdervative1-loglikelihood-probit">(2.7)</a>.</p>
+<p><span class="math inline">\(\boldsymbol{H}^{(t)} = \begin{bmatrix} \frac{\partial^2 \boldsymbol{\ell}(\boldsymbol{\beta}^{(t)} | \boldsymbol{y};\boldsymbol{x})}{\partial \beta_0^2} &amp; \frac{\partial^2 \boldsymbol{\ell}(\boldsymbol{\beta}^{(t)} | \boldsymbol{y};\boldsymbol{x})}{\partial \beta_0 \beta_1} \\ \frac{\partial^2 \boldsymbol{\ell}(\boldsymbol{\beta}^{(t)} | \boldsymbol{y};\boldsymbol{x})}{\partial \beta_0 \beta_1} &amp; \frac{\partial^2 \boldsymbol{\ell}(\boldsymbol{\beta}^{(t)} | \boldsymbol{y};\boldsymbol{x})}{\partial \beta_1^2} \end{bmatrix}\)</span>, <span class="math inline">\(\boldsymbol{H}^{(t)}\)</span> are determined by <span class="math inline">\(\boldsymbol{u}^{(t)}\)</span>, hence will be different from <a href="#mle-logit-link-via-newton-raphson">equations from MLE-logit section</a>.</p>
+<pre class="r"><code>model2 &lt;- function(x) c(sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
+                                   ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))),
+                        sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
+                                   ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))*df1$xx)
+)
+
+delta &lt;- matrix(1:2,nrow = 2)
+x &lt;- array(c(2,-2))
+
+while(abs(sum(delta)) &gt; 0.0001){
+  xx &lt;- x ##current x value
+  x &lt;- as.matrix(x) - solve(jacobian(model2, x = x)) %*% model2(x) ##new x value
+  delta &lt;- x - as.matrix(xx)
+}
+x</code></pre>
+<pre><code>##           [,1]
+## [1,]  1.477002
+## [2,] -0.590801</code></pre>
+</div>
+<div id="mle-probit-link-via-fisher-socring" class="section level2">
+<h2><span class="header-section-number">4.5</span> MLE-probit link via Fisher Socring</h2>
+<p>Fisher Socring’s equation is</p>
+<span class="math display" id="eq:Probit-Fisher-Socring">\[\begin{equation} 
+\begin{split}
+\boldsymbol{\beta}^{(t+1)} = \boldsymbol{\beta}^{(t)} + (\boldsymbol{J}^{(t)})^{-1}\boldsymbol{u}^{(t)}
+\end{split}
+\tag{4.5}
+\end{equation}\]</span>
+<p>Where <span class="math inline">\(\boldsymbol{J}^{(t)} = \boldsymbol{X}^{T} \boldsymbol{W}^{(t)} \boldsymbol{X}\)</span></p>
+<p><span class="math inline">\(\boldsymbol{W}^{(t)} = \text{ diag }((\frac{\partial \mu_i^{(t)}}{\partial (\beta_0 + x_i\beta_1)})^2 \frac{1}{\text{var}(y_i)})\)</span></p>
+<p><span class="math inline">\(\frac{\partial \mu_i}{\partial \beta_0 + x_1\beta_1} = \frac{\partial p_i}{\partial \beta_0 + x_1\beta_1} = \varphi(\beta_0 + x_1\beta_1)\)</span></p>
+<p><span class="math inline">\(\text{Var}(y_i) = p_i (1-p_i) = \Phi(\beta_0 + x_1\beta_1)(1-\Phi(\beta_0 + x_1\beta_1))\)</span></p>
+<p><span class="math inline">\(\boldsymbol{W}^{(t)} = \text{ diag }(\frac{\varphi^2(\beta_0 + x_1\beta_1)}{\Phi(\beta_0 + x_1\beta_1)(1-\Phi(\beta_0 + x_1\beta_1))})^{(t)}\)</span></p>
+<pre class="r"><code>X &lt;- cbind(rep(1,4),df1$xx)
+X &lt;- as.matrix(X)
+
+func2 &lt;- function(x) {
+  x &lt;- X %*% matrix(c(x[1],x[2]), nrow = 2)
+  dnorm(x)^2/(pnorm(x)*(1-pnorm(x)))
+}
+
+model2 &lt;- function(x) c(sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
+                                   ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))),
+                        sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
+                                   ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))*df1$xx)
+)
+
+delta &lt;- matrix(1:2,nrow = 2)
+x &lt;- array(c(2,-1))
+
+while (abs(sum(delta)) &gt; 0.0001) {
+  xx &lt;- x ##current x value
+  W &lt;- diag(array(func2(x = x)))
+  J &lt;- t(X) %*% W %*% X 
+  x &lt;- as.matrix(x) + solve(J) %*% model2(x)
+  delta &lt;- x - as.matrix(xx)
+}
+x</code></pre>
+<pre><code>##            [,1]
+## [1,]  1.4769988
+## [2,] -0.5907995</code></pre>
+</div>
 <div id="mle-probit-link-via-irls" class="section level2">
 <h2><span class="header-section-number">4.6</span> MLE-probit link via IRLS</h2>
+<p>Iteratively reweighted least squares’ equation is</p>
+<span class="math display" id="eq:Probit-IRLS">\[\begin{equation} 
+\begin{split}
+\boldsymbol{\beta}^{(t+1)} = (\boldsymbol{J}^{(t)})^{-1}\boldsymbol{X}^{T}\boldsymbol{W}^{(t)}\boldsymbol{Z}^{(t)}
+\end{split}
+\tag{4.6}
+\end{equation}\]</span>
+<p>Where</p>
+<p><span class="math inline">\(\boldsymbol{Z}^{(t)} = \boldsymbol{X} \boldsymbol{\beta}^{(t)} + (\boldsymbol{D}^{(t)})^{-1}(\boldsymbol{y} - \boldsymbol{p}^{(t)})\)</span></p>
+<p><span class="math inline">\(\boldsymbol{D}^{(t)} = \text{ diag }(\frac{\partial \mu_i ^{(t)}}{\partial (\beta_0 + \beta_1x_i)}) = \text{diag }(\varphi(\beta_0 + \beta_1x_i))^{(t)}\)</span></p>
 <pre class="r"><code>df1 &lt;- data.frame(xx = 1:4,
                   y = c(1,0,1,0))
 
@@ -630,6 +700,33 @@ x</code></pre>
 <pre><code>##            [,1]
 ## [1,]  1.4769988
 ## [2,] -0.5907995</code></pre>
+</div>
+<div id="r-glm-output" class="section level2">
+<h2><span class="header-section-number">4.7</span> R <code>glm</code> output</h2>
+<p>Using ‘stats::glm’ function we have identical estimations comparing from <a href="#mle-logit-link-via-newton-raphson">MLE-logit link via Newton-Raphson</a> to <a href="#mle-logit-link-via-irls">MLE-logit link via IRLS</a>.</p>
+<p>However, for probit link, estimations we have from <a href="#mle-probit-link-via-newton-raphson">MLE-probit link via Newton-Raphson</a> to <a href="#mle-probit-link-via-irls">MLE-probit link via IRLS</a> are slightly different from estimations via ‘stats::glm’ function. There must be hiden secret that I don’t know. It will be inteseting to find out how exactly <code>stats::glm</code> do estimation for logistic regression.</p>
+<pre class="r"><code>##Logit logistic regression
+glm1 &lt;- glm(y ~ xx, data=df1, family=binomial)
+glm1$coefficients</code></pre>
+<pre><code>## (Intercept)          xx 
+##   2.2704607  -0.9081843</code></pre>
+<pre class="r"><code>##Build probit logistic regression
+glm2 &lt;- glm(y ~ xx, data=df1, family=binomial(link = &quot;probit&quot;))
+glm2$coefficients</code></pre>
+<pre><code>## (Intercept)          xx 
+##   1.4769772  -0.5907909</code></pre>
+</div>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<p><span class="citation">Agresti (<a href="#ref-FLGLM">2015</a>)</span> <span class="citation">Richard M. Heiberger (<a href="#ref-HH2">2015</a>)</span></p>
+<div id="refs" class="references">
+<div id="ref-FLGLM">
+<p>Agresti, Alan. 2015. <em>Foundations of Linear and Generalized Linear Models</em>. 1st Edition.</p>
+</div>
+<div id="ref-HH2">
+<p>Richard M. Heiberger, Burt Holland. 2015. <em>Statistical Analysis and Data Display an Intermediate Course with Examples in R</em>. 2nd Edition.</p>
+</div>
 </div>
 </div>
 
