@@ -4,5 +4,8 @@ title: "Table of Contents"
 
 > I built this website to help my dear wife to study in Biostatistcs program. I hope that she will find some context to be useful.
 
-* Topics about MLE
+* Topics about Logistic regression
     + [Logistic regression MLE](logistic_regression_theory_hand_check.html)
+    
+* Topics about time series analysis
+    + [Visualize Model Selection](Data_Visulization_of_ARIMA_Model_Selection.html)
