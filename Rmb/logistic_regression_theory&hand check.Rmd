@@ -537,9 +537,9 @@ x
 
 ##R `glm` output
 
-Using 'stats::glm' function we have identical estimations comparing from [MLE-logit link via Newton-Raphson][MLE-logit link via Newton-Raphson] to [MLE-logit link via IRLS][MLE-logit link via IRLS]. 
+Using `stats::glm` function we have identical estimations comparing from [MLE-logit link via Newton-Raphson][MLE-logit link via Newton-Raphson] to [MLE-logit link via IRLS][MLE-logit link via IRLS]. 
 
-However, for probit link, estimations we have from [MLE-probit link via Newton-Raphson][MLE-probit link via Newton-Raphson] to [MLE-probit link via IRLS][MLE-probit link via IRLS] are slightly different from estimations via 'stats::glm' function. There must be hiden secret that I don't know. It will be inteseting to find out how exactly `stats::glm` do estimation for logistic regression.
+However, for probit link, estimations we have from [MLE-probit link via Newton-Raphson][MLE-probit link via Newton-Raphson] to [MLE-probit link via IRLS][MLE-probit link via IRLS] are slightly different from estimations via `stats::glm` function. There must be hiden secret that I don't know. It will be inteseting to find out how exactly `stats::glm` do estimation for logistic regression.
 
 
 ```{r func.glm.logit}

@@ -704,8 +704,8 @@ x</code></pre>
 </div>
 <div id="r-glm-output" class="section level2">
 <h2><span class="header-section-number">4.7</span> R <code>glm</code> output</h2>
-<p>Using ‘stats::glm’ function we have identical estimations comparing from <a href="#mle-logit-link-via-newton-raphson">MLE-logit link via Newton-Raphson</a> to <a href="#mle-logit-link-via-irls">MLE-logit link via IRLS</a>.</p>
-<p>However, for probit link, estimations we have from <a href="#mle-probit-link-via-newton-raphson">MLE-probit link via Newton-Raphson</a> to <a href="#mle-probit-link-via-irls">MLE-probit link via IRLS</a> are slightly different from estimations via ‘stats::glm’ function. There must be hiden secret that I don’t know. It will be inteseting to find out how exactly <code>stats::glm</code> do estimation for logistic regression.</p>
+<p>Using <code>stats::glm</code> function we have identical estimations comparing from <a href="#mle-logit-link-via-newton-raphson">MLE-logit link via Newton-Raphson</a> to <a href="#mle-logit-link-via-irls">MLE-logit link via IRLS</a>.</p>
+<p>However, for probit link, estimations we have from <a href="#mle-probit-link-via-newton-raphson">MLE-probit link via Newton-Raphson</a> to <a href="#mle-probit-link-via-irls">MLE-probit link via IRLS</a> are slightly different from estimations via <code>stats::glm</code> function. There must be hiden secret that I don’t know. It will be inteseting to find out how exactly <code>stats::glm</code> do estimation for logistic regression.</p>
 <pre class="r"><code>##Logit logistic regression
 glm1 &lt;- glm(y ~ xx, data=df1, family=binomial)
 glm1$coefficients</code></pre>
