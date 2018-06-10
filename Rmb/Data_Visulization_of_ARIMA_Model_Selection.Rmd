@@ -42,7 +42,7 @@ arima.plot <- function(data = sunspot.year, title = "Main Title",lag.max = 24, .
           plot.title = element_text(hjust = 0.5))
   
   list.acf <- acf(x = data, plot = FALSE, lag.max = lag.max)
-  df.acf <- data.frame(lag = c(0,as.numeric(list.acf$lag)), value = c(1,as.numeric(list.acf$acf)))
+  df.acf <- data.frame(lag = as.numeric(list.acf$lag), value = as.numeric(list.acf$acf))
   df.acf$type <- "ACF"
   
   list.pacf <- acf(x = data, type = "partial", plot = FALSE, lag.max = lag.max)

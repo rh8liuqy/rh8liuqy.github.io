@@ -19,7 +19,7 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.align='center')
 
 ##Bernoulli distribution
 
-The pmf of bernoulli distributino is 
+The pmf of bernoulli distribution is 
 \begin{equation} 
 P(Y=y) = p^{y} (1-p) ^{1-y}
 (\#eq:Bernoulli)
