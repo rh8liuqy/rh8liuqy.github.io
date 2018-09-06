@@ -14,4 +14,4 @@ title: "Table of Contents"
 * Topics about Linear Mixed Model
     + [Mixed Model Equations and REML](Linear_mixed_model_equations.html)
     + [Example for Mixed Model Equations and REML](Example_Linear_mixed_model.html)
-    + [Expectation_Maximization_Algorithm_With_Two_Example](Expectation_Maximization_Algorithm_With_Two_Example.html)
+    + [Expectation Maximization Algorithm With Two Example](Expectation_Maximization_Algorithm_With_Two_Example.html)
