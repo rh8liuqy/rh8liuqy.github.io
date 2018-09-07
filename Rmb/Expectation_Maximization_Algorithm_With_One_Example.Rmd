@@ -255,7 +255,7 @@ From the histogram, we can easily see that EM density estimation fits the real d
 
 ## Example - EM algorithm as a classification tool for mixture probabaility density. 
 
-We can classify $x_i$ to be 1st group if $T_{0,i}=P(z_i=0|\mathbf{x};\boldsymbol{\theta}^{(\text{32th iteration})}) \stackrel{(1.8)}{=} \frac{0.69679 \times 1}{0.69679 \times 1 + (1-0.69679) \times 11.09327(1-x_i)^{(11.09327 -1)}} > 0.5$.
+We can classify $x_i$ to be 1st group if $T_{0,i}=P(z_i=0|\mathbf{x};\boldsymbol{\theta}^{(\text{32th iteration})}) \stackrel{(\text{A.}4)}{=} \frac{0.69679 \times 1}{0.69679 \times 1 + (1-0.69679) \times 11.09327(1-x_i)^{(11.09327 -1)}} > 0.5$.
 
 Use `R` to calculate
 

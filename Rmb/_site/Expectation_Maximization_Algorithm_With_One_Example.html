@@ -454,7 +454,7 @@ ggplot(data = df.plot, aes(x = x, y = y)) +
 </div>
 <div id="example---em-algorithm-as-a-classification-tool-for-mixture-probabaility-density." class="section level2">
 <h2><span class="header-section-number">2.3</span> Example - EM algorithm as a classification tool for mixture probabaility density.</h2>
-<p>We can classify <span class="math inline">\(x_i\)</span> to be 1st group if <span class="math inline">\(T_{0,i}=P(z_i=0|\mathbf{x};\boldsymbol{\theta}^{(\text{32th iteration})}) \stackrel{(1.8)}{=} \frac{0.69679 \times 1}{0.69679 \times 1 + (1-0.69679) \times 11.09327(1-x_i)^{(11.09327 -1)}} &gt; 0.5\)</span>.</p>
+<p>We can classify <span class="math inline">\(x_i\)</span> to be 1st group if <span class="math inline">\(T_{0,i}=P(z_i=0|\mathbf{x};\boldsymbol{\theta}^{(\text{32th iteration})}) \stackrel{(\text{A.}4)}{=} \frac{0.69679 \times 1}{0.69679 \times 1 + (1-0.69679) \times 11.09327(1-x_i)^{(11.09327 -1)}} &gt; 0.5\)</span>.</p>
 <p>Use <code>R</code> to calculate</p>
 <pre class="r"><code>pvalue[&quot;p0&quot;] &lt;- s.new[1]/(s.new[1] + (1-s.new[1]) * s.new[2] * (1-pvalue$X)^(s.new[2] - 1))
 pvalue[pvalue$p0 &gt;= 0.5, &quot;estimated_group&quot;] &lt;- as.integer(0)
