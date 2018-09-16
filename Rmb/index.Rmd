@@ -2,7 +2,7 @@
 title: "Table of Contents"
 ---
 
-> I built this website to help my dear wife to study in Biostatistcs program. I hope that she will find some context to be useful.
+> I built this website to show my understanding in statistics.
 
 * Topics about Logistic regression
     + [Logistic regression MLE](logistic_regression_theory_hand_check.html)
