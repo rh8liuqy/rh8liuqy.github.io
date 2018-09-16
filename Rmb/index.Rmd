@@ -2,11 +2,16 @@
 title: "Table of Contents"
 ---
 
-> I built this website to help my dear wife to study in Biostatistcs program. I hope that she will find some context to be useful.
+> I built this website to show my understanding in statistics.
 
 * Topics about Logistic regression
     + [Logistic regression MLE](logistic_regression_theory_hand_check.html)
     
-* Topics about time series analysis
+* Topics about Time Series Analysis
     + [Visualize Model Selection](Data_Visulization_of_ARIMA_Model_Selection.html)
     + [ACF&PACF by `ggplot2`](ACF_PACF_by_ggplot2.html)
+
+* Topics about Linear Mixed Model
+    + [Mixed Model Equations and REML](Linear_mixed_model_equations.html)
+    + [Example for Mixed Model Equations and REML](Example_Linear_mixed_model.html)
+    + [Expectation Maximization Algorithm With One Example](Expectation_Maximization_Algorithm_With_One_Example.html)
