@@ -94,7 +94,7 @@ ggplot.corr <- function(data, lag.max = 24, ci = 0.95, large.sample.size = TRUE,
   df1$acfstd[1] <- 0
   df1 <- select(df1, lag, acf, acfstd)
   
-  list.pacf <- acf(sunspot.year, lag.max = lag.max, type = "partial", plot = FALSE)
+  list.pacf <- acf(data, lag.max = lag.max, type = "partial", plot = FALSE)
   df2 <- data.frame(lag = list.pacf$lag,pacf = list.pacf$acf)
   df2$pacfstd <- sqrt(1/N)
   
