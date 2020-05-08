@@ -2,7 +2,7 @@
 title: "Table of Contents"
 ---
 
-![](./files/too-much-coffee-featured.jpg){width=20%}
+![](./files/too-much-coffee-featured.jpg){width=200px}
 
 * Topics about Logistic regression
     + [Logistic regression MLE](logistic_regression_theory_hand_check.html)
