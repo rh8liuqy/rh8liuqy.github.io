@@ -2,7 +2,7 @@
 title: "Table of Contents"
 ---
 
-> I built this website to show my understanding in statistics.
+> :)
 
 * Topics about Logistic regression
     + [Logistic regression MLE](logistic_regression_theory_hand_check.html)
@@ -15,3 +15,6 @@ title: "Table of Contents"
     + [Mixed Model Equations and REML](Linear_mixed_model_equations.html)
     + [Example for Mixed Model Equations and REML](Example_Linear_mixed_model.html)
     + [Expectation Maximization Algorithm With One Example](Expectation_Maximization_Algorithm_With_One_Example.html)
+    
+* Optimization
+    + [Finite Difference](Finite_Difference.html)

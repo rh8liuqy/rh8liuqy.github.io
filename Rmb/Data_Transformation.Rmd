@@ -1,0 +1,112 @@
+---
+title: "Data Transformation with `dplyr` and `pandas`"
+author: "Kevin Liu"
+date: "02/29/2020"
+header-includes:
+  - \usepackage{upgreek}
+output: 
+  bookdown::html_document2:
+    toc: true
+    toc_depth: 4
+    self_contained: true
+bibliography: "bibliography.bib"
+link-citations: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,fig.align = "center")
+```
+
+I use two popular package `dplyr` in `r` and `pandas` in `python` to accomplish same data transformation goals. Hope this webpage could help anyone who are learning `R` from `Python` or `Python` from `R`.
+
+# load nycflights 13
+To demonstrate data management in both packages, I use `nycflights13::flights`.
+
+R code
+```{r nycflights_r}
+library(tidyverse)
+library(knitr)
+library(nycflights13)
+data(flights)
+head(as_tibble(flights))
+##only run following code for once for sake of time
+##write.csv(flights,"flights.csv",row.names = FALSE)
+```
+
+Python Code
+```{python nycflights_y}
+import numpy as np
+import pandas as pd
+df1 = pd.read_csv("flights.csv")
+df1.head()
+```
+
+# Filter rows
+
+## AND operator
+R Code
+```{r and_r}
+flights %>% filter(month == 1, day == 1)
+```
+
+Python Code
+```{python and_p}
+filter_row = (df1['month'] == 1) & (df1['day'] == 1)
+df1[filter_row].head()
+```
+
+## IN operator
+
+R code
+```{r in_r}
+flights %>% filter(month %in% c(11,12))
+```
+
+Python Code
+```{python in_p}
+filter_row = df1['month'].isin([11,12])
+df1[filter_row].head()
+```
+
+# Sort Rows
+R code
+```{r sort_r}
+flights %>% arrange(desc(arr_delay))
+```
+
+Python Code
+```{python sort_p}
+df1.sort_values(by=['arr_delay'],ascending=False).head()
+```
+
+# Select column
+
+R code
+
+```{r select_col_r}
+flights %>% select(year:day)
+```
+Python Code
+
+```{python select_col_y}
+df1.loc[:,"year":"day"].head()
+```
+
+# unselect column
+
+R code
+
+```{r unselect_r}
+flights %>% select(-(year:day))
+```
+
+Python Code
+
+```{python unselect_y}
+sel_col = df1.loc[:,"year":"day"].columns
+sel_col = ~np.isin(df1.columns,sel_col)
+df1.loc[:,sel_col].head()
+```
+
+`r if (knitr::is_html_output()) '# References {-}'`
+@R_for_data_science
