@@ -96,7 +96,7 @@ def hess(x):
   return output(x)
   
 ##begin of newton-raphson
-def newton(func,x0,tol=1e-10):
+def newton(x0,tol=1e-10):
   diff = 100
   xold = np.copy(x0)
   xnew = 0
@@ -111,7 +111,7 @@ def newton(func,x0,tol=1e-10):
   output = {"beta":xnew, "sd":1/np.sqrt(hess(xnew))}
   return output
 
-output = newton(loglikelihood,2.5)
+output = newton(2.5)
 output
 ```
 

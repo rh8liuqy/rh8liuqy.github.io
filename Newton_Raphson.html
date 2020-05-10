@@ -360,7 +360,7 @@ def hess(x):
   return output(x)
   
 ##begin of newton-raphson
-def newton(func,x0,tol=1e-10):
+def newton(x0,tol=1e-10):
   diff = 100
   xold = np.copy(x0)
   xnew = 0
@@ -375,7 +375,7 @@ def newton(func,x0,tol=1e-10):
   output = {&quot;beta&quot;:xnew, &quot;sd&quot;:1/np.sqrt(hess(xnew))}
   return output
 
-output = newton(loglikelihood,2.5)</code></pre>
+output = newton(2.5)</code></pre>
 <pre><code>## iteration:1 || betas:2.3188799462720966
 ## change: 0.0185
 ## iteration:2 || betas:2.300355926680856
@@ -403,7 +403,7 @@ model.fit().summary()</code></pre>
 ## Model:                        Poisson   Df Residuals:                      999
 ## Method:                           MLE   Df Model:                            0
 ## Date:                Sun, 10 May 2020   Pseudo R-squ.:                   0.000
-## Time:                        11:41:57   Log-Likelihood:                -2538.4
+## Time:                        16:01:30   Log-Likelihood:                -2538.4
 ## converged:                       True   LL-Null:                       -2538.4
 ##                                         LLR p-value:                       nan
 ## ==============================================================================
