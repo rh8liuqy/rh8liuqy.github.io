@@ -1,0 +1,125 @@
+---
+title: "Newton–Raphson method"
+author: "Kevin Liu"
+date: "5/09/2020"
+output: 
+  bookdown::html_document2:
+    toc: true
+    toc_depth: 4
+    self_contained: true
+bibliography: "bibliography.bib"
+link-citations: true
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(reticulate)
+matplotlib <- import("matplotlib")
+matplotlib$use("Agg", force = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.align='center',python = reticulate::eng_python, fig.width = 8*0.7,fig.height = 6*0.7)
+```
+
+Here is a example about Newton-Raphson's method in optimization. I simulated data from Poisson distribution. Under GLM framework, I compare MLE estimation by Newton-Raphson method and by `statsmodels` library. 
+
+Assume that $Y\sim\text{Poisson}(10)$,
+
+\begin{equation}
+log(E(y)) = \beta_0
+(\#eq:e1)
+\end{equation}
+
+\begin{equation}
+E(y) = \lambda
+(\#eq:e2)
+\end{equation}
+
+From \@ref(eq:e1) and \@ref(eq:e2),
+\begin{equation}
+\lambda = e^{\beta_0}
+(\#eq:e3)
+\end{equation}
+
+\begin{equation}
+P(Y=y)=\frac{\lambda^{y} e^{-\lambda}}{y !}
+(\#eq:e4)
+\end{equation}
+
+Likelihood function is
+
+\begin{equation}
+P(\mathbf{Y}=\mathbf{y})=\frac{\lambda^{\sum_{i}y_i} e^{-n\lambda}}{\prod_i y_i !}
+(\#eq:e5)
+\end{equation}
+
+Log-likelihood function is
+
+\begin{equation}
+\ell(\lambda|\mathbf{Y}) = \sum_{i}y_i log(\lambda)-n\lambda-\sum_{i}log(y_i !)
+\propto \sum_{i}y_i log(\lambda) - n\lambda
+(\#eq:e6)
+\end{equation}
+
+Plot about partial log-likelihood function,$\sum_{i}y_i log(\lambda) - n\lambda$,is shown below.
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+import numdifftools as nd
+import statsmodels.api as sm
+import statsmodels
+np.random.seed(509)
+y = np.random.poisson(lam = 10, size = 1000)
+x = np.ones(1000)
+def loglikelihood(x):
+  l = np.exp(x)
+  n = len(y)
+  f1 = (np.sum(y)) * np.log(l)
+  f2 = -n * l
+  output = f1 + f2
+  output = -output
+  return output
+plt.figure()
+plt.plot(np.arange(2.1,2.5,0.01),
+loglikelihood(np.arange(2.1,2.5,0.01)))
+plt.title("Partial log-likelihood of Poisson(10)")
+plt.xlabel("lambda")
+plt.show()
+```
+
+```{python}
+##approximation of first/second order derivative
+def derivative(x):
+  output = nd.Derivative(loglikelihood)
+  return output(x)
+def hess(x):
+  output = nd.Derivative(loglikelihood, n = 2)
+  return output(x)
+  
+##begin of newton-raphson
+def newton(func,x0,tol=1e-10):
+  diff = 100
+  xold = np.copy(x0)
+  xnew = 0
+  i = 1
+  while diff > tol:
+    xnew = xold - derivative(xold)/hess(xold)
+    diff = np.sum(np.abs(xnew - xold))
+    xold = xnew
+    print("iteration:"+str(i)+" || "+ "betas:" + str(xnew))
+    print("change: {:.4f}".format(derivative(xold)/hess(xold)))
+    i = i + 1
+  output = {"beta":xnew, "sd":1/np.sqrt(hess(xnew))}
+  return output
+
+output = newton(loglikelihood,2.5)
+output
+```
+
+We have $\hat{\beta}$ and var$(\hat{\beta})$, that are identical with those from `statsmodels.discrete.discrete_model.Poisson`.
+
+Theoretically, $\beta=log(\lambda)|_{\lambda=10}=2.302585$
+
+```{python}
+model = statsmodels.discrete.discrete_model.Poisson(y,x)
+model.fit().summary()
+```

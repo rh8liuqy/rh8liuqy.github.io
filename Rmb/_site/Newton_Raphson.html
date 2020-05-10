@@ -10,9 +10,10 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Kevin Liu" />
 
 
-<title>Table of Contents</title>
+<title>Newton–Raphson method</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -289,34 +290,128 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Table of Contents</h1>
+<h1 class="title toc-ignore">Newton–Raphson method</h1>
+<h4 class="author">Kevin Liu</h4>
+<h4 class="date">5/09/2020</h4>
 
 </div>
 
 
-<p><img src="files/too-much-coffee-featured.jpg" width="200" /></p>
-<ul>
-<li>Topics about Logistic regression
-<ul>
-<li><a href="logistic_regression_theory_hand_check.html">Logistic regression MLE</a></li>
-</ul></li>
-<li>Topics about Time Series Analysis
-<ul>
-<li><a href="Data_Visulization_of_ARIMA_Model_Selection.html">Visualize Model Selection</a></li>
-<li><a href="ACF_PACF_by_ggplot2.html">ACF&amp;PACF by <code>ggplot2</code></a></li>
-</ul></li>
-<li>Topics about Linear Mixed Model
-<ul>
-<li><a href="Linear_mixed_model_equations.html">Mixed Model Equations and REML</a></li>
-<li><a href="Example_Linear_mixed_model.html">Example for Mixed Model Equations and REML</a></li>
-<li><a href="Expectation_Maximization_Algorithm_With_One_Example.html">Expectation Maximization Algorithm With One Example</a></li>
-</ul></li>
-<li>Optimization
-<ul>
-<li><a href="Finite_Difference.html">Finite Difference</a></li>
-<li><a href="Newton_Raphson.html">Newton Raphson</a></li>
-</ul></li>
-</ul>
+<p>Here is a example about Newton-Raphson’s method in optimization. I simulated data from Poisson distribution. Under GLM framework, I compare MLE estimation by Newton-Raphson method and by <code>statsmodels</code> library.</p>
+<p>Assume that <span class="math inline">\(Y\sim\text{Poisson}(10)\)</span>,</p>
+<p><span class="math display" id="eq:e1">\[\begin{equation}
+log(E(y)) = \beta_0
+\tag{1}
+\end{equation}\]</span></p>
+<p><span class="math display" id="eq:e2">\[\begin{equation}
+E(y) = \lambda
+\tag{2}
+\end{equation}\]</span></p>
+<p>From <a href="#eq:e1">(1)</a> and <a href="#eq:e2">(2)</a>,
+<span class="math display" id="eq:e3">\[\begin{equation}
+\lambda = e^{\beta_0}
+\tag{3}
+\end{equation}\]</span></p>
+<p><span class="math display" id="eq:e4">\[\begin{equation}
+P(Y=y)=\frac{\lambda^{y} e^{-\lambda}}{y !}
+\tag{4}
+\end{equation}\]</span></p>
+<p>Likelihood function is</p>
+<p><span class="math display" id="eq:e5">\[\begin{equation}
+P(\mathbf{Y}=\mathbf{y})=\frac{\lambda^{\sum_{i}y_i} e^{-n\lambda}}{\prod_i y_i !}
+\tag{5}
+\end{equation}\]</span></p>
+<p>Log-likelihood function is</p>
+<p><span class="math display" id="eq:e6">\[\begin{equation}
+\ell(\lambda|\mathbf{Y}) = \sum_{i}y_i log(\lambda)-n\lambda-\sum_{i}log(y_i !)
+\propto \sum_{i}y_i log(\lambda) - n\lambda
+\tag{6}
+\end{equation}\]</span></p>
+<p>Plot about partial log-likelihood function,<span class="math inline">\(\sum_{i}y_i log(\lambda) - n\lambda\)</span>,is shown below.</p>
+<pre class="python"><code>import numpy as np
+import matplotlib.pyplot as plt
+import numdifftools as nd
+import statsmodels.api as sm
+import statsmodels
+np.random.seed(509)
+y = np.random.poisson(lam = 10, size = 1000)
+x = np.ones(1000)
+def loglikelihood(x):
+  l = np.exp(x)
+  n = len(y)
+  f1 = (np.sum(y)) * np.log(l)
+  f2 = -n * l
+  output = f1 + f2
+  output = -output
+  return output
+plt.figure()
+plt.plot(np.arange(2.1,2.5,0.01),
+loglikelihood(np.arange(2.1,2.5,0.01)))
+plt.title(&quot;Partial log-likelihood of Poisson(10)&quot;)
+plt.xlabel(&quot;lambda&quot;)
+plt.show()</code></pre>
+<p><img src="Newton_Raphson_files/figure-html/unnamed-chunk-1-1.png" width="538" style="display: block; margin: auto;" /></p>
+<pre class="python"><code>##approximation of first/second order derivative
+def derivative(x):
+  output = nd.Derivative(loglikelihood)
+  return output(x)
+def hess(x):
+  output = nd.Derivative(loglikelihood, n = 2)
+  return output(x)
+  
+##begin of newton-raphson
+def newton(func,x0,tol=1e-10):
+  diff = 100
+  xold = np.copy(x0)
+  xnew = 0
+  i = 1
+  while diff &gt; tol:
+    xnew = xold - derivative(xold)/hess(xold)
+    diff = np.sum(np.abs(xnew - xold))
+    xold = xnew
+    print(&quot;iteration:&quot;+str(i)+&quot; || &quot;+ &quot;betas:&quot; + str(xnew))
+    print(&quot;change: {:.4f}&quot;.format(derivative(xold)/hess(xold)))
+    i = i + 1
+  output = {&quot;beta&quot;:xnew, &quot;sd&quot;:1/np.sqrt(hess(xnew))}
+  return output
+
+output = newton(loglikelihood,2.5)</code></pre>
+<pre><code>## iteration:1 || betas:2.3188799462720966
+## change: 0.0185
+## iteration:2 || betas:2.300355926680856
+## change: 0.0002
+## iteration:3 || betas:2.3001822234659084
+## change: 0.0000
+## iteration:4 || betas:2.300182208377686
+## change: -0.0000
+## iteration:5 || betas:2.3001822083777603
+## change: 0.0000</code></pre>
+<pre class="python"><code>output</code></pre>
+<pre><code>## {&#39;beta&#39;: 2.3001822083777603, &#39;sd&#39;: 0.010012021643289229}</code></pre>
+<p>We have <span class="math inline">\(\hat{\beta}\)</span> and var<span class="math inline">\((\hat{\beta})\)</span>, that are identical with those from <code>statsmodels.discrete.discrete_model.Poisson</code>.</p>
+<p>Theoretically, <span class="math inline">\(\beta=log(\lambda)|_{\lambda=10}=2.302585\)</span></p>
+<pre class="python"><code>model = statsmodels.discrete.discrete_model.Poisson(y,x)
+model.fit().summary()</code></pre>
+<pre><code>## Optimization terminated successfully.
+##          Current function value: 2.538426
+##          Iterations 1
+## &lt;class &#39;statsmodels.iolib.summary.Summary&#39;&gt;
+## &quot;&quot;&quot;
+##                           Poisson Regression Results                          
+## ==============================================================================
+## Dep. Variable:                      y   No. Observations:                 1000
+## Model:                        Poisson   Df Residuals:                      999
+## Method:                           MLE   Df Model:                            0
+## Date:                Sun, 10 May 2020   Pseudo R-squ.:                   0.000
+## Time:                        11:41:57   Log-Likelihood:                -2538.4
+## converged:                       True   LL-Null:                       -2538.4
+##                                         LLR p-value:                       nan
+## ==============================================================================
+##                  coef    std err          z      P&gt;|z|      [0.025      0.975]
+## ------------------------------------------------------------------------------
+## const          2.3002      0.010    229.742      0.000       2.281       2.320
+## ==============================================================================
+## &quot;&quot;&quot;</code></pre>
 
 
 
