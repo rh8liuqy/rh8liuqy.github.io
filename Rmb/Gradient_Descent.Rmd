@@ -1,0 +1,36 @@
+---
+title: "Gradient Descent"
+author: "Kevin Liu"
+date: "5/11/2020"
+output: 
+  bookdown::html_document2:
+    toc: true
+    toc_depth: 4
+    self_contained: true
+bibliography: "bibliography.bib"
+link-citations: true
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(reticulate)
+matplotlib <- import("matplotlib")
+matplotlib$use("Agg", force = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.align='center',python = reticulate::eng_python, fig.width = 8*0.7,fig.height = 8*0.7)
+```
+
+I will use both Newton Rapshon method and Gradient Descent method to get minimal value of $f(x,y)$.
+
+$$z = f(x,y) = x^2 + y^2$$
+
+```{python}
+def f(x):
+  x1 = x[0]
+  x2 = x[1]
+  output = x1**2 + x2**2
+  return output
+
+delta = 1
+x = np.arange(-20.0, 20.0+delta, delta)
+y = np.arange(-20.0, 20.0+delta, delta)
+```

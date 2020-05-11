@@ -1,5 +1,5 @@
 ---
-title: "Table of Contents"
+title: "What Do You Care What Other People Think"
 ---
 
 ![](./files/too-much-coffee-featured.jpg){width=200px}
@@ -16,6 +16,9 @@ title: "Table of Contents"
     + [Example for Mixed Model Equations and REML](Example_Linear_mixed_model.html)
     + [Expectation Maximization Algorithm With One Example](Expectation_Maximization_Algorithm_With_One_Example.html)
     
-* Optimization
+* Topics about Optimization
     + [Finite Difference](Finite_Difference.html)
     + [Newton Raphson](Newton_Raphson.html)
+    
+* Topics about `matplotlib`
+    + [Contour Plots](Contour_matplotlib.html)
