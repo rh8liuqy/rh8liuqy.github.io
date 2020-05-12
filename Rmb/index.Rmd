@@ -22,3 +22,6 @@ title: "What Do You Care What Other People Think"
     
 * Topics about `matplotlib`
     + [Contour Plots](Contour_matplotlib.html)
+    
+* Miscellaneous
+    + [QR decomposition](OLS_QR.html)

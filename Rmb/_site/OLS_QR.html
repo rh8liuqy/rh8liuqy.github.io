@@ -10,9 +10,10 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Kevin Liu" />
 
 
-<title>What Do You Care What Other People Think</title>
+<title>QR decomposition and Least square regression</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -289,42 +290,100 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">What Do You Care What Other People Think</h1>
+<h1 class="title toc-ignore">QR decomposition and Least square regression</h1>
+<h4 class="author">Kevin Liu</h4>
+<h4 class="date">5/11/2020</h4>
 
 </div>
 
-
-<p><img src="files/too-much-coffee-featured.jpg" width="200" /></p>
+<div id="TOC">
 <ul>
-<li>Topics about Logistic regression
-<ul>
-<li><a href="logistic_regression_theory_hand_check.html">Logistic regression MLE</a></li>
-</ul></li>
-<li>Topics about Time Series Analysis
-<ul>
-<li><a href="Data_Visulization_of_ARIMA_Model_Selection.html">Visualize Model Selection</a></li>
-<li><a href="ACF_PACF_by_ggplot2.html">ACF&amp;PACF by <code>ggplot2</code></a></li>
-</ul></li>
-<li>Topics about Linear Mixed Model
-<ul>
-<li><a href="Linear_mixed_model_equations.html">Mixed Model Equations and REML</a></li>
-<li><a href="Example_Linear_mixed_model.html">Example for Mixed Model Equations and REML</a></li>
-<li><a href="Expectation_Maximization_Algorithm_With_One_Example.html">Expectation Maximization Algorithm With One Example</a></li>
-</ul></li>
-<li>Topics about Optimization
-<ul>
-<li><a href="Finite_Difference.html">Finite Difference</a></li>
-<li><a href="Newton_Raphson.html">Newton Raphson</a></li>
-</ul></li>
-<li>Topics about <code>matplotlib</code>
-<ul>
-<li><a href="Contour_matplotlib.html">Contour Plots</a></li>
-</ul></li>
-<li>Miscellaneous
-<ul>
-<li><a href="OLS_QR.html">QR decomposition</a></li>
-</ul></li>
+<li><a href="#references">References</a></li>
 </ul>
+</div>
+
+<p>QR Decomposition: Let <span class="math inline">\(\mathbf{X}\)</span> be an <span class="math inline">\(n\times p\)</span> matrix of rank <span class="math inline">\(p(n\ge p)\)</span>. Then, <span class="math inline">\(\mathbf{X}\)</span> can be written as <span class="math inline">\(\mathbf{X} = \mathbf{Q}_{n\times p}\mathbf{R}_{p\times p}\)</span>, where <span class="math inline">\(\mathbf{Q}^T\mathbf{Q}=\mathbf{I}\)</span> and <span class="math inline">\(\mathbf{R}\)</span> is an upper-triangular matrix.<span class="citation">(Harville <a href="#ref-Harville_1997">1997</a>)</span></p>
+<p>In least square problem, <span class="math inline">\(\mathbf{y} = \boldsymbol{X\beta} + \mathbf{e}\)</span>, where <span class="math inline">\(\mathbf{e}\sim \text{MVN}(\mathbf{0},\mathbf{I}\ \times \sigma^2)\)</span>.</p>
+<p>It is well known that <span class="math inline">\(\hat{\boldsymbol{\beta}}=(\boldsymbol{X}^T\boldsymbol{X})^{-1}\boldsymbol{X}^T\mathbf{y}\)</span>. Use the fact <span class="math inline">\(\mathbf{X} = \mathbf{Q}\mathbf{R}\)</span> and <span class="math inline">\(\mathbf{Q}^T\mathbf{Q}=\mathbf{I}\)</span></p>
+<p><span class="math display">\[\begin{equation}
+\begin{split}
+\hat{\boldsymbol{\beta}}&amp;= (\boldsymbol{X}^T\boldsymbol{X})^{-1}\boldsymbol{X}^T\mathbf{y}\\
+&amp;=(\boldsymbol{R}^T\boldsymbol{Q}^T\boldsymbol{Q}\boldsymbol{R})^{-1}\boldsymbol{R}^T\boldsymbol{Q}^T\mathbf{y}\\
+&amp;=(\boldsymbol{R}^T\boldsymbol{R})^{-1}\boldsymbol{R}^T\boldsymbol{Q}^T\mathbf{y}\\
+&amp;=\boldsymbol{R}^{-1}\boldsymbol{Q}^T\mathbf{y}
+\end{split}
+\end{equation}\]</span></p>
+<p>I will demonstrate application of QR decomposition in Least square regression.</p>
+<ol style="list-style-type: decimal">
+<li>Simulate data such as <span class="math inline">\(Y_{1.} \sim N(20,1)\)</span>, <span class="math inline">\(Y_{2.} \sim N(40,1)\)</span>, <span class="math inline">\(Y_{3.} \sim N(60,1)\)</span></li>
+</ol>
+<pre class="python"><code>import numpy as np
+import statsmodels.api as sm
+import timeit
+import matplotlib.pyplot as plt
+np.random.seed(511)
+y = np.concatenate([np.random.normal(loc=20,scale=1,size=100),
+np.random.normal(loc=40,scale=1,size=100),
+np.random.normal(loc=60,scale=1,size=100)])
+X1 = np.ones(300)
+X2 = np.concatenate([np.ones(100),np.zeros(200)])
+X3 = np.concatenate([np.zeros(100),np.ones(100),np.zeros(100)])
+X = np.column_stack((X1,X2,X3))</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Use the formula that <span class="math inline">\(\hat{\boldsymbol{\beta}}=(\boldsymbol{X}^T\boldsymbol{X})^{-1}\boldsymbol{X}^T\mathbf{y}\)</span></li>
+</ol>
+<pre class="python"><code>beta_est = np.linalg.inv(X.T @ X) @ X.T @ y
+beta_est</code></pre>
+<pre><code>## array([ 60.03807704, -40.05588504, -20.08218135])</code></pre>
+<ol start="3" style="list-style-type: decimal">
+<li>Use the formula that <span class="math inline">\(\hat{\boldsymbol{\beta}}=\boldsymbol{R}^{-1}\boldsymbol{Q}^T\mathbf{y}\)</span></li>
+</ol>
+<pre class="python"><code>Q,R = np.linalg.qr(X)
+beta_est = np.linalg.inv(R) @ Q.T @ y
+beta_est</code></pre>
+<pre><code>## array([ 60.03807704, -40.05588504, -20.08218135])</code></pre>
+<ol start="4" style="list-style-type: decimal">
+<li>Verify <span class="math inline">\(\hat{\boldsymbol{\beta}}\)</span> via <code>statsmodels</code></li>
+</ol>
+<pre class="python"><code>model = sm.OLS(y,X)
+model.fit().summary()</code></pre>
+<pre><code>## &lt;class &#39;statsmodels.iolib.summary.Summary&#39;&gt;
+## &quot;&quot;&quot;
+##                             OLS Regression Results                            
+## ==============================================================================
+## Dep. Variable:                      y   R-squared:                       0.996
+## Model:                            OLS   Adj. R-squared:                  0.996
+## Method:                 Least Squares   F-statistic:                 3.785e+04
+## Date:                Tue, 12 May 2020   Prob (F-statistic):               0.00
+## Time:                        10:22:08   Log-Likelihood:                -432.90
+## No. Observations:                 300   AIC:                             871.8
+## Df Residuals:                     297   BIC:                             882.9
+## Df Model:                           2                                         
+## Covariance Type:            nonrobust                                         
+## ==============================================================================
+##                  coef    std err          t      P&gt;|t|      [0.025      0.975]
+## ------------------------------------------------------------------------------
+## const         60.0381      0.103    583.176      0.000      59.835      60.241
+## x1           -40.0559      0.146   -275.121      0.000     -40.342     -39.769
+## x2           -20.0822      0.146   -137.933      0.000     -20.369     -19.796
+## ==============================================================================
+## Omnibus:                        1.175   Durbin-Watson:                   2.002
+## Prob(Omnibus):                  0.556   Jarque-Bera (JB):                0.906
+## Skew:                           0.099   Prob(JB):                        0.636
+## Kurtosis:                       3.183   Cond. No.                         3.73
+## ==============================================================================
+## 
+## Warnings:
+## [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+## &quot;&quot;&quot;</code></pre>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references">
+<div id="ref-Harville_1997">
+<p>Harville, David A. 1997. <em>Matrix Algebra from a Statistician’s Perspective</em>. Springer New York. <a href="https://doi.org/10.1007/b98818">https://doi.org/10.1007/b98818</a>.</p>
+</div>
+</div>
+</div>
 
 
 

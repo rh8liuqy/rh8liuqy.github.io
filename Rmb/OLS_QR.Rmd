@@ -1,0 +1,78 @@
+---
+title: "QR decomposition and Least square regression"
+author: "Kevin Liu"
+date: "5/11/2020"
+output: 
+  bookdown::html_document2:
+    toc: true
+    toc_depth: 4
+    self_contained: true
+bibliography: "bibliography.bib"
+link-citations: true
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(reticulate)
+matplotlib <- import("matplotlib")
+matplotlib$use("Agg", force = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.align='center',python = reticulate::eng_python, fig.width = 8*0.7,fig.height = 8*0.7)
+```
+
+QR Decomposition: Let $\mathbf{X}$ be an $n\times p$ matrix of rank $p(n\ge p)$. Then, $\mathbf{X}$ can be written as $\mathbf{X} = \mathbf{Q}_{n\times p}\mathbf{R}_{p\times p}$, where $\mathbf{Q}^T\mathbf{Q}=\mathbf{I}$ and $\mathbf{R}$ is an upper-triangular matrix.[@Harville_1997]
+
+In least square problem, $\mathbf{y} = \boldsymbol{X\beta} + \mathbf{e}$, where $\mathbf{e}\sim \text{MVN}(\mathbf{0},\mathbf{I}\ \times \sigma^2)$. 
+
+It is well known that $\hat{\boldsymbol{\beta}}=(\boldsymbol{X}^T\boldsymbol{X})^{-1}\boldsymbol{X}^T\mathbf{y}$. Use the fact $\mathbf{X} = \mathbf{Q}\mathbf{R}$ and $\mathbf{Q}^T\mathbf{Q}=\mathbf{I}$
+
+\begin{equation}
+\begin{split}
+\hat{\boldsymbol{\beta}}&= (\boldsymbol{X}^T\boldsymbol{X})^{-1}\boldsymbol{X}^T\mathbf{y}\\
+&=(\boldsymbol{R}^T\boldsymbol{Q}^T\boldsymbol{Q}\boldsymbol{R})^{-1}\boldsymbol{R}^T\boldsymbol{Q}^T\mathbf{y}\\
+&=(\boldsymbol{R}^T\boldsymbol{R})^{-1}\boldsymbol{R}^T\boldsymbol{Q}^T\mathbf{y}\\
+&=\boldsymbol{R}^{-1}\boldsymbol{Q}^T\mathbf{y}
+\end{split}
+\end{equation}
+
+I will demonstrate application of QR decomposition in Least square regression.
+
+1. Simulate data such as $Y_{1.} \sim N(20,1)$, $Y_{2.} \sim N(40,1)$, $Y_{3.} \sim N(60,1)$
+
+```{python}
+import numpy as np
+import statsmodels.api as sm
+import timeit
+import matplotlib.pyplot as plt
+np.random.seed(511)
+y = np.concatenate([np.random.normal(loc=20,scale=1,size=100),
+np.random.normal(loc=40,scale=1,size=100),
+np.random.normal(loc=60,scale=1,size=100)])
+X1 = np.ones(300)
+X2 = np.concatenate([np.ones(100),np.zeros(200)])
+X3 = np.concatenate([np.zeros(100),np.ones(100),np.zeros(100)])
+X = np.column_stack((X1,X2,X3))
+```
+
+2. Use the formula that $\hat{\boldsymbol{\beta}}=(\boldsymbol{X}^T\boldsymbol{X})^{-1}\boldsymbol{X}^T\mathbf{y}$
+
+```{python}
+beta_est = np.linalg.inv(X.T @ X) @ X.T @ y
+beta_est
+```
+
+3. Use the formula that $\hat{\boldsymbol{\beta}}=\boldsymbol{R}^{-1}\boldsymbol{Q}^T\mathbf{y}$
+
+```{python}
+Q,R = np.linalg.qr(X)
+beta_est = np.linalg.inv(R) @ Q.T @ y
+beta_est
+```
+
+4. Verify $\hat{\boldsymbol{\beta}}$ via `statsmodels`
+
+```{python}
+model = sm.OLS(y,X)
+model.fit().summary()
+```
+
+`r if (knitr::is_html_output()) '# References {-}'`
