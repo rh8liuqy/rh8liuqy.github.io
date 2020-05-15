@@ -10,9 +10,10 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Kevin Liu" />
 
 
-<title>What Do You Care What Other People Think</title>
+<title>GLM fitting with canonical link by Newton-Rapshon and Fisher Scoring</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -289,41 +290,112 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">What Do You Care What Other People Think</h1>
+<h1 class="title toc-ignore">GLM fitting with canonical link by Newton-Rapshon and Fisher Scoring</h1>
+<h4 class="author">Kevin Liu</h4>
+<h4 class="date">5/13/2020</h4>
 
 </div>
 
-
-<p><img src="files/too-much-coffee-featured.jpg" width="200" /></p>
+<div id="TOC">
 <ul>
-<li>Topics about Logistic regression
-<ul>
-<li><a href="logistic_regression_theory_hand_check.html">Logistic regression MLE</a></li>
-</ul></li>
-<li>Topics about Data Visualization
-<ul>
-<li><a href="Data_Visulization_of_ARIMA_Model_Selection.html">Visualize Time Series Model Selection</a></li>
-<li><a href="ACF_PACF_by_ggplot2.html">ACF&amp;PACF by <code>ggplot2</code></a></li>
-<li><a href="Contour_matplotlib.html">Contour Plots by <code>matplotlib</code></a></li>
-</ul></li>
-<li>Topics about Linear Mixed Model
-<ul>
-<li><a href="Linear_mixed_model_equations.html">Mixed Model Equations and REML</a></li>
-<li><a href="Example_Linear_mixed_model.html">Example for Mixed Model Equations and REML</a></li>
-<li><a href="Expectation_Maximization_Algorithm_With_One_Example.html">Expectation Maximization Algorithm With One Example</a></li>
-</ul></li>
-<li>Topics about Optimization
-<ul>
-<li><a href="Finite_Difference.html">Finite Difference</a></li>
-<li><a href="Newton_Raphson.html">Newton Raphson in Python</a></li>
-<li><a href="Fisher_Scoring.html">GLM fitting with canonical link</a></li>
-</ul></li>
-<li>Miscellaneous
-<ul>
-<li><a href="OLS_QR.html">QR decomposition</a></li>
-<li><a href="Gaussian-Markov.html">Gauss–Markov theorem</a></li>
-</ul></li>
+<li><a href="#newton-rapshon-for-mle"><span class="toc-section-number">1</span> Newton-Rapshon for MLE</a></li>
+<li><a href="#fisher-scoring"><span class="toc-section-number">2</span> Fisher scoring</a></li>
+<li><a href="#expected-information-and-observed-information-for-glm-with-canonical-link"><span class="toc-section-number">3</span> Expected Information and Observed Information for GLM with canonical link</a></li>
+<li><a href="#references">References</a></li>
 </ul>
+</div>
+
+<div id="newton-rapshon-for-mle" class="section level1">
+<h1><span class="header-section-number">1</span> Newton-Rapshon for MLE</h1>
+<p>Define log likelihood as</p>
+<p><span class="math display" id="eq:loglikelihood">\[\begin{equation}
+l(\boldsymbol{\theta}) = \sum_{i}^{n}\text{log}f(y_i;\boldsymbol{\theta})
+\tag{1.1}
+\end{equation}\]</span></p>
+<p>Score is gradient of log likelihood <span class="math inline">\(l(\boldsymbol{\theta})\)</span></p>
+<p><span class="math display" id="eq:score">\[\begin{equation}
+s(\boldsymbol{\theta}) = \frac{\partial l(\boldsymbol{\theta})}{\partial \boldsymbol{\theta}} = 
+\begin{bmatrix}
+\frac{l(\boldsymbol{\theta})}{\partial \theta_1}\\
+\vdots\\
+\frac{l(\boldsymbol{\theta})}{\partial \theta_n}
+\end{bmatrix}
+\tag{1.2}
+\end{equation}\]</span></p>
+<p>Define <em>Observed Information</em>, or <em>Hessian Matrix</em>, as</p>
+<p><span class="math display" id="eq:hess">\[\begin{equation}
+H(\boldsymbol{\theta}) = \frac{\partial^2 l(\boldsymbol{\theta})}{\partial \boldsymbol{\theta}\partial\boldsymbol{\theta}^T}=\frac{\partial s(\boldsymbol{\theta})}{\partial \boldsymbol{\theta}^T}
+\tag{1.3}
+\end{equation}\]</span></p>
+<p>Assume that <span class="math inline">\(s(\boldsymbol{\theta}_{n+1}) = \mathbf{0}\)</span>, <a href="https://en.wikipedia.org/wiki/Linear_approximation">linear approximation</a> of <span class="math inline">\(s(\boldsymbol{\theta}_{n+1}) = \mathbf{0}\)</span> is</p>
+<p><span class="math display" id="eq:linearapprox">\[\begin{equation}
+s(\boldsymbol{\theta}_{n+1}) =\mathbf{0} \approx s(\boldsymbol{\theta}_{n}) + H(\boldsymbol{\theta}_{n})(\boldsymbol{\theta}_{n+1}-\boldsymbol{\theta}_{n})
+\tag{1.4}
+\end{equation}\]</span></p>
+<p>Equation <a href="#eq:newtonapprox">(1.5)</a> implies that</p>
+<p><span class="math display" id="eq:newtonapprox">\[\begin{equation}
+\boldsymbol{\theta}_{n+1} = \boldsymbol{\theta}_{n} - H\left(\boldsymbol{\theta}_{n}\right)^{-1}s\left(\boldsymbol{\theta}_{n}\right)
+\tag{1.5}
+\end{equation}\]</span></p>
+</div>
+<div id="fisher-scoring" class="section level1">
+<h1><span class="header-section-number">2</span> Fisher scoring</h1>
+<p>Define <em>Expected Information</em>, as</p>
+<p><span class="math display" id="eq:info">\[\begin{equation}
+I(\boldsymbol{\theta})=\mathrm{E}(-H(\boldsymbol{\theta}))
+\tag{2.1}
+\end{equation}\]</span></p>
+<p><strong>Replace Observed Information with Expected Information</strong>, we have formula for Fisher Scoring</p>
+<p><span class="math display" id="eq:fisherscoring">\[\begin{equation}
+\boldsymbol{\theta}_{n+1}=\boldsymbol{\theta}_{n}+I(\boldsymbol{\theta})^{-1} s\left(\boldsymbol{\theta}_{n}\right)
+\tag{2.2}
+\end{equation}\]</span></p>
+</div>
+<div id="expected-information-and-observed-information-for-glm-with-canonical-link" class="section level1">
+<h1><span class="header-section-number">3</span> Expected Information and Observed Information for GLM with canonical link</h1>
+<p>Exponential Dispersion Family is defined as</p>
+<p><span class="math display" id="eq:expdisperision">\[\begin{equation}
+f\left(y_{i} ; \theta_{i}, \phi\right)=\exp \left\{\left[y_{i} \theta_{i}-b\left(\theta_{i}\right)\right] / a(\phi)+c\left(y_{i}, \phi\right)\right\}
+\tag{3.1}
+\end{equation}\]</span></p>
+<p>A well known relationship between mean/variance and <span class="math inline">\(b(\theta)\)</span> is shown below <span class="citation">(Agresti <a href="#ref-FLGLM">2016</a>)</span></p>
+<p><span class="math display" id="eq:mean">\[\begin{equation}
+\mu_{i}=E\left(y_{i}\right)=b^{\prime}\left(\theta_{i}\right) \quad \text { and } \quad \operatorname{var}\left(y_{i}\right)=b^{\prime \prime}\left(\theta_{i}\right) a(\phi)
+\tag{3.2}
+\end{equation}\]</span></p>
+<p>By definition of canonical link</p>
+<p><span class="math display" id="eq:canonicallink">\[\begin{equation}
+\theta_i = \eta_{i} = \sum_{j=1}^{p} \beta_{j} x_{i j}
+\tag{3.3}
+\end{equation}\]</span></p>
+<p>Log-likelihood becomes</p>
+<p><span class="math display" id="eq:Loglikelihood">\[\begin{equation}
+\ell(\eta_{i}) = \left[y_{i} \eta_{i}-b\left(\eta_{i}\right)\right] / a(\phi)+c\left(y_{i}, \phi\right)
+\tag{3.4}
+\end{equation}\]</span></p>
+<p>Observed Information is free of random variable <span class="math inline">\(y_i\)</span></p>
+<p><span class="math display" id="eq:free1">\[\begin{equation}
+\frac{\partial \ell(\eta_{i})}{\partial \beta_j} = \frac{y_i-b^{&#39;}(\eta_{i})}{a(\phi)}x_{ij}
+\tag{3.5}
+\end{equation}\]</span></p>
+<p><span class="math display" id="eq:free2">\[\begin{equation}
+\frac{\partial^2 \ell(\eta_{i})}{\partial \beta_j \partial \beta_h} = \frac{-b^{&#39;&#39;}(\eta_{i})}{a(\phi)}x_{ij}x_{ih}
+\tag{3.6}
+\end{equation}\]</span></p>
+<p>Equation <a href="#eq:free2">(3.6)</a> is free of random variable <span class="math inline">\(y_i\)</span>. Hence, <span class="math inline">\(-E(\frac{\partial^{2} \ell\left(\eta_{i}\right)}{\partial \beta_{j} \partial \beta_{h}})=-\frac{\partial^{2} \ell\left(\eta_{i}\right)}{\partial \beta_{j} \partial \beta_{h}}\)</span>. In other words, <em>Observed Information</em> and <em>Expected Information</em> are same for GLM with canonical link.</p>
+<p>Overall, <strong>Fisher scoring and Newton-Raphson are identical for GLM using canonical link</strong>.<span class="citation">(Nelder and Wedderburn <a href="#ref-10.2307/2344614">1972</a>)</span></p>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references">
+<div id="ref-FLGLM">
+<p>Agresti, Alan. 2016. <em>Foundations of Linear and Generalized Linear Models</em>. First Edition.</p>
+</div>
+<div id="ref-10.2307/2344614">
+<p>Nelder, J. A., and R. W. M. Wedderburn. 1972. “Generalized Linear Models.” <em>Journal of the Royal Statistical Society. Series A (General)</em> 135 (3): 370–84. <a href="http://www.jstor.org/stable/2344614">http://www.jstor.org/stable/2344614</a>.</p>
+</div>
+</div>
+</div>
 
 
 

@@ -10,9 +10,10 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Kevin Liu" />
 
 
-<title>What Do You Care What Other People Think</title>
+<title>Gaussian-Markov Theorem</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -289,41 +290,51 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">What Do You Care What Other People Think</h1>
+<h1 class="title toc-ignore">Gaussian-Markov Theorem</h1>
+<h4 class="author">Kevin Liu</h4>
+<h4 class="date">5/15/2020</h4>
 
 </div>
 
-
-<p><img src="files/too-much-coffee-featured.jpg" width="200" /></p>
+<div id="TOC">
 <ul>
-<li>Topics about Logistic regression
-<ul>
-<li><a href="logistic_regression_theory_hand_check.html">Logistic regression MLE</a></li>
-</ul></li>
-<li>Topics about Data Visualization
-<ul>
-<li><a href="Data_Visulization_of_ARIMA_Model_Selection.html">Visualize Time Series Model Selection</a></li>
-<li><a href="ACF_PACF_by_ggplot2.html">ACF&amp;PACF by <code>ggplot2</code></a></li>
-<li><a href="Contour_matplotlib.html">Contour Plots by <code>matplotlib</code></a></li>
-</ul></li>
-<li>Topics about Linear Mixed Model
-<ul>
-<li><a href="Linear_mixed_model_equations.html">Mixed Model Equations and REML</a></li>
-<li><a href="Example_Linear_mixed_model.html">Example for Mixed Model Equations and REML</a></li>
-<li><a href="Expectation_Maximization_Algorithm_With_One_Example.html">Expectation Maximization Algorithm With One Example</a></li>
-</ul></li>
-<li>Topics about Optimization
-<ul>
-<li><a href="Finite_Difference.html">Finite Difference</a></li>
-<li><a href="Newton_Raphson.html">Newton Raphson in Python</a></li>
-<li><a href="Fisher_Scoring.html">GLM fitting with canonical link</a></li>
-</ul></li>
-<li>Miscellaneous
-<ul>
-<li><a href="OLS_QR.html">QR decomposition</a></li>
-<li><a href="Gaussian-Markov.html">Gauss–Markov theorem</a></li>
-</ul></li>
+<li><a href="#gauss-markov-theorem"><span class="toc-section-number">1</span> Gauss-Markov Theorem</a></li>
 </ul>
+</div>
+
+<div id="gauss-markov-theorem" class="section level1">
+<h1><span class="header-section-number">1</span> Gauss-Markov Theorem</h1>
+<p>If <span class="math inline">\(E(\boldsymbol{y}) = \boldsymbol{X\beta}\)</span>, <span class="math inline">\(\boldsymbol{X}\)</span> has full rank and var<span class="math inline">\((\boldsymbol{y})=\sigma^2\boldsymbol{I}\)</span>, then the best linear unbiased estimator for <span class="math inline">\(\boldsymbol{\beta}\)</span> is <span class="math inline">\(\hat{\boldsymbol{\beta}}=(\boldsymbol{X}^T\boldsymbol{X})^{-1}\boldsymbol{X}^T\boldsymbol{y}\)</span>.</p>
+<p>Proof:</p>
+<p>The unbised part is obivious, <span class="math inline">\(E((\boldsymbol{X}^T\boldsymbol{X})^{-1}\boldsymbol{X}^T\boldsymbol{y})=(\boldsymbol{X}^T\boldsymbol{X})^{-1}\boldsymbol{X}^T\boldsymbol{X\beta}=\boldsymbol{\beta}\)</span></p>
+<p>“Best” here means minimum variance.</p>
+<p>Assume that there is another linear unbiased estimator <span class="math inline">\(\tilde{\boldsymbol{\beta}} = a^T\boldsymbol{y}\)</span>.</p>
+<p>We have,</p>
+<p><span class="math display" id="eq:tildebeta">\[\begin{equation}
+E(\tilde{\boldsymbol{\beta}}) = \boldsymbol{\beta} = a^T \boldsymbol{X} \boldsymbol{\beta} \quad \text{and} \quad a^T \boldsymbol{X} = I
+\tag{1.1}
+\end{equation}\]</span></p>
+<p><span class="math display" id="eq:cov">\[\begin{equation}
+\begin{aligned}
+\text{cov}(\tilde{\boldsymbol{\beta}} - \hat{\boldsymbol{\beta}},\hat{\boldsymbol{\beta}}) &amp;=
+\text{cov}(a^{T} \boldsymbol{y} - \left(\boldsymbol{X}^{T} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{T} \boldsymbol{y}, \left(\boldsymbol{X}^{T} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{T} \boldsymbol{y})\\
+&amp;= \sigma^2 (a^T - \left(\boldsymbol{X}^{T} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{T})I(\boldsymbol{X}\left(\boldsymbol{X}^{T} \boldsymbol{X}\right)^{-1})\\
+&amp;= \sigma^2 (\left(\boldsymbol{X}^{T} \boldsymbol{X}\right)^{-1} - \left(\boldsymbol{X}^{T} \boldsymbol{X}\right)^{-1})\\
+&amp;= \mathbf{0}
+\end{aligned}
+\tag{1.2}
+\end{equation}\]</span></p>
+<p><span class="math display" id="eq:minvar">\[\begin{equation}
+\begin{aligned}
+\text{var}(\tilde{\boldsymbol{\beta}}) &amp;= \text{var}(\tilde{\boldsymbol{\beta}} - \hat{\boldsymbol{\beta}} + \hat{\boldsymbol{\beta}})\\
+&amp;= \text{var}(\tilde{\boldsymbol{\beta}} - \hat{\boldsymbol{\beta}}) + \text{var}(\hat{\boldsymbol{\beta}}) + 2\text{cov}(\tilde{\boldsymbol{\beta}} - \hat{\boldsymbol{\beta}},\hat{\boldsymbol{\beta}})\\
+&amp;\ge \text{var}(\hat{\boldsymbol{\beta}}) + 2\text{cov}(\tilde{\boldsymbol{\beta}} - \hat{\boldsymbol{\beta}},\hat{\boldsymbol{\beta}}) \\
+&amp;= \text{var}(\hat{\boldsymbol{\beta}})
+\end{aligned}
+\tag{1.3}
+\end{equation}\]</span></p>
+<p>Hence, <span class="math inline">\(\hat{\boldsymbol{\beta}}\)</span> is the best linear unbiased estimator(BLUE) for <span class="math inline">\(\boldsymbol{\beta}\)</span>.</p>
+</div>
 
 
 

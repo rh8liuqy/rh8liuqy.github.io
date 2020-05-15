@@ -1,0 +1,126 @@
+---
+title: "GLM fitting with canonical link by Newton-Rapshon and Fisher Scoring"
+author: "Kevin Liu"
+date: "5/13/2020"
+output: 
+  bookdown::html_document2:
+    toc: true
+    toc_depth: 4
+    self_contained: true
+bibliography: "bibliography.bib"
+link-citations: true
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(reticulate)
+matplotlib <- import("matplotlib")
+matplotlib$use("Agg", force = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.align='center',python = reticulate::eng_python, fig.width = 8*0.7,fig.height = 6*0.7)
+```
+
+# Newton-Rapshon for MLE
+
+Define log likelihood as 
+
+\begin{equation}
+l(\boldsymbol{\theta}) = \sum_{i}^{n}\text{log}f(y_i;\boldsymbol{\theta})
+(\#eq:loglikelihood)
+\end{equation}
+
+Score is gradient of log likelihood $l(\boldsymbol{\theta})$
+
+\begin{equation}
+s(\boldsymbol{\theta}) = \frac{\partial l(\boldsymbol{\theta})}{\partial \boldsymbol{\theta}} = 
+\begin{bmatrix}
+\frac{l(\boldsymbol{\theta})}{\partial \theta_1}\\
+\vdots\\
+\frac{l(\boldsymbol{\theta})}{\partial \theta_n}
+\end{bmatrix}
+(\#eq:score)
+\end{equation}
+
+Define *Observed Information*, or *Hessian Matrix*, as 
+
+\begin{equation}
+H(\boldsymbol{\theta}) = \frac{\partial^2 l(\boldsymbol{\theta})}{\partial \boldsymbol{\theta}\partial\boldsymbol{\theta}^T}=\frac{\partial s(\boldsymbol{\theta})}{\partial \boldsymbol{\theta}^T}
+(\#eq:hess)
+\end{equation}
+
+Assume that $s(\boldsymbol{\theta}_{n+1}) = \mathbf{0}$, [linear approximation](https://en.wikipedia.org/wiki/Linear_approximation) of $s(\boldsymbol{\theta}_{n+1}) = \mathbf{0}$ is
+
+\begin{equation}
+s(\boldsymbol{\theta}_{n+1}) =\mathbf{0} \approx s(\boldsymbol{\theta}_{n}) + H(\boldsymbol{\theta}_{n})(\boldsymbol{\theta}_{n+1}-\boldsymbol{\theta}_{n})
+(\#eq:linearapprox)
+\end{equation}
+
+Equation \@ref(eq:newtonapprox) implies that
+
+\begin{equation}
+\boldsymbol{\theta}_{n+1} = \boldsymbol{\theta}_{n} - H\left(\boldsymbol{\theta}_{n}\right)^{-1}s\left(\boldsymbol{\theta}_{n}\right)
+(\#eq:newtonapprox)
+\end{equation}
+
+# Fisher scoring
+
+Define *Expected Information*, as 
+
+\begin{equation}
+I(\boldsymbol{\theta})=\mathrm{E}(-H(\boldsymbol{\theta}))
+(\#eq:info)
+\end{equation}
+
+**Replace Observed Information with Expected Information**, we have formula for Fisher Scoring
+
+\begin{equation}
+\boldsymbol{\theta}_{n+1}=\boldsymbol{\theta}_{n}+I(\boldsymbol{\theta})^{-1} s\left(\boldsymbol{\theta}_{n}\right)
+(\#eq:fisherscoring)
+\end{equation}
+
+# Expected Information and Observed Information for GLM with canonical link
+
+Exponential Dispersion Family is defined as 
+
+\begin{equation}
+f\left(y_{i} ; \theta_{i}, \phi\right)=\exp \left\{\left[y_{i} \theta_{i}-b\left(\theta_{i}\right)\right] / a(\phi)+c\left(y_{i}, \phi\right)\right\}
+(\#eq:expdisperision)
+\end{equation}
+
+A well known relationship between mean/variance and $b(\theta)$ is shown below  [@FLGLM]
+
+\begin{equation}
+\mu_{i}=E\left(y_{i}\right)=b^{\prime}\left(\theta_{i}\right) \quad \text { and } \quad \operatorname{var}\left(y_{i}\right)=b^{\prime \prime}\left(\theta_{i}\right) a(\phi)
+(\#eq:mean)
+\end{equation}
+
+By definition of canonical link
+
+\begin{equation}
+\theta_i = \eta_{i} = \sum_{j=1}^{p} \beta_{j} x_{i j}
+(\#eq:canonicallink)
+\end{equation}
+
+Log-likelihood becomes
+
+\begin{equation}
+\ell(\eta_{i}) = \left[y_{i} \eta_{i}-b\left(\eta_{i}\right)\right] / a(\phi)+c\left(y_{i}, \phi\right)
+(\#eq:Loglikelihood)
+\end{equation}
+
+Observed Information is free of random variable $y_i$
+
+\begin{equation}
+\frac{\partial \ell(\eta_{i})}{\partial \beta_j} = \frac{y_i-b^{'}(\eta_{i})}{a(\phi)}x_{ij}
+(\#eq:free1)
+\end{equation}
+
+\begin{equation}
+\frac{\partial^2 \ell(\eta_{i})}{\partial \beta_j \partial \beta_h} = \frac{-b^{''}(\eta_{i})}{a(\phi)}x_{ij}x_{ih}
+(\#eq:free2)
+\end{equation}
+
+Equation \@ref(eq:free2) is free of random variable $y_i$. Hence, $-E(\frac{\partial^{2} \ell\left(\eta_{i}\right)}{\partial \beta_{j} \partial \beta_{h}})=-\frac{\partial^{2} \ell\left(\eta_{i}\right)}{\partial \beta_{j} \partial \beta_{h}}$. In other words, *Observed Information* and *Expected Information* are same for GLM with canonical link.
+
+Overall, **Fisher scoring and Newton-Raphson are identical for GLM using canonical link**.[@10.2307/2344614] 
+
+`r if (knitr::is_html_output()) '# References {-}'`

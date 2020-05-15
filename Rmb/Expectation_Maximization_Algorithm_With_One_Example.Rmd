@@ -17,9 +17,9 @@ Expectation Maximization Algorithm is a very important algorithm for mixture dis
 
 # General form of EM algorithm for mixture distribution with 2 parts.
 
-For $\mathbf{x} = (x_1,\dots,x_n)$, where $x_i$ is known numeric variable , with $f_0$ and $f_1$ being probability density functions. We assume that 
+For $\mathbf{x} = (x_1,\dots,x_n)$, where $x_i$ is known, with $f_0$ and $f_1$ being probability density functions. We assume that 
 \begin{equation}
-P(X_i = x_i) = \pi_0 f_0(x_i) + \pi_1 f_1(x_i)
+f_{X_i}(X_i = x_i) = \pi_0 f_0(x_i) + \pi_1 f_1(x_i)
 (\#eq:e1)
 \end{equation}
 

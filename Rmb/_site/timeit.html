@@ -10,9 +10,10 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Kevin Liu" />
 
 
-<title>What Do You Care What Other People Think</title>
+<title>Measure process time in python</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -289,41 +290,35 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">What Do You Care What Other People Think</h1>
+<h1 class="title toc-ignore">Measure process time in python</h1>
+<h4 class="author">Kevin Liu</h4>
+<h4 class="date">5/12/2020</h4>
 
 </div>
 
 
-<p><img src="files/too-much-coffee-featured.jpg" width="200" /></p>
-<ul>
-<li>Topics about Logistic regression
-<ul>
-<li><a href="logistic_regression_theory_hand_check.html">Logistic regression MLE</a></li>
-</ul></li>
-<li>Topics about Data Visualization
-<ul>
-<li><a href="Data_Visulization_of_ARIMA_Model_Selection.html">Visualize Time Series Model Selection</a></li>
-<li><a href="ACF_PACF_by_ggplot2.html">ACF&amp;PACF by <code>ggplot2</code></a></li>
-<li><a href="Contour_matplotlib.html">Contour Plots by <code>matplotlib</code></a></li>
-</ul></li>
-<li>Topics about Linear Mixed Model
-<ul>
-<li><a href="Linear_mixed_model_equations.html">Mixed Model Equations and REML</a></li>
-<li><a href="Example_Linear_mixed_model.html">Example for Mixed Model Equations and REML</a></li>
-<li><a href="Expectation_Maximization_Algorithm_With_One_Example.html">Expectation Maximization Algorithm With One Example</a></li>
-</ul></li>
-<li>Topics about Optimization
-<ul>
-<li><a href="Finite_Difference.html">Finite Difference</a></li>
-<li><a href="Newton_Raphson.html">Newton Raphson in Python</a></li>
-<li><a href="Fisher_Scoring.html">GLM fitting with canonical link</a></li>
-</ul></li>
-<li>Miscellaneous
-<ul>
-<li><a href="OLS_QR.html">QR decomposition</a></li>
-<li><a href="Gaussian-Markov.html">Gauss–Markov theorem</a></li>
-</ul></li>
-</ul>
+<p>I compare time used for simulating <span class="math inline">\(100\times 100\)</span> normal distributed random numbers, repeating 3000 times, by <code>numpy</code> and <code>cupy</code> via <code>timeit.repeat</code>. Then plot time used by both method via <code>matplotlib.pyplot</code>.</p>
+<pre class="python"><code>import numpy as np
+import cupy as cp
+import timeit
+import matplotlib.pyplot as plt
+
+def f1():
+  np.random.normal(size = 100*100)
+  return None
+
+def f2():
+  cp.random.normal(size = 100*100)
+  return None
+
+t1 = timeit.repeat(f1,repeat=3000,number=1)
+t2 = timeit.repeat(f2,repeat=3000,number=1)
+
+plt.figure()
+fig = plt.boxplot([t1,t2],labels=[&quot;numpy&quot;,&quot;cupy&quot;])
+plt.ylabel(&quot;seconds&quot;)
+plt.show()</code></pre>
+<p><img src="timeit_files/figure-html/unnamed-chunk-1-1.png" width="538" style="display: block; margin: auto;" /></p>
 
 
 
