@@ -8,48 +8,78 @@
 
 
 <url>
-  <loc>https://rh8liuqy.github.io/index.html</loc>
-  <lastmod>2020-05-08T20:23:39+00:00</lastmod>
+  <loc>https://rh8liuqy.github.io/</loc>
+  <lastmod>2020-05-15T18:14:53+00:00</lastmod>
   <priority>1.00</priority>
 </url>
 <url>
+  <loc>https://rh8liuqy.github.io/index.html</loc>
+  <lastmod>2020-05-15T18:14:53+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
   <loc>https://rh8liuqy.github.io/about.html</loc>
-  <lastmod>2020-05-08T20:23:39+00:00</lastmod>
+  <lastmod>2020-05-15T18:14:53+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://rh8liuqy.github.io/logistic_regression_theory_hand_check.html</loc>
-  <lastmod>2020-05-08T20:23:39+00:00</lastmod>
+  <lastmod>2020-05-15T18:14:53+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://rh8liuqy.github.io/Data_Visulization_of_ARIMA_Model_Selection.html</loc>
-  <lastmod>2020-05-08T20:23:38+00:00</lastmod>
+  <lastmod>2020-05-15T18:14:52+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://rh8liuqy.github.io/ACF_PACF_by_ggplot2.html</loc>
-  <lastmod>2020-05-08T20:23:38+00:00</lastmod>
+  <lastmod>2020-05-15T18:14:52+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://rh8liuqy.github.io/Contour_matplotlib.html</loc>
+  <lastmod>2020-05-15T18:14:52+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://rh8liuqy.github.io/Linear_mixed_model_equations.html</loc>
-  <lastmod>2020-05-08T20:23:38+00:00</lastmod>
+  <lastmod>2020-05-15T18:14:52+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://rh8liuqy.github.io/Example_Linear_mixed_model.html</loc>
-  <lastmod>2020-05-08T20:23:38+00:00</lastmod>
+  <lastmod>2020-05-15T18:14:52+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://rh8liuqy.github.io/Expectation_Maximization_Algorithm_With_One_Example.html</loc>
-  <lastmod>2020-05-08T20:23:38+00:00</lastmod>
+  <lastmod>2020-05-15T18:14:52+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://rh8liuqy.github.io/Finite_Difference.html</loc>
-  <lastmod>2020-05-08T20:23:38+00:00</lastmod>
+  <lastmod>2020-05-15T18:14:52+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://rh8liuqy.github.io/Newton_Raphson.html</loc>
+  <lastmod>2020-05-15T18:14:52+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://rh8liuqy.github.io/Fisher_Scoring.html</loc>
+  <lastmod>2020-05-15T18:14:52+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://rh8liuqy.github.io/OLS_QR.html</loc>
+  <lastmod>2020-05-15T18:14:52+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://rh8liuqy.github.io/Gaussian-Markov.html</loc>
+  <lastmod>2020-05-15T18:14:52+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 
