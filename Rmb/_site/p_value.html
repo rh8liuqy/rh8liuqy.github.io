@@ -10,9 +10,10 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Kevin Liu" />
 
 
-<title>What Do You Care What Other People Think</title>
+<title>p-Value is a test statistic</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -289,42 +290,109 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">What Do You Care What Other People Think</h1>
+<h1 class="title toc-ignore"><span class="math inline">\(p\)</span>-Value is a test statistic</h1>
+<h4 class="author">Kevin Liu</h4>
+<h4 class="date">5/15/2020</h4>
 
 </div>
 
-
-<p><img src="files/too-much-coffee-featured.jpg" width="200" /></p>
+<div id="TOC">
 <ul>
-<li>Topics about Logistic regression
-<ul>
-<li><a href="logistic_regression_theory_hand_check.html">Logistic regression MLE</a></li>
-</ul></li>
-<li>Topics about Data Visualization
-<ul>
-<li><a href="Data_Visulization_of_ARIMA_Model_Selection.html">Visualize Time Series Model Selection</a></li>
-<li><a href="ACF_PACF_by_ggplot2.html">ACF&amp;PACF by <code>ggplot2</code></a></li>
-<li><a href="Contour_matplotlib.html">Contour Plots by <code>matplotlib</code></a></li>
-</ul></li>
-<li>Topics about Linear Mixed Model
-<ul>
-<li><a href="Linear_mixed_model_equations.html">Mixed Model Equations and REML</a></li>
-<li><a href="Example_Linear_mixed_model.html">Example for Mixed Model Equations and REML</a></li>
-<li><a href="Expectation_Maximization_Algorithm_With_One_Example.html">Expectation Maximization Algorithm With One Example</a></li>
-</ul></li>
-<li>Topics about Optimization
-<ul>
-<li><a href="Finite_Difference.html">Finite Difference</a></li>
-<li><a href="Newton_Raphson.html">Newton Raphson in Python</a></li>
-<li><a href="Fisher_Scoring.html">GLM fitting with canonical link</a></li>
-</ul></li>
-<li>Miscellaneous
-<ul>
-<li><a href="OLS_QR.html">QR decomposition</a></li>
-<li><a href="Gaussian-Markov.html">Gauss–Markov theorem</a></li>
-<li><a href="p_value.html"><span class="math inline">\(p\)</span>-value is a statistic!(random variable)</a></li>
-</ul></li>
+<li><a href="#definition-of-p-value"><span class="toc-section-number">1</span> Definition of <span class="math inline">\(p\)</span>-value</a></li>
+<li><a href="#example-in-ordinary-least-square-regression"><span class="toc-section-number">2</span> Example in ordinary least square regression</a></li>
+<li><a href="#references">References</a></li>
 </ul>
+</div>
+
+<div id="definition-of-p-value" class="section level1">
+<h1><span class="header-section-number">1</span> Definition of <span class="math inline">\(p\)</span>-value</h1>
+<p>A <span class="math inline">\(p\)</span>-value, <span class="math inline">\(p(\mathbf{X})\)</span>, is a <strong>test statistic</strong>, a type of random variable, satisfying <span class="math inline">\(0\le p(\mathbf{x}) \le 1\)</span> for every sample point <span class="math inline">\(\mathbf{x}\)</span>.</p>
+<p>A <span class="math inline">\(p\)</span>-value is <em>valid</em> if, <span class="math inline">\(\forall \theta \in \Theta_0\)</span> and <span class="math inline">\(0\le \alpha \le 1\)</span>.</p>
+<p><span class="math display" id="eq:e1">\[\begin{equation}
+P(p(\mathbf{X}) \le \alpha |\theta)\le \alpha
+\tag{1.1}
+\end{equation}\]</span></p>
+<p>Hence by definition, if <span class="math inline">\(H_0\)</span> is simple, such as <span class="math inline">\(H_0:\theta=\theta_0\)</span>, CDF of a valid <span class="math inline">\(p\)</span>-value is <span class="math inline">\(P(p(\mathbf{X}) \le \alpha|\theta_0) = \alpha\)</span>. Recall that a random variable <span class="math inline">\(T\)</span> follows uniform(0,1) distribution if and only if <span class="math inline">\(P(T\le t) = t, \quad \forall t\in[0,1]\)</span>. Hence when null hypothesis is simple and true, <span class="math inline">\(p\)</span>-value statistic follows uniform(0,1) distribution.</p>
+</div>
+<div id="example-in-ordinary-least-square-regression" class="section level1">
+<h1><span class="header-section-number">2</span> Example in ordinary least square regression</h1>
+<p>In ordinary least square regression</p>
+<p><span class="math display" id="eq:e2">\[\begin{equation}
+\boldsymbol{y} = \boldsymbol{X\beta} + \boldsymbol{e}
+\tag{2.1}
+\end{equation}\]</span></p>
+<p><span class="math display" id="eq:e3">\[\begin{equation}
+e_i \sim_{\text{i.i.d}} N(0,1)
+\tag{2.2}
+\end{equation}\]</span></p>
+<p><span class="math display" id="eq:e4">\[\begin{equation}
+\boldsymbol{X} =
+\begin{bmatrix}
+0 &amp; \sqrt{10}\\
+1 &amp; \sqrt{11}\\
+2 &amp; \sqrt{12}\\
+3 &amp; \sqrt{13}\\
+4 &amp; \sqrt{14}\\
+5 &amp; \sqrt{15}\\
+6 &amp; \sqrt{16}\\
+7 &amp; \sqrt{17}\\
+8 &amp; \sqrt{18}\\
+9 &amp; \sqrt{19}\\
+\end{bmatrix}
+\tag{2.3}
+\end{equation}\]</span></p>
+<p><span class="math display" id="eq:e5">\[\begin{equation}
+\boldsymbol{\beta} = 
+\begin{bmatrix}
+\beta_1\\
+\beta_2
+\end{bmatrix} = 
+\begin{bmatrix}
+5\\
+0
+\end{bmatrix}
+\tag{2.4}
+\end{equation}\]</span></p>
+<p>In each iteration, I simulate 100 <span class="math inline">\(e_i\)</span>, then use <a href="#eq:e2">(2.1)</a> to get <span class="math inline">\(\boldsymbol{y}\)</span>. I use <code>statsmodels</code> package to calculate <span class="math inline">\(p\)</span>-value of each <span class="math inline">\(\boldsymbol{\beta}\)</span>. I only keep <span class="math inline">\(p\)</span>-value of <span class="math inline">\(\beta_2\)</span>.</p>
+<p>I repeat same process for 5000 times, then plot the histogram based on <span class="math inline">\(p\)</span>-value of <span class="math inline">\(\beta_2\)</span>.</p>
+<p>Histogram of <span class="math inline">\(p\)</span>-value for <span class="math inline">\(\beta_2\)</span> seems to be unifrom(0,1).</p>
+<pre class="python"><code>import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+
+np.random.seed(515)
+X1 = np.array(np.arange(0,10,1))
+X2 = np.array(np.arange(10,20,1))
+X2 = np.sqrt(X2)
+X = np.column_stack((X1,X2))
+betas = np.array([5,0])
+
+pvalues = []
+for i in range(5000):
+  e = np.random.normal(size = 10)
+  Y = X @ betas + e
+  model = sm.OLS(Y,X)
+  model_fit = model.fit()
+  pvalues.append(model_fit.pvalues[1])
+
+df = pd.DataFrame(pvalues)
+plt.figure()
+fig = df.hist()
+plt.title(&quot;Histogram of p-values for beta2&quot;)
+plt.ylabel(&quot;count&quot;)
+plt.show()</code></pre>
+<p><img src="p_value_files/figure-html/unnamed-chunk-1-1.png" width="538" style="display: block; margin: auto;" /></p>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<p><span class="citation">Casella and Berger (<a href="#ref-CaseBerg:01">2001</a>)</span></p>
+<div id="refs" class="references">
+<div id="ref-CaseBerg:01">
+<p>Casella, George, and Roger Berger. 2001. <em>Statistical Inference</em>. Textbook Binding; Duxbury Resource Center.</p>
+</div>
+</div>
+</div>
 
 
 

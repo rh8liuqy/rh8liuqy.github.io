@@ -25,4 +25,4 @@ title: "What Do You Care What Other People Think"
 * Miscellaneous
     + [QR decomposition](OLS_QR.html)
     + [Gauss–Markov theorem](Gaussian-Markov.html)
-    
+    + [$p$-value is a statistic!(random variable)](p_value.html)
