@@ -10,9 +10,10 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Kevin Liu" />
 
 
-<title>What Do You Care What Other People Think</title>
+<title>Grouped display</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -289,43 +290,71 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">What Do You Care What Other People Think</h1>
+<h1 class="title toc-ignore">Grouped display</h1>
+<h4 class="author">Kevin Liu</h4>
+<h4 class="date">5/17/2020</h4>
 
 </div>
 
-
-<p><img src="files/too-much-coffee-featured.jpg" width="200" /></p>
+<div id="TOC">
 <ul>
-<li>Topics about Generalized Linear Model(GLM)
-<ul>
-<li><a href="Fisher_Scoring.html">GLM fitting with canonical link</a></li>
-<li><a href="logistic_regression_theory_hand_check.html">Logistic regression MLE with examples</a></li>
-</ul></li>
-<li>Topics about Data Visualization
-<ul>
-<li><a href="Data_Visulization_of_ARIMA_Model_Selection.html">Visualize Time Series Model Selection</a></li>
-<li><a href="ACF_PACF_by_ggplot2.html">ACF&amp;PACF by <code>ggplot2</code></a></li>
-<li><a href="Contour_matplotlib.html">Contour Plots by <code>matplotlib</code></a></li>
-<li><a href="grouped_display.html">Grouped Display by <code>lattice</code> and <code>matplotlib</code></a></li>
-</ul></li>
-<li>Topics about Linear Mixed Model
-<ul>
-<li><a href="Linear_mixed_model_equations.html">Mixed Model Equations and REML</a></li>
-<li><a href="Example_Linear_mixed_model.html">Example for Mixed Model Equations and REML</a></li>
-<li><a href="Expectation_Maximization_Algorithm_With_One_Example.html">Expectation Maximization Algorithm With One Example</a></li>
-</ul></li>
-<li>Topics about Optimization
-<ul>
-<li><a href="Finite_Difference.html">Finite Difference</a></li>
-<li><a href="Newton_Raphson.html">Newton Raphson in Python</a></li>
-</ul></li>
-<li>Miscellaneous
-<ul>
-<li><a href="OLS_QR.html">QR decomposition</a></li>
-<li><a href="Gaussian-Markov.html">Gauss–Markov theorem</a></li>
-<li><a href="p_value.html"><span class="math inline">\(p\)</span>-value is a statistic!(random variable)</a></li>
-</ul></li>
+<li><a href="#r-lattice"><span class="toc-section-number">1</span> R <code>lattice</code></a></li>
+<li><a href="#python-matplotlib"><span class="toc-section-number">2</span> Python <code>matplotlib</code></a></li>
+<li><a href="#references">References</a></li>
 </ul>
+</div>
+
+<p>Just a pratice using <code>matplotlib</code>.</p>
+<div id="r-lattice" class="section level1">
+<h1><span class="header-section-number">1</span> R <code>lattice</code></h1>
+<pre class="r"><code>library(lattice)
+dotplot(variety ~ yield | site, barley,
+        layout = c(1, 6), aspect = c(0.7),
+        groups = year, auto.key = list(space = &quot;right&quot;))</code></pre>
+<p><img src="grouped_display_files/figure-html/unnamed-chunk-1-1.png" width="1152" style="display: block; margin: auto;" /></p>
+</div>
+<div id="python-matplotlib" class="section level1">
+<h1><span class="header-section-number">2</span> Python <code>matplotlib</code></h1>
+<pre class="python"><code>import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+df1 = r.barley
+
+site_list = df1.site.unique()
+year_list = df1.year.unique()
+n = 1
+plt.figure()
+for i in site_list:
+  for j in year_list:
+    index1 = (df1.site == i) &amp; (df1.year == j)
+    df_temp = df1.loc[index1,]
+    y = list(df_temp[&quot;variety&quot;])
+    x = list(df_temp[&quot;yield&quot;])
+    plt.subplot(610 + n)
+    if j == &quot;1931&quot;:
+      plt.plot(x, y,&#39;bo&#39;,label = j)
+    if j == &quot;1932&quot;:
+      plt.plot(x, y,&#39;r+&#39;,label = j)
+    ax = plt.axis(xmin = 10, xmax = 70)
+    if n == 1:
+      plt.legend()
+    plt.title(i)
+    plt.grid(True,axis=&#39;y&#39;)
+  n = n + 1
+plt.subplots_adjust(hspace=0.5)
+plt.show()</code></pre>
+<p><img src="grouped_display_files/figure-html/unnamed-chunk-2-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<pre class="python"><code>plt.close()</code></pre>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<p><span class="citation">Sarkar (<a href="#ref-lattice">2008</a>)</span></p>
+<div id="refs" class="references">
+<div id="ref-lattice">
+<p>Sarkar, Deepayan. 2008. <em>Lattice: Multivariate Data Visualization with R</em>. New York: Springer. <a href="http://lmdvr.r-forge.r-project.org">http://lmdvr.r-forge.r-project.org</a>.</p>
+</div>
+</div>
+</div>
 
 
 

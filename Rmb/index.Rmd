@@ -4,13 +4,15 @@ title: "What Do You Care What Other People Think"
 
 ![](./files/too-much-coffee-featured.jpg){width=200px}
 
-* Topics about Logistic regression
-    + [Logistic regression MLE](logistic_regression_theory_hand_check.html)
+* Topics about Generalized Linear Model(GLM)
+    + [GLM fitting with canonical link](Fisher_Scoring.html)
+    + [Logistic regression MLE with examples](logistic_regression_theory_hand_check.html)
     
 * Topics about Data Visualization
     + [Visualize Time Series Model Selection](Data_Visulization_of_ARIMA_Model_Selection.html)
     + [ACF&PACF by `ggplot2`](ACF_PACF_by_ggplot2.html)
     + [Contour Plots by `matplotlib`](Contour_matplotlib.html)
+    + [Grouped Display by `lattice` and `matplotlib`](grouped_display.html)
 
 * Topics about Linear Mixed Model
     + [Mixed Model Equations and REML](Linear_mixed_model_equations.html)
@@ -20,7 +22,6 @@ title: "What Do You Care What Other People Think"
 * Topics about Optimization
     + [Finite Difference](Finite_Difference.html)
     + [Newton Raphson in Python](Newton_Raphson.html)
-    + [GLM fitting with canonical link](Fisher_Scoring.html)
     
 * Miscellaneous
     + [QR decomposition](OLS_QR.html)
