@@ -1,0 +1,62 @@
+---
+title: "Fisher Information Matrix under regularity conditions"
+author: "Kevin Liu"
+date: "5/18/2020"
+output: 
+  bookdown::html_document2:
+    toc: true
+    toc_depth: 2
+    self_contained: true
+bibliography: "bibliography.bib"
+link-citations: true
+notice: | 
+  @fisher
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(reticulate)
+matplotlib <- import("matplotlib")
+matplotlib$use("Agg", force = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.align='center',python = reticulate::eng_python, fig.width = 12,fig.height = 12)
+```
+
+Fisher Information Matrix is defined as
+
+\begin{equation}
+[\mathcal{I}(\theta)]_{i, j}\equiv\mathrm{E}\left[\left(\frac{\partial}{\partial \theta_{i}} \log f(X ; \theta)\right)\left(\frac{\partial}{\partial \theta_{j}} \log f(X ; \theta)\right) \right]
+(\#eq:eq1)
+\end{equation}
+
+**Under regularity conditions**, 
+
+\begin{equation}
+\begin{aligned}
+\mathrm{E}\left[\frac{1}{f(X ; \theta)} \frac{\partial^{2}}{\partial \theta_{i} \theta_{j}} f(X ; \theta)\right] &= \int_{x} \frac{1}{f(X ; \theta)} \frac{\partial^{2} f(X ; \theta)}{\partial \theta_{i} \partial \theta_{j}} f(X ; \theta)dx \\
+&= \frac{\partial^2}{\partial \theta_{i} \partial \theta_{j}} \int_{x} f(X ; \theta) dx \\
+&= \frac{\partial^{2} 1}{\partial \theta_{i} \partial \theta_{j}} \\
+&= 0
+\end{aligned}
+(\#eq:eq2)
+\end{equation}
+
+\begin{equation}
+\begin{aligned}
+-\mathrm{E}\left[\frac{\partial^{2}}{\partial \theta_{i} \partial \theta_{j}} \log f(X ; \theta) \right] &=
+-\mathrm{E}\left[ \frac{\partial \left(\frac{1}{f(X ; \theta)} \frac{\partial}{\partial \theta_{i}} f(X ; \theta)\right)} {\partial \theta_j} \right] \\
+&=-\mathrm{E} \left[ \frac{-1}{f^2(X ; \theta)}\frac{\partial}{\partial \theta_{i}} f(X ; \theta) \frac{\partial}{\partial \theta_{j}} f(X ; \theta) + \frac{1}{f(X ; \theta)} \frac{\partial^2}{\partial \theta_{i}\theta_{j}} f(X ; \theta) \right]\\
+&= \mathrm{E}\left[\left(\frac{\partial}{\partial \theta_{i}} \log f(X ; \theta)\right)\left(\frac{\partial}{\partial \theta_{j}} \log f(X ; \theta)\right)\right] -
+\mathrm{E}\left[ \frac{1}{f(X ; \theta)} \frac{\partial^{2} f(X ; \theta)}{\partial \theta_{i} \partial \theta_{j}} \right] \\
+&= \mathrm{E}\left[\left(\frac{\partial}{\partial \theta_{i}} \log f(X ; \theta)\right)\left(\frac{\partial}{\partial \theta_{j}} \log f(X ; \theta)\right)\right] - 0\\
+&= [\mathcal{I}(\theta)]_{i, j}
+\end{aligned}
+(\#eq:eq3)
+\end{equation}
+
+Overall, under regularity conditions, we have 
+\begin{equation}
+[\mathcal{I}(\theta)]_{i, j} \equiv \mathrm{E}\left[\left(\frac{\partial}{\partial \theta_{i}} \log f(X ; \theta)\right)\left(\frac{\partial}{\partial \theta_{j}} \log f(X ; \theta)\right)\right] = -\mathrm{E}\left[\frac{\partial^{2}}{\partial \theta_{i} \partial \theta_{j}} \log f(X ; \theta)\right]
+(\#eq:eq4)
+\end{equation}
+
+`r if (knitr::is_html_output()) '# References {-}'`

@@ -1,0 +1,136 @@
+---
+title: "Some important results about Generalized Linear Models"
+author: "Kevin Liu"
+date: "5/18/2020"
+output: 
+  bookdown::html_document2:
+    toc: true
+    toc_depth: 2
+    self_contained: true
+bibliography: "bibliography.bib"
+link-citations: true
+notice: | 
+  @FLGLM
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(reticulate)
+matplotlib <- import("matplotlib")
+matplotlib$use("Agg", force = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.align='center',python = reticulate::eng_python, fig.width = 12,fig.height = 12)
+```
+
+# Introduction
+
+It has been four years since I learned generalized linear model at first time. GLM was a very difficult topic to me at that time. I were so confused by terminologies such as link function, canonical link, mean and variance relationship and asymptotic normality of MLE. It is worth the effort to write down proof/explanation of some important results about Generalized Linear Models(GLM). 
+
+# Definition of Exponential Dispersion Family
+
+In framework of GLM, random variable $y$ is assumed to follow this exponential dispersion family, defined as:
+
+\begin{equation}
+f(y;\theta,\phi)=\exp \left\{\frac{y \theta-b(\theta)}{a(\phi)}+c(y, \phi)\right\}
+(\#eq:defexp)
+\end{equation}
+
+# Mean and Variance Relationship
+
+Log-likelihood of **one observation** is 
+
+\begin{equation}
+\ell(\theta;y,\phi)= \log(f(y ; \theta, \phi))=\frac{y \theta-b(\theta)}{a(\phi)}+c(y, \phi)
+(\#eq:onelog)
+\end{equation}
+
+Under [regularity condition](https://en.wikipedia.org/wiki/Likelihood_function#Regularity_conditions), expectation of score statistic, $s(\theta) = \frac{\partial \ell(\theta;y,\phi)}{\partial \theta}$, is 0.
+
+\begin{equation}
+\begin{aligned}
+E(\frac{\partial \ell(\theta ; y, \phi)}{\partial \theta}) &= E(\frac{1}{f(y ; \theta, \phi)} \frac{\partial f(y ; \theta, \phi)}{\partial \theta})\\
+&= \int_{x} \frac{1}{f(y ; \theta, \phi)} \frac{\partial f(y ; \theta, \phi)}{\partial \theta} f(y ; \theta, \phi) dx \\
+&= \int_{x} \frac{\partial f(y ; \theta, \phi)}{\partial \theta} dx\\
+&= \frac{\partial \int_{x} f(y ; \theta, \phi) dx }{\partial \theta}\\
+&= \frac{\partial 1 }{\partial \theta} \\
+&= 0
+\end{aligned}
+(\#eq:Escore)
+\end{equation}
+
+Under [regularity condition](https://en.wikipedia.org/wiki/Likelihood_function#Regularity_conditions), expected information, $\mathcal{I}(\theta)=\mathrm{E}\left[\left(\frac{\partial}{\partial \theta}\ell(\theta ; y, \phi)\right)^{2} \right]$, can be expressed as
+$-\mathrm{E}\left[\frac{\partial^{2}}{\partial \theta^{2}} \ell(\theta ; y, \phi)\right]$.
+
+\begin{equation}
+\mathcal{I}(\theta)=\mathrm{E}\left[\left(\frac{\partial}{\partial \theta} \ell(\theta ; y, \phi)\right)^{2}\right] = -\mathrm{E}\left[\frac{\partial^{2}}{\partial \theta^{2}} \ell(\theta ; y, \phi)\right]
+(\#eq:information)
+\end{equation}
+
+Because 
+\begin{equation}
+\frac{\partial^{2}}{\partial \theta^{2}} \ell(\theta ; y, \phi) = \frac{-1}{f^2(y;\theta\phi)} \left(\frac{\partial f(y ; \theta, \phi)}{\partial, \theta}\right)^2 + \frac{1}{f(y ; \theta, \phi)}\frac{\partial f^2(y ; \theta, \phi)}{\partial \theta^2}
+(\#eq:since1)
+\end{equation}
+
+And
+\begin{equation}
+E(\frac{1}{f(y ; \theta, \phi)} \frac{\partial^2 f(y ; \theta, \phi)}{\partial \theta^{2}}) = \int_{x} \frac{\partial^2 f(y ; \theta, \phi)}{\partial \theta^{2}} dx = \frac{\partial^2 \int_{x} f(y ; \theta, \phi) d x}{\partial \theta^2} = 0
+(\#eq:since2)
+\end{equation}
+
+Put \@ref(eq:since1) and \@ref(eq:since2) together, we have \@ref(eq:information).
+
+Now we have 
+
+$$E\left(\frac{\partial \ell(\theta ; y, \phi)}{\partial \theta}\right)= 0 \quad \text{and} \quad \mathrm{E}\left[\left(\frac{\partial}{\partial \theta} \ell(\theta ; y, \phi)\right)^{2}\right]=-\mathrm{E}\left[\frac{\partial^{2}}{\partial \theta^{2}} \ell(\theta ; y, \phi)\right]$$
+\begin{equation}
+E\left(\frac{\partial \ell(\theta ; y, \phi)}{\partial \theta}\right)=0 \quad \Rightarrow \quad E\left(\frac{y -b^{'}(\theta)}{a(\phi)}\right) = 0 \quad \Rightarrow \quad E(y) = b^{'}(\theta)
+(\#eq:mean)
+\end{equation}
+
+\begin{equation}
+\mathrm{E}\left[\left(\frac{\partial}{\partial \theta} \ell(\theta ; y, \phi)\right)^{2}\right] = \mathrm{E}\left[\left(\frac{y-b^{\prime}(\theta)}{a(\phi)}\right)^2 \right] = \frac{\text{var}(y)}{(a(\phi))^2}
+(\#eq:var1)
+\end{equation}
+
+\begin{equation}
+\mathrm{E}\left[\left(\frac{\partial}{\partial \theta} \ell(\theta ; y, \phi)\right)^{2}\right] = 
+-\mathrm{E}\left[\frac{\partial^{2}}{\partial \theta^{2}} \ell(\theta ; y, \phi)\right] = 
+E\left[ \frac{b^{''}(\theta)}{a(\phi)}\right] =
+\frac{b^{\prime \prime}(\theta)}{a(\phi)}
+(\#eq:var2)
+\end{equation}
+
+Combine \@ref(eq:var1) and \@ref(eq:var2),
+
+\begin{equation}
+\text{var}(y) = b^{\prime \prime}(\theta) a(\phi)
+(\#eq:var3)
+\end{equation}
+
+Overall, in GLM framework, mean and variance can be expressed by $b(\theta)$ and $a(\phi)$,
+
+$$
+E(y)=b^{\prime}(\theta) \quad \text{and} \quad \operatorname{var}(y)=a(\phi) b^{\prime \prime}(\theta)
+$$
+
+# Link function
+
+Link function is defined as
+
+\begin{equation}
+g(E(y)) = \eta = \boldsymbol{X\beta}
+(\#eq:linkfunction)
+\end{equation}
+
+**Canonical link** is defined as
+
+\begin{equation}
+\theta = \eta = \boldsymbol{X\beta}
+(\#eq:Canonicallink)
+\end{equation}
+
+# Likelihood equation for GLM
+
+# Large-Sample property of MLE estimation in GLM
+
+`r if (knitr::is_html_output()) '# References {-}'`

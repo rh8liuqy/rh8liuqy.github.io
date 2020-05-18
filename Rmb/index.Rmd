@@ -27,3 +27,4 @@ title: "What Do You Care What Other People Think"
     + [QR decomposition](OLS_QR.html)
     + [Gauss–Markov theorem](Gaussian-Markov.html)
     + [$p$-value is a statistic!(random variable)](p_value.html)
+    + [Fisher Information Matrix under regularity conditions](Fisher_Information_Matrix.html)
