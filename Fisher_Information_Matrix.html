@@ -10,9 +10,10 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Kevin Liu" />
 
 
-<title>What Do You Care What Other People Think</title>
+<title>Fisher Information Matrix under regularity conditions</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -289,44 +290,58 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">What Do You Care What Other People Think</h1>
+<h1 class="title toc-ignore">Fisher Information Matrix under regularity conditions</h1>
+<h4 class="author">Kevin Liu</h4>
+<h4 class="date">5/18/2020</h4>
 
 </div>
 
-
-<p><img src="files/too-much-coffee-featured.jpg" width="200" /></p>
+<div id="TOC">
 <ul>
-<li>Topics about Generalized Linear Model(GLM)
-<ul>
-<li><a href="Fisher_Scoring.html">GLM fitting with canonical link</a></li>
-<li><a href="logistic_regression_theory_hand_check.html">Logistic regression MLE with examples</a></li>
-</ul></li>
-<li>Topics about Data Visualization
-<ul>
-<li><a href="Data_Visulization_of_ARIMA_Model_Selection.html">Visualize Time Series Model Selection</a></li>
-<li><a href="ACF_PACF_by_ggplot2.html">ACF&amp;PACF by <code>ggplot2</code></a></li>
-<li><a href="Contour_matplotlib.html">Contour Plots by <code>matplotlib</code></a></li>
-<li><a href="grouped_display.html">Grouped Display by <code>lattice</code> and <code>matplotlib</code></a></li>
-</ul></li>
-<li>Topics about Linear Mixed Model
-<ul>
-<li><a href="Linear_mixed_model_equations.html">Mixed Model Equations and REML</a></li>
-<li><a href="Example_Linear_mixed_model.html">Example for Mixed Model Equations and REML</a></li>
-<li><a href="Expectation_Maximization_Algorithm_With_One_Example.html">Expectation Maximization Algorithm With One Example</a></li>
-</ul></li>
-<li>Topics about Optimization
-<ul>
-<li><a href="Finite_Difference.html">Finite Difference</a></li>
-<li><a href="Newton_Raphson.html">Newton Raphson in Python</a></li>
-</ul></li>
-<li>Miscellaneous
-<ul>
-<li><a href="OLS_QR.html">QR decomposition</a></li>
-<li><a href="Gaussian-Markov.html">Gauss–Markov theorem</a></li>
-<li><a href="p_value.html"><span class="math inline">\(p\)</span>-value is a statistic!(random variable)</a></li>
-<li><a href="Fisher_Information_Matrix.html">Fisher Information Matrix under regularity conditions</a></li>
-</ul></li>
+<li><a href="#references">References</a></li>
 </ul>
+</div>
+
+<p>Fisher Information Matrix is defined as</p>
+<p><span class="math display" id="eq:eq1">\[\begin{equation}
+[\mathcal{I}(\theta)]_{i, j}\equiv\mathrm{E}\left[\left(\frac{\partial}{\partial \theta_{i}} \log f(X ; \theta)\right)\left(\frac{\partial}{\partial \theta_{j}} \log f(X ; \theta)\right) \right]
+\tag{1}
+\end{equation}\]</span></p>
+<p><strong>Under regularity conditions</strong>,</p>
+<p><span class="math display" id="eq:eq2">\[\begin{equation}
+\begin{aligned}
+\mathrm{E}\left[\frac{1}{f(X ; \theta)} \frac{\partial^{2}}{\partial \theta_{i} \theta_{j}} f(X ; \theta)\right] &amp;= \int_{x} \frac{1}{f(X ; \theta)} \frac{\partial^{2} f(X ; \theta)}{\partial \theta_{i} \partial \theta_{j}} f(X ; \theta)dx \\
+&amp;= \frac{\partial^2}{\partial \theta_{i} \partial \theta_{j}} \int_{x} f(X ; \theta) dx \\
+&amp;= \frac{\partial^{2} 1}{\partial \theta_{i} \partial \theta_{j}} \\
+&amp;= 0
+\end{aligned}
+\tag{2}
+\end{equation}\]</span></p>
+<p><span class="math display" id="eq:eq3">\[\begin{equation}
+\begin{aligned}
+-\mathrm{E}\left[\frac{\partial^{2}}{\partial \theta_{i} \partial \theta_{j}} \log f(X ; \theta) \right] &amp;=
+-\mathrm{E}\left[ \frac{\partial \left(\frac{1}{f(X ; \theta)} \frac{\partial}{\partial \theta_{i}} f(X ; \theta)\right)} {\partial \theta_j} \right] \\
+&amp;=-\mathrm{E} \left[ \frac{-1}{f^2(X ; \theta)}\frac{\partial}{\partial \theta_{i}} f(X ; \theta) \frac{\partial}{\partial \theta_{j}} f(X ; \theta) + \frac{1}{f(X ; \theta)} \frac{\partial^2}{\partial \theta_{i}\theta_{j}} f(X ; \theta) \right]\\
+&amp;= \mathrm{E}\left[\left(\frac{\partial}{\partial \theta_{i}} \log f(X ; \theta)\right)\left(\frac{\partial}{\partial \theta_{j}} \log f(X ; \theta)\right)\right] -
+\mathrm{E}\left[ \frac{1}{f(X ; \theta)} \frac{\partial^{2} f(X ; \theta)}{\partial \theta_{i} \partial \theta_{j}} \right] \\
+&amp;= \mathrm{E}\left[\left(\frac{\partial}{\partial \theta_{i}} \log f(X ; \theta)\right)\left(\frac{\partial}{\partial \theta_{j}} \log f(X ; \theta)\right)\right] - 0\\
+&amp;= [\mathcal{I}(\theta)]_{i, j}
+\end{aligned}
+\tag{3}
+\end{equation}\]</span></p>
+<p>Overall, under regularity conditions, we have
+<span class="math display" id="eq:eq4">\[\begin{equation}
+[\mathcal{I}(\theta)]_{i, j} \equiv \mathrm{E}\left[\left(\frac{\partial}{\partial \theta_{i}} \log f(X ; \theta)\right)\left(\frac{\partial}{\partial \theta_{j}} \log f(X ; \theta)\right)\right] = -\mathrm{E}\left[\frac{\partial^{2}}{\partial \theta_{i} \partial \theta_{j}} \log f(X ; \theta)\right]
+\tag{4}
+\end{equation}\]</span></p>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references">
+<div id="ref-fisher">
+<p>Wikipedia. 2020. <a href="https://en.wikipedia.org/wiki/Fisher_information#Matrix_form">https://en.wikipedia.org/wiki/Fisher_information#Matrix_form</a>.</p>
+</div>
+</div>
+</div>
 
 
 
