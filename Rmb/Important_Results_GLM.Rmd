@@ -131,6 +131,95 @@ g(E(y)) = \eta = \boldsymbol{X\beta}
 
 # Likelihood equation for GLM
 
+\begin{equation}
+\frac{\partial \ell_i(\theta_i)}{\partial \theta_i} = \frac{y_i - b^{'}(\theta_i)}{a(\phi)}
+(\#eq:e1)
+\end{equation}
+
+From \@ref(eq:mean), we have $E(y_i)=\mu_i=b^{\prime}(\theta_i)$ and $\frac{\partial \mu_i}{\partial \theta_i} = b^{''}(\theta_i)$
+
+\begin{equation}
+\frac{\partial \theta_i}{\partial \mu_i} = \frac{1}{\frac{\partial \mu_i}{\partial \theta_i}} = \frac{1}{b^{''}(\theta_i)}
+(\#eq:e2)
+\end{equation}
+
+From \@ref(eq:linkfunction), we have
+
+\begin{equation}
+\frac{\partial \mu_i}{\partial \eta_i} = \frac{1}{g^{'}(\mu_i)}
+(\#eq:e3)
+\end{equation}
+
+Last, from $\eta_i = \sum_{j}x_{i,j}\beta_j$
+
+\begin{equation}
+\frac{\partial \eta_i}{\partial \beta_j} = x_{i,j}
+(\#eq:e4)
+\end{equation}
+
+Hence,
+
+\begin{equation}
+\frac{\partial \ell_i\left(\theta_{i}\right)}{\partial \beta_{j}} = \frac{\partial \ell_i\left(\theta_{i}\right)}{\partial \theta_{i}}
+\frac{\partial \theta_{i}}{\partial \mu_{i}}
+\frac{\partial \mu_{i}}{\partial \eta_{i}}
+\frac{\partial \eta_{i}}{\partial \beta_{j}}
+=
+\frac{(y_i-b^{\prime}\left(\theta_{i}\right))x_{i,j}}{a(\phi)b^{\prime \prime}\left(\theta_{i}\right)} \frac{1}{g^{\prime}\left(\mu_{i}\right)}
+=
+\frac{(y_i-\mu_i)x_{i,j}}{\text{var}(y_i)} \frac{1}{g^{\prime}\left(\mu_{i}\right)}
+(\#eq:e5)
+\end{equation}
+
+Overall, likelihood equation for GLM is
+
+$$\frac{\partial \ell_i\left(\theta_{i}\right)}{\partial \beta_{j}} = \frac{\left(y_{i}-\mu_{i}\right) x_{i, j}}{\operatorname{var}\left(y_{i}\right)} \frac{1}{g^{\prime}\left(\mu_{i}\right)} \quad
+\text{or equivalent,} \quad \frac{\left(y_{i}-\mu_{i}\right) x_{i, j}}{\operatorname{var}\left(y_{i}\right)} \frac{\partial \mu_{i}}{\partial \eta_{i}}$$
+
 # Large-Sample property of MLE estimation in GLM
+
+By [property of MLE estimation](https://en.wikipedia.org/wiki/Maximum_likelihood_estimation#Efficiency), we have 
+
+\begin{equation}
+\hat{\boldsymbol{\beta}} \stackrel{d}{\rightarrow}
+\mathcal{N}\left(0, \mathcal{I_n}^{-1}\right)
+(\#eq:MLE)
+\end{equation}
+
+where $\mathcal{I_n}$ is expected information, fisher information matrix for $n$ observations $y_1,...,y_n$. 
+
+For each observation $y_i$, fisher information matrix is defined as 
+
+\begin{equation}
+\begin{aligned}
+\mathcal{I}_{i,j, k} &\equiv \mathrm{E}\left[\left(\frac{\partial}{\partial \beta_{j}} \log f(y_i ; \boldsymbol{\beta})\right)\left(\frac{\partial}{\partial \beta_{k}} \log f(y_i ; \boldsymbol{\beta})\right)\right] \\
+&= \mathrm{E}\left[ \frac{\left(y_{i}-\mu_{i}\right) x_{i, j}}{\operatorname{var}\left(y_{i}\right)} \frac{\partial \mu_{i}}{\partial \eta_{i}} 
+\frac{\left(y_{i}-\mu_{i}\right) x_{i, k}}{\operatorname{var}\left(y_{i}\right)} \frac{\partial \mu_{i}}{\partial \eta_{i}}
+\right] \\
+&= \frac{x_{i, j} x_{i, k}}{\operatorname{var}\left(y_{i}\right)} \left(\frac{\partial \mu_{i}}{\partial \eta_{i}}\right)^2
+\end{aligned}
+(\#eq:fisher)
+\end{equation}
+
+Since $y_i \perp y_j,\forall i \ne j$, complete log-likelihood of exponential dispersion family is 
+\begin{equation}
+\ell(\boldsymbol{\theta} ; \boldsymbol{y}, \phi) = 
+\sum_i \ell(\boldsymbol{\theta} ; y_i, \phi)
+(\#eq:completelog)
+\end{equation}
+
+The $j$th and $k$th element of Fisher information matrix, $\mathcal{I}_{n}$, is 
+
+\begin{equation}
+\mathcal{I}_{., j, k} = \sum_{i=1}^{n} \mathcal{I}_{i, j, k}
+(\#eq:informationij)
+\end{equation}
+
+Overall, fisher information matrix can be expressed as
+
+\begin{equation}
+\mathcal{I}_{n} = \boldsymbol{X}^T\boldsymbol{W}\boldsymbol{X}, \quad \text{where } \boldsymbol{W} \text{ is a diagnal matrix with element } w_i = \frac{\left(\frac{\partial \mu_{i}}{\partial \eta_{i}}\right)^{2}}{\operatorname{var}\left(y_{i}\right)}
+(\#eq:informationn)
+\end{equation}
 
 `r if (knitr::is_html_output()) '# References {-}'`

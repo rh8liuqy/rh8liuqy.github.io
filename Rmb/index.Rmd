@@ -5,6 +5,7 @@ title: "What Do You Care What Other People Think"
 ![](./files/too-much-coffee-featured.jpg){width=200px}
 
 * Topics about Generalized Linear Model(GLM)
+    + [Some important results about GLM](Important_Results_GLM.html)
     + [GLM fitting with canonical link](Fisher_Scoring.html)
     + [Logistic regression MLE with examples](logistic_regression_theory_hand_check.html)
     
