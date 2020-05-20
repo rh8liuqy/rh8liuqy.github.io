@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Kevin Liu" />
+
+
+<title>Classical Monte Carlo Integration</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Statistics by steps</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Classical Monte Carlo Integration</h1>
+<h4 class="author">Kevin Liu</h4>
+<h4 class="date">5/19/2020</h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction"><span class="toc-section-number">1</span> Introduction</a><ul>
+<li><a href="#weak-law-of-large-numbers-for-mean"><span class="toc-section-number">1.1</span> Weak law of large numbers for mean</a></li>
+<li><a href="#weak-law-of-large-numbers-for-variance"><span class="toc-section-number">1.2</span> Weak law of large numbers for variance</a></li>
+</ul></li>
+<li><a href="#classical-monte-carlo-integration"><span class="toc-section-number">2</span> Classical Monte Carlo Integration</a><ul>
+<li><a href="#example-1"><span class="toc-section-number">2.1</span> Example 1</a></li>
+<li><a href="#example-2"><span class="toc-section-number">2.2</span> Example 2</a></li>
+</ul></li>
+<li><a href="#references">References</a></li>
+</ul>
+</div>
+
+<div id="introduction" class="section level1">
+<h1><span class="header-section-number">1</span> Introduction</h1>
+<p>I write this webpage to record my study about classical Monte Carlo Integration.
+In my understanding, classical Monte Carlo Integration is a byproduct of <a href="https://en.wikipedia.org/wiki/Law_of_large_numbers">law of large numbers</a>:</p>
+<div id="weak-law-of-large-numbers-for-mean" class="section level2">
+<h2><span class="header-section-number">1.1</span> Weak law of large numbers for mean</h2>
+<p>Let <span class="math inline">\(X_1,...,X_n\)</span> be i.i.d random variables with <span class="math inline">\(E\left(X_{1}\right)=E\left(X_{2}\right)=\ldots=\mu\)</span> and <span class="math inline">\(\text{var}(X_1)=\text{var}(X_2)=...=\text{var}(X_n)=\sigma^2&lt;\infty\)</span>.</p>
+<p>Define <span class="math inline">\(\bar{X}_{n}=\frac{1}{n}\left(X_{1}+\cdots+X_{n}\right)\)</span>,</p>
+<p><span class="math display" id="eq:largenumbers">\[\begin{equation}
+\bar{X}_{n} \stackrel{P}{\rightarrow} \mu \quad \text { when } n \rightarrow \infty
+\tag{1.1}
+\end{equation}\]</span></p>
+</div>
+<div id="weak-law-of-large-numbers-for-variance" class="section level2">
+<h2><span class="header-section-number">1.2</span> Weak law of large numbers for variance</h2>
+<p>Define sample variance as <span class="math inline">\(S^2_n=\frac{1}{n}\sum_{i=1}^n(X_i-\bar{X}_n)^2\)</span>.</p>
+<p><span class="math display" id="eq:largenumberssigma">\[\begin{equation}
+\text { If } \operatorname{Var} (S_{n}^{2}) \rightarrow 0 \text { as } n \rightarrow 0, \text { then } S_{n}^{2} \stackrel{P}{\rightarrow} \sigma^{2} \text { as } n \rightarrow 0, \text { where } \operatorname{Var}(X)=\sigma^{2}
+\tag{1.2}
+\end{equation}\]</span></p>
+</div>
+</div>
+<div id="classical-monte-carlo-integration" class="section level1">
+<h1><span class="header-section-number">2</span> Classical Monte Carlo Integration</h1>
+<p>If we are <strong>interested at integral</strong> <span class="math inline">\(\int_{\mathcal{X}} g(x) d x\)</span>, then we can do a transformation such that <span class="math inline">\(h(x) f(x) = g(x)\)</span> and <span class="math inline">\(\int_{\mathcal{X}} g(x) d x = \int_{\mathcal{X}} h(x) f(x) d x\)</span>, where <span class="math inline">\(f(x)\)</span> is a probability density function.</p>
+<blockquote>
+<p>Classical Monte Carlo Integration<br>
+1. We are interested at <span class="math inline">\(\int_{\mathcal{X}} g(x) d x\)</span><br>
+2. Do transformation such that <span class="math inline">\(\int_{\mathcal{X}} g(x) d x=\int_{\mathcal{X}} h(x) f(x) d x\)</span> where <span class="math inline">\(f(x)\)</span> is a probability density function<br>
+3. <span class="math inline">\(\mathbb{E}_{f}[h(X)]=\int_{\mathcal{X}} h(x) f(x) d x\)</span>, hence by law of large number,
+<span class="math inline">\(\int_{\mathcal{X}} g(x) d x = \mathbb{E}_{f}[h(X)]\approx \frac{\sum_i h(X_i)}{n}\)</span>, where <span class="math inline">\(X \stackrel{i.i.d}{\sim} f(X)\)</span></p>
+</blockquote>
+<p>Approximation of <span class="math inline">\(\int_{\mathcal{X}} h(x) f(x) d x\)</span> can be expressed as</p>
+<p><span class="math display" id="eq:monte1">\[\begin{equation}
+\bar{h}_{n}=\frac{1}{n} \sum_{j=1}^{n} h\left(x_{j}\right)
+\tag{2.1}
+\end{equation}\]</span></p>
+<p>Variance of <span class="math inline">\(\bar{h}_{n}\)</span> can be calculated as</p>
+<p><span class="math display" id="eq:variancehm">\[\begin{equation}
+\text{var}(\bar{h}_{n}) = \frac{\sum_{j=1}^{n} \text{var}(h\left(x_{j}\right))}{n^2} = \frac{n \text{var}(h\left(x\right))}{n^2} = \frac{\text{var}(h\left(x\right))}{n}
+\tag{2.2}
+\end{equation}\]</span></p>
+<p>Be definition of variance,</p>
+<p><span class="math display" id="eq:variance">\[\begin{equation}
+\operatorname{var}(h(x)) = \int_{\mathcal{X}}\left(h(x)-\mathbb{E}_{f}[h(X)]\right)^{2} f(x) d x
+\tag{2.3}
+\end{equation}\]</span></p>
+<p>By WLLN for sample variance, approximation of <span class="math inline">\(\operatorname{var}(h(x))\)</span> can be achieved by</p>
+<p><span class="math display" id="eq:WLLNvariance">\[\begin{equation}
+\operatorname{var}(h(x)) \approx \frac{\sum_{j=1}^n (h(x_j) - \bar{h}_{n})^2}{n}
+\tag{2.4}
+\end{equation}\]</span></p>
+<p>Use <a href="#eq:variancehm">(2.2)</a> and <a href="#eq:WLLNvariance">(2.4)</a>, we have</p>
+<p><span class="math display" id="eq:WLLNvariancehbar">\[\begin{equation}
+\operatorname{var}\left(\bar{h}_{n}\right) \approx \frac{\sum_{j=1}^{n}\left(h\left(x_{j}\right)-\bar{h}_{n}\right)^{2}}{n^2}
+\tag{2.5}
+\end{equation}\]</span></p>
+<div id="example-1" class="section level2">
+<h2><span class="header-section-number">2.1</span> Example 1</h2>
+<p>This is example 3.4 from page 84 <span class="citation">Robert and Casella (<a href="#ref-10.5555/1051451">2005</a>)</span>. I reproduce similar results from book by <code>python</code>.</p>
+<p>We are interested at <span class="math inline">\(\int_0^1 [\cos(50x) + \sin(20x)]^2dx\)</span>.</p>
+<p>Set <span class="math inline">\(g(x) = [\cos(50x) + \sin(20x)]^2\)</span> and <span class="math inline">\(\mathcal{X} = [0,1]\)</span>.</p>
+<p>Set <span class="math inline">\(h(x) = [\cos(50x) + \sin(20x)]^2\)</span> and <span class="math inline">\(f(x) = I(0\le x \le 1)\)</span> is pdf of uniform(0,1) distribution.</p>
+<blockquote>
+<p>Example1 algorithm<br>
+1. Simulate <span class="math inline">\(X \stackrel{i . i . d}{\sim}\)</span> uniform(0.1)<br>
+2. <span class="math inline">\(\int_{0}^{1}[\cos (50 x)+\sin (20 x)]^{2} d x \approx \frac{\sum_i h(x_i)}{n}\)</span><br>
+3. Confidence interval is calculated as mean <span class="math inline">\(\pm\)</span> one standard error</p>
+</blockquote>
+<p>Standard error can be estimated by equation <a href="#eq:WLLNvariancehbar">(2.5)</a>.</p>
+<pre class="python"><code>##example1
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+np.random.seed(521)
+
+def h(x):
+  output = np.cos(50 * x) + np.sin(20 * x)
+  output = output**2
+  return output
+
+x = np.arange(0,1 + 0.001,0.001)
+y = h(x)
+
+n = 10000
+u = np.random.uniform(size = n)
+
+x3 = np.arange(1,10000+1,1)
+df1 = pd.DataFrame({&#39;x&#39;:x3,&#39;y&#39;:h(u)})
+df1[&quot;cumsum&quot;] = np.cumsum(df1.y)
+df1[&quot;mean&quot;] = df1[&quot;cumsum&quot;]/df1[&quot;x&quot;]
+df1[&quot;diff_2&quot;] = (df1[&quot;y&quot;] - df1[&quot;mean&quot;])**2
+df1[&quot;cumsom_diff_2&quot;] = np.cumsum(df1[&quot;diff_2&quot;])
+df1[&quot;var&quot;] = df1[&quot;cumsom_diff_2&quot;]/((df1[&quot;x&quot;])**2)
+df1[&quot;lower&quot;] = df1[&quot;mean&quot;] - np.sqrt(df1[&quot;var&quot;])
+df1[&quot;upper&quot;] = df1[&quot;mean&quot;] + np.sqrt(df1[&quot;var&quot;])
+
+fig,(ax1,ax2,ax3) = plt.subplots(1,3)
+ax1.plot(x,y)
+ax1.set_xlabel(&quot;Function&quot;)
+temp = ax2.hist(h(u)) ##hide output
+ax2.set_xlabel(&quot;Generated Values of Function&quot;)
+ax3.plot(df1[&quot;x&quot;],df1[&quot;lower&quot;])
+ax3.plot(df1[&quot;x&quot;],df1[&quot;upper&quot;])
+ax3.plot(df1[&quot;x&quot;],df1[&quot;mean&quot;])
+ax3.set_xlabel(&quot;Mean and Standard Error&quot;)
+ax3.set_ybound(0.9,1.10)
+plt.show()</code></pre>
+<p><img src="Classical_Monte_Carlo_Integration_files/figure-html/unnamed-chunk-1-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<pre class="python"><code>plt.close()</code></pre>
+<p>Left is plot for <span class="math inline">\([\cos (50 x)+\sin (20 x)]^{2}\)</span>. Middle plot is histogram of <span class="math inline">\(10,000\)</span> values of <span class="math inline">\(h\left(x_{i}\right)\)</span>, simulated from uniform(0.1). Right plot is mean and confidence interval.</p>
+</div>
+<div id="example-2" class="section level2">
+<h2><span class="header-section-number">2.2</span> Example 2</h2>
+<p>I reproduce similar results from Rxample 3.5. <span class="citation">Robert and Casella (<a href="#ref-10.5555/1051451">2005</a>)</span>.</p>
+<p>We are interested at, for given t, the approximation of</p>
+<p><span class="math display" id="eq:CDF">\[\begin{equation}
+\Phi(t)=\int_{-\infty}^{t} \frac{1}{\sqrt{2 \pi}} e^{-y^{2} / 2} d y
+\tag{2.6}
+\end{equation}\]</span></p>
+<p>Use indication function as <span class="math inline">\(h(y)\)</span>, we have</p>
+<p><span class="math display" id="eq:indication">\[\begin{equation}
+\Phi(t)=\int_{-\infty}^{t} \frac{1}{\sqrt{2 \pi}} e^{-y^{2} / 2} d y = \int_{-\infty}^{+\infty} \mathbb{I}(-\infty &lt; y &lt; t)\frac{1}{\sqrt{2 \pi}} e^{-y^{2} / 2} d y
+\tag{2.7}
+\end{equation}\]</span></p>
+<p>We can denote <span class="math inline">\(h(y) = \mathbb{I}(-\infty&lt;y&lt;t)\)</span> and <span class="math inline">\(f(y) = \frac{1}{\sqrt{2 \pi}} e^{-y^{2} / 2}\)</span></p>
+<blockquote>
+<p>Example2 algorithm<br>
+1. Simulate <span class="math inline">\(Y \stackrel{i . i . d}{\sim} \mathcal{N}(0,1)\)</span><br>
+2. For given <span class="math inline">\(t\)</span>, <span class="math inline">\(\Phi(t)=\int_{-\infty}^{t} \frac{1}{\sqrt{2 \pi}} e^{-y^{2} / 2} d y \approx \frac{\sum_{i} h\left(y_{i}\right)}{n} = \frac{\sum_{i=1}^n \mathbb{I}_{x_{i} \leq t}}{n}\)</span><br></p>
+</blockquote>
+<pre class="python"><code>output = np.zeros(6*7)
+z = 0
+for t in [0,0.67,0.84,1.28,1.65,2.32]:
+  for n in np.arange(2,9,1):
+    x = np.random.normal(size = 10**n)
+    output[z] = np.round(np.mean(x &lt; t),4)
+    z = z + 1
+
+df_output = pd.DataFrame(output.reshape(6,7).T)
+df_output.columns = map(lambda x: &quot;t = {}&quot;.format(x),[0,0.67,0.84,1.28,1.65,2.32])
+df_output.index = map(lambda x: &quot;10^{}&quot;.format(x),np.arange(2,9,1))</code></pre>
+<pre class="r"><code>kable(py$df_output)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="right">t = 0</th>
+<th align="right">t = 0.67</th>
+<th align="right">t = 0.84</th>
+<th align="right">t = 1.28</th>
+<th align="right">t = 1.65</th>
+<th align="right">t = 2.32</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>10^2</td>
+<td align="right">0.5000</td>
+<td align="right">0.8100</td>
+<td align="right">0.7600</td>
+<td align="right">0.9100</td>
+<td align="right">0.9400</td>
+<td align="right">1.0000</td>
+</tr>
+<tr class="even">
+<td>10^3</td>
+<td align="right">0.4800</td>
+<td align="right">0.7540</td>
+<td align="right">0.7890</td>
+<td align="right">0.8930</td>
+<td align="right">0.9370</td>
+<td align="right">0.9890</td>
+</tr>
+<tr class="odd">
+<td>10^4</td>
+<td align="right">0.4965</td>
+<td align="right">0.7465</td>
+<td align="right">0.8104</td>
+<td align="right">0.8988</td>
+<td align="right">0.9553</td>
+<td align="right">0.9904</td>
+</tr>
+<tr class="even">
+<td>10^5</td>
+<td align="right">0.5029</td>
+<td align="right">0.7491</td>
+<td align="right">0.8008</td>
+<td align="right">0.8989</td>
+<td align="right">0.9499</td>
+<td align="right">0.9894</td>
+</tr>
+<tr class="odd">
+<td>10^6</td>
+<td align="right">0.5002</td>
+<td align="right">0.7494</td>
+<td align="right">0.7997</td>
+<td align="right">0.8998</td>
+<td align="right">0.9504</td>
+<td align="right">0.9899</td>
+</tr>
+<tr class="even">
+<td>10^7</td>
+<td align="right">0.4999</td>
+<td align="right">0.7487</td>
+<td align="right">0.7994</td>
+<td align="right">0.8997</td>
+<td align="right">0.9505</td>
+<td align="right">0.9899</td>
+</tr>
+<tr class="odd">
+<td>10^8</td>
+<td align="right">0.5000</td>
+<td align="right">0.7486</td>
+<td align="right">0.7995</td>
+<td align="right">0.8997</td>
+<td align="right">0.9505</td>
+<td align="right">0.9899</td>
+</tr>
+</tbody>
+</table>
+<p>It is known that <span class="math inline">\(\Phi(t = 0) = 0.5\)</span>, <span class="math inline">\(\Phi(t = 0.67) = 0.75\)</span>, <span class="math inline">\(\Phi(t = 0.84) = 0.8\)</span>, <span class="math inline">\(\Phi(t = 1.28) = 0.9\)</span>, <span class="math inline">\(\Phi(t = 1.65) = 0.95\)</span> and <span class="math inline">\(\Phi(t = 2.32) = 0.99\)</span>.</p>
+</div>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references">
+<div id="ref-CaseBerg:01">
+<p>Casella, George, and Roger Berger. 2001. <em>Statistical Inference</em>. Textbook Binding; Duxbury Resource Center.</p>
+</div>
+<div id="ref-10.5555/1051451">
+<p>Robert, Christian P., and George Casella. 2005. <em>Monte Carlo Statistical Methods (Springer Texts in Statistics)</em>. Berlin, Heidelberg: Springer-Verlag.</p>
+</div>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -23,6 +23,7 @@ title: "What Do You Care What Other People Think"
 * Topics about Optimization
     + [Finite Difference](Finite_Difference.html)
     + [Newton Raphson in Python](Newton_Raphson.html)
+    + [Classical Monte Carlo Integration](Classical_Monte_Carlo_Integration.html)
     
 * Miscellaneous
     + [QR decomposition](OLS_QR.html)
