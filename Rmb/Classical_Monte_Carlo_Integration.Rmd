@@ -18,7 +18,7 @@ library(knitr)
 library(reticulate)
 matplotlib <- import("matplotlib")
 matplotlib$use("Agg", force = TRUE)
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.align='center',python = reticulate::eng_python, fig.width = 12,fig.height = 6)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.align='center',python = reticulate::eng_python, fig.width = 12,fig.height = 6, eval = TRUE)
 ```
 
 # Introduction
@@ -195,5 +195,69 @@ kable(py$df_output)
 ```
 
 It is known that $\Phi(t = 0) = 0.5$, $\Phi(t = 0.67) = 0.75$, $\Phi(t = 0.84) = 0.8$, $\Phi(t = 1.28) = 0.9$, $\Phi(t = 1.65) = 0.95$ and $\Phi(t = 2.32) = 0.99$.
+
+## Example 3 - a bivariate integration
+
+It is known that 
+
+\begin{equation}
+\int_A 1 dx dy = \pi \quad \text{where } A = \{(x,y):x^2+y^2 < 1\}
+(\#eq:pi1)
+\end{equation}
+
+We can apply classical monte carlo integration method to get approximation of $\pi$.
+
+Assume that 
+\begin{equation}
+X \sim \text{ uniform}(-1,1), \quad Y \sim \text{ uniform}(-1,1), \quad \text{and } X \bot Y
+(\#eq:pi2)
+\end{equation}
+
+Joint pdf of X and Y is 
+
+\begin{equation}
+f_{X,Y}(x,y) = f_X(x)f_Y(y) = \frac{1}{2} \mathbb{I}_{-1< x < 1} \frac{1}{2} \mathbb{I}_{-1< y < 1} = \frac{1}{4} \mathbb{I}_{-1< x < 1} \mathbb{I}_{-1< y < 1}
+(\#eq:pi3)
+\end{equation}
+
+Hence,
+
+\begin{equation}
+\mathbb{E}\left[\frac{\mathbb{I}(X^2+Y^2<1)}{f_{X, Y}(X, Y)}\right] = \int_{-\infty}^{\infty} \frac{\mathbb{I}\left(x^{2}+y^{2}<1\right)}{f_{X, Y}(x, y)} f_{X, Y}(x, y) dx dy= \int_{A} 1 d x d y=\pi
+
+(\#eq:pi4)
+\end{equation}
+
+Apply law of large numbers,
+
+\begin{equation}
+\pi \approx \frac{\sum_{i=1}^{n} \frac{\mathbb{I}\left(x_i^{2}+y_i^{2}<1\right)}{f_{X, Y}(x_i, y_i)}}{n}
+= \frac{\sum_{i=1}^{n} 4 \mathbb{I}\left(x_i^{2}+y_i^{2}<1\right) }{n}
+
+(\#eq:pi5)
+\end{equation}
+
+> Example3 algorithm<br>
+1. Simulate $X \stackrel{i . i . d}{\sim} \text{uniform}(-1,1)$ and $Y \stackrel{i . i . d}{\sim} \text{uniform}(-1,1)$<br>
+2. $\pi \approx \frac{\sum_{i=1}^{n} 4 \mathbb{I}\left(x_{i}^{2}+y_{i}^{2}<1\right)}{n}$
+
+```{python}
+output = []
+for i in np.arange(0,10**5,100):
+  x = np.random.uniform(low = -1, high = 1, size = i+1)
+  y = np.random.uniform(low = -1, high = 1, size = i+1)
+  output.append(np.mean( (x**2 + y **2) < 1) * 4)
+
+output = np.array(output) 
+
+fig,ax = plt.subplots(1,1)
+ax.plot(np.arange(0,10**5,100), output)
+temp = ax.yaxis.set_ticks([3,3.1415926,3.2,3.4,3.6,3.8,4])
+ax.axhline(3.1415926,linestyle = '--', color = 'r')
+ax.set_xlabel("Number of simulation")
+plt.title("Trace plot of Monte Carlo Approximation of pi")
+plt.show()
+plt.close()
+```
 
 `r if (knitr::is_html_output()) '# References {-}'`

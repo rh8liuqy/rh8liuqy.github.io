@@ -305,6 +305,7 @@ $(document).ready(function () {
 <li><a href="#classical-monte-carlo-integration"><span class="toc-section-number">2</span> Classical Monte Carlo Integration</a><ul>
 <li><a href="#example-1"><span class="toc-section-number">2.1</span> Example 1</a></li>
 <li><a href="#example-2"><span class="toc-section-number">2.2</span> Example 2</a></li>
+<li><a href="#example-3---a-bivariate-integration"><span class="toc-section-number">2.3</span> Example 3 - a bivariate integration</a></li>
 </ul></li>
 <li><a href="#references">References</a></li>
 </ul>
@@ -532,6 +533,60 @@ df_output.index = map(lambda x: &quot;10^{}&quot;.format(x),np.arange(2,9,1))</c
 </tbody>
 </table>
 <p>It is known that <span class="math inline">\(\Phi(t = 0) = 0.5\)</span>, <span class="math inline">\(\Phi(t = 0.67) = 0.75\)</span>, <span class="math inline">\(\Phi(t = 0.84) = 0.8\)</span>, <span class="math inline">\(\Phi(t = 1.28) = 0.9\)</span>, <span class="math inline">\(\Phi(t = 1.65) = 0.95\)</span> and <span class="math inline">\(\Phi(t = 2.32) = 0.99\)</span>.</p>
+</div>
+<div id="example-3---a-bivariate-integration" class="section level2">
+<h2><span class="header-section-number">2.3</span> Example 3 - a bivariate integration</h2>
+<p>It is known that</p>
+<p><span class="math display" id="eq:pi1">\[\begin{equation}
+\int_A 1 dx dy = \pi \quad \text{where } A = \{(x,y):x^2+y^2 &lt; 1\}
+\tag{2.8}
+\end{equation}\]</span></p>
+<p>We can apply classical monte carlo integration method to get approximation of <span class="math inline">\(\pi\)</span>.</p>
+<p>Assume that
+<span class="math display" id="eq:pi2">\[\begin{equation}
+X \sim \text{ uniform}(-1,1), \quad Y \sim \text{ uniform}(-1,1), \quad \text{and } X \bot Y
+\tag{2.9}
+\end{equation}\]</span></p>
+<p>Joint pdf of X and Y is</p>
+<p><span class="math display" id="eq:pi3">\[\begin{equation}
+f_{X,Y}(x,y) = f_X(x)f_Y(y) = \frac{1}{2} \mathbb{I}_{-1&lt; x &lt; 1} \frac{1}{2} \mathbb{I}_{-1&lt; y &lt; 1} = \frac{1}{4} \mathbb{I}_{-1&lt; x &lt; 1} \mathbb{I}_{-1&lt; y &lt; 1}
+\tag{2.10}
+\end{equation}\]</span></p>
+<p>Hence,</p>
+<p><span class="math display" id="eq:pi4">\[\begin{equation}
+\mathbb{E}\left[\frac{\mathbb{I}(X^2+Y^2&lt;1)}{f_{X, Y}(X, Y)}\right] = \int_{-\infty}^{\infty} \frac{\mathbb{I}\left(x^{2}+y^{2}&lt;1\right)}{f_{X, Y}(x, y)} f_{X, Y}(x, y) dx dy= \int_{A} 1 d x d y=\pi
+
+\tag{2.11}
+\end{equation}\]</span></p>
+<p>Apply law of large numbers,</p>
+<p><span class="math display" id="eq:pi5">\[\begin{equation}
+\pi \approx \frac{\sum_{i=1}^{n} \frac{\mathbb{I}\left(x_i^{2}+y_i^{2}&lt;1\right)}{f_{X, Y}(x_i, y_i)}}{n}
+= \frac{\sum_{i=1}^{n} 4 \mathbb{I}\left(x_i^{2}+y_i^{2}&lt;1\right) }{n}
+
+\tag{2.12}
+\end{equation}\]</span></p>
+<blockquote>
+<p>Example3 algorithm<br>
+1. Simulate <span class="math inline">\(X \stackrel{i . i . d}{\sim} \text{uniform}(-1,1)\)</span> and <span class="math inline">\(Y \stackrel{i . i . d}{\sim} \text{uniform}(-1,1)\)</span><br>
+2. <span class="math inline">\(\pi \approx \frac{\sum_{i=1}^{n} 4 \mathbb{I}\left(x_{i}^{2}+y_{i}^{2}&lt;1\right)}{n}\)</span></p>
+</blockquote>
+<pre class="python"><code>output = []
+for i in np.arange(0,10**5,100):
+  x = np.random.uniform(low = -1, high = 1, size = i+1)
+  y = np.random.uniform(low = -1, high = 1, size = i+1)
+  output.append(np.mean( (x**2 + y **2) &lt; 1) * 4)
+
+output = np.array(output) 
+
+fig,ax = plt.subplots(1,1)
+ax.plot(np.arange(0,10**5,100), output)
+temp = ax.yaxis.set_ticks([3,3.1415926,3.2,3.4,3.6,3.8,4])
+ax.axhline(3.1415926,linestyle = &#39;--&#39;, color = &#39;r&#39;)
+ax.set_xlabel(&quot;Number of simulation&quot;)
+plt.title(&quot;Trace plot of Monte Carlo Approximation of pi&quot;)
+plt.show()</code></pre>
+<p><img src="Classical_Monte_Carlo_Integration_files/figure-html/unnamed-chunk-4-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<pre class="python"><code>plt.close()</code></pre>
 </div>
 </div>
 <div id="references" class="section level1 unnumbered">
