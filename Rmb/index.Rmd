@@ -14,6 +14,7 @@ title: "What Do You Care What Other People Think"
     + [ACF&PACF by `ggplot2`](ACF_PACF_by_ggplot2.html)
     + [Contour Plots by `matplotlib`](Contour_matplotlib.html)
     + [Grouped Display by `lattice` and `matplotlib`](grouped_display.html)
+    + [Visualize Monte Carlo Integration Approximation of $\pi$](Visulization_Classical_Monte_Carlo_Integration.html)
 
 * Topics about Linear Mixed Model
     + [Mixed Model Equations and REML](Linear_mixed_model_equations.html)

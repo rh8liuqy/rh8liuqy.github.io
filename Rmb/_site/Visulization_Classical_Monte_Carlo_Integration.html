@@ -10,9 +10,10 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Kevin Liu" />
 
 
-<title>What Do You Care What Other People Think</title>
+<title>Data Visualization of Monte Carlo Approximation</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -289,47 +290,45 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">What Do You Care What Other People Think</h1>
+<h1 class="title toc-ignore">Data Visualization of Monte Carlo Approximation</h1>
+<h4 class="author">Kevin Liu</h4>
+<h4 class="date">5/20/2020</h4>
 
 </div>
 
 
-<p><img src="files/too-much-coffee-featured.jpg" width="200" /></p>
-<ul>
-<li>Topics about Generalized Linear Model(GLM)
-<ul>
-<li><a href="Important_Results_GLM.html">Some important results about GLM</a></li>
-<li><a href="Fisher_Scoring.html">GLM fitting with canonical link</a></li>
-<li><a href="logistic_regression_theory_hand_check.html">Logistic regression MLE with examples</a></li>
-</ul></li>
-<li>Topics about Data Visualization
-<ul>
-<li><a href="Data_Visulization_of_ARIMA_Model_Selection.html">Visualize Time Series Model Selection</a></li>
-<li><a href="ACF_PACF_by_ggplot2.html">ACF&amp;PACF by <code>ggplot2</code></a></li>
-<li><a href="Contour_matplotlib.html">Contour Plots by <code>matplotlib</code></a></li>
-<li><a href="grouped_display.html">Grouped Display by <code>lattice</code> and <code>matplotlib</code></a></li>
-<li><a href="Visulization_Classical_Monte_Carlo_Integration.html">Visualize Monte Carlo Integration Approximation of <span class="math inline">\(\pi\)</span></a></li>
-</ul></li>
-<li>Topics about Linear Mixed Model
-<ul>
-<li><a href="Linear_mixed_model_equations.html">Mixed Model Equations and REML</a></li>
-<li><a href="Example_Linear_mixed_model.html">Example for Mixed Model Equations and REML</a></li>
-<li><a href="Expectation_Maximization_Algorithm_With_One_Example.html">Expectation Maximization Algorithm With One Example</a></li>
-</ul></li>
-<li>Topics about Optimization
-<ul>
-<li><a href="Finite_Difference.html">Finite Difference</a></li>
-<li><a href="Newton_Raphson.html">Newton Raphson in Python</a></li>
-<li><a href="Classical_Monte_Carlo_Integration.html">Classical Monte Carlo Integration</a></li>
-</ul></li>
-<li>Miscellaneous
-<ul>
-<li><a href="OLS_QR.html">QR decomposition</a></li>
-<li><a href="Gaussian-Markov.html">Gauss–Markov theorem</a></li>
-<li><a href="p_value.html"><span class="math inline">\(p\)</span>-value is a statistic!(random variable)</a></li>
-<li><a href="Fisher_Information_Matrix.html">Fisher Information Matrix under regularity conditions</a></li>
-</ul></li>
-</ul>
+<p>I wrote a short webpage about <a href="Classical_Monte_Carlo_Integration.html">classical Monte Carlo Integration method</a>. In Example 3, I used Monte Carlo Integration method to get approximated value of <span class="math inline">\(\pi\)</span>. Following plot is a visulization of how Monte Carlo method works.</p>
+<blockquote>
+<p>Monte Carlo Approximation of <span class="math inline">\(\pi\)</span><br>
+1. Simulate n random variables from uniform(-1,1) as <span class="math inline">\(X\)</span>.<br>
+2. Simulate n random variables from uniform(-1,1) as <span class="math inline">\(Y\)</span>.<br>
+3. Plot scatter plot using <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> with a unit circle.<br>
+4. Calculate the proportion of the number of dots falling inside unit circle.<br>
+5. <span class="math inline">\(4\times\text{this proportion} \approx \pi\)</span></p>
+</blockquote>
+<pre class="python"><code>import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+np.random.seed(520)
+
+x = np.random.uniform(low = -1, high = 1, size = 1000)
+y = np.random.uniform(low = -1, high = 1, size = 1000)
+df_plot = pd.DataFrame({&quot;x&quot;:x,&quot;y&quot;:y})
+index = (((df_plot.x)**2 + (df_plot.y)**2) &lt; 1)
+df1 = df_plot.loc[index,:]
+df2 = df_plot.loc[~index,:]
+
+circle = plt.Circle((0, 0), 1, color=&#39;b&#39;, fill=False)
+
+fig,ax = plt.subplots()
+ax.scatter(df1[&quot;x&quot;],df1[&quot;y&quot;],color = &#39;#1f77b4&#39;,label = &quot;Accept&quot;)
+ax.scatter(df2[&quot;x&quot;],df2[&quot;y&quot;],color = &#39;#ff7f0e&#39;,label = &quot;Reject&quot;)
+ax.add_artist(circle)
+ax.legend()
+plt.title(&quot;Monte Carlo Approximation of Pi&quot;)
+plt.show()</code></pre>
+<p><img src="Visulization_Classical_Monte_Carlo_Integration_files/figure-html/unnamed-chunk-1-1.png" width="576" style="display: block; margin: auto;" /></p>
+<pre class="python"><code>plt.close()</code></pre>
 
 
 
