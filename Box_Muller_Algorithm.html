@@ -10,9 +10,10 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Kevin Liu" />
 
 
-<title>What Do You Care What Other People Think</title>
+<title>Box-Muller Algorithm by Python</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -289,48 +290,89 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">What Do You Care What Other People Think</h1>
+<h1 class="title toc-ignore">Box-Muller Algorithm by <code>Python</code></h1>
+<h4 class="author">Kevin Liu</h4>
+<h4 class="date">5/21/2020</h4>
 
 </div>
 
-
-<p><img src="files/too-much-coffee-featured.jpg" width="200" /></p>
+<div id="TOC">
 <ul>
-<li>Topics about Generalized Linear Model(GLM)
-<ul>
-<li><a href="Important_Results_GLM.html">Some important results about GLM</a></li>
-<li><a href="Fisher_Scoring.html">GLM fitting with canonical link</a></li>
-<li><a href="logistic_regression_theory_hand_check.html">Logistic regression MLE with examples</a></li>
-</ul></li>
-<li>Topics about Data Visualization
-<ul>
-<li><a href="Data_Visulization_of_ARIMA_Model_Selection.html">Visualize Time Series Model Selection</a></li>
-<li><a href="ACF_PACF_by_ggplot2.html">ACF&amp;PACF by <code>ggplot2</code></a></li>
-<li><a href="Contour_matplotlib.html">Contour Plots by <code>matplotlib</code></a></li>
-<li><a href="grouped_display.html">Grouped Display by <code>lattice</code> and <code>matplotlib</code></a></li>
-<li><a href="Visulization_Classical_Monte_Carlo_Integration.html">Visualize Monte Carlo Integration Approximation of <span class="math inline">\(\pi\)</span></a></li>
-</ul></li>
-<li>Topics about Linear Mixed Model
-<ul>
-<li><a href="Linear_mixed_model_equations.html">Mixed Model Equations and REML</a></li>
-<li><a href="Example_Linear_mixed_model.html">Example for Mixed Model Equations and REML</a></li>
-<li><a href="Expectation_Maximization_Algorithm_With_One_Example.html">Expectation Maximization Algorithm With One Example</a></li>
-</ul></li>
-<li>Topics about Optimization
-<ul>
-<li><a href="Finite_Difference.html">Finite Difference</a></li>
-<li><a href="Newton_Raphson.html">Newton Raphson in Python</a></li>
-<li><a href="Classical_Monte_Carlo_Integration.html">Classical Monte Carlo Integration</a></li>
-</ul></li>
-<li>Miscellaneous
-<ul>
-<li><a href="OLS_QR.html">QR decomposition</a></li>
-<li><a href="Gaussian-Markov.html">Gauss–Markov theorem</a></li>
-<li><a href="p_value.html"><span class="math inline">\(p\)</span>-value is a statistic!(random variable)</a></li>
-<li><a href="Fisher_Information_Matrix.html">Fisher Information Matrix under regularity conditions</a></li>
-<li><a href="Box_Muller_Algorithm.html">Box Muller Algorithm by <code>Python</code></a></li>
-</ul></li>
+<li><a href="#references">References</a></li>
 </ul>
+</div>
+
+<p>Box-Muller Algorithm is a classic method to generate identical and independent standard normal random variables.</p>
+<blockquote>
+<p>Box-Muller Algorithm<br>
+1. Generate <span class="math inline">\(U_1\sim\)</span>uniform(0,1) and <span class="math inline">\(U_2\sim\)</span>uniform(0,1) where <span class="math inline">\(U_1\perp U_2\)</span><br>
+2. Set <span class="math inline">\(R=\sqrt{-2\log(U_1)}\)</span> and <span class="math inline">\(\theta = 2\pi U_2\)</span><br>
+3. Set <span class="math inline">\(X = R\cos(\theta)\)</span> and <span class="math inline">\(Y = R\sin(\theta)\)</span></p>
+</blockquote>
+<p>Overall,</p>
+<p><span class="math display">\[\begin{array}{l}
+X=\sqrt{-2 \log U_{1}} \cos \left(2 \pi U_{2}\right) \\
+Y=\sqrt{-2 \log U_{1}} \sin \left(2 \pi U_{2}\right)
+\end{array}\]</span></p>
+<p>This can be verified by solving <span class="math inline">\(U_1\)</span> and <span class="math inline">\(U_2\)</span>,</p>
+<p><span class="math display">\[
+\begin{array}{l}
+U_{1}=e^{-\left(X^{2}+Y^{2}\right) / 2} \\
+U_{2}=\frac{1}{2 \pi} \arctan \left(\frac{X}{Y}\right)
+\end{array}
+\]</span></p>
+<p>Jacobian matrix equals</p>
+<p><span class="math display">\[
+J(X,Y) = \begin{bmatrix}
+\frac{\partial U_1}{\partial X} &amp; \frac{\partial U_1}{\partial Y}\\
+\frac{\partial U_2}{\partial X} &amp; \frac{\partial U_2}{\partial Y}
+\end{bmatrix} =
+\begin{bmatrix}
+-X e^{\frac{-(X^2+Y^2)}{2}}  &amp; -Y e^{\frac{-(X^2+Y^2)}{2}}\\
+\frac{1}{2\pi} \frac{Y}{X^2 + Y^2} &amp; \frac{1}{2\pi} \frac{-X}{X^2 + Y^2}
+\end{bmatrix}
+\]</span></p>
+<p>Hence <span class="math display">\[\det(J) = \frac{1}{2\pi} e^{\frac{-(X^2+Y^2)}{2}}\]</span></p>
+<p><span class="math display">\[
+\begin{aligned}
+f_{X,Y}(x,y)&amp;=f_{U_1,U_2}(e^{-\left(X^{2}+Y^{2}\right) / 2}, \frac{1}{2 \pi} \arctan \left(\frac{X}{Y}\right)) |\det(J)|\\
+&amp;= |\det(J)|\\
+&amp;= \frac{1}{\sqrt{2\pi}}e^{-\frac{X^2}{2}} \frac{1}{\sqrt{2\pi}}e^{-\frac{Y^2}{2}}
+\end{aligned}
+\]</span>
+Recall that</p>
+<p><span class="math display">\[f_{X,Y}(x,y)= f_{X}(x)f_{Y}(y) \Leftrightarrow X\perp Y\]</span></p>
+<p>We have <span class="math display">\[X\perp Y, \quad X \sim \mathcal{N}(0,1),\quad Y\sim \mathcal{N}(0,1)\]</span></p>
+<p>I use <code>Python</code> to generate <span class="math inline">\(1000 U_1\)</span> and <span class="math inline">\(1000 U_2\)</span> then use Box-Muller to transfer <span class="math inline">\(U_1\)</span> and <span class="math inline">\(U_2\)</span> to two series of <span class="math inline">\(\mathcal{N}(0,1)\)</span>.</p>
+<pre class="python"><code>import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+np.random.seed(521)
+U1 = np.random.uniform(size = 1000)
+U2 = np.random.uniform(size = 1000)
+R = np.sqrt(-2 * np.log(U1))
+Theta = 2 * np.pi * U2
+X = R * np.cos(Theta)
+Y = R * np.sin(Theta)
+fig,(ax1,ax2) = plt.subplots(1,2)
+temp = ax1.hist(X)
+ax1.set_title(&quot;X&quot;)
+temp = ax2.hist(Y)
+ax2.set_title(&quot;Y&quot;)
+plt.show()</code></pre>
+<p><img src="Box_Muller_Algorithm_files/figure-html/unnamed-chunk-1-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<pre class="python"><code>plt.close()</code></pre>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references">
+<div id="ref-CaseBerg:01">
+<p>Casella, George, and Roger Berger. 2001. <em>Statistical Inference</em>. Textbook Binding; Duxbury Resource Center.</p>
+</div>
+<div id="ref-10.5555/1051451">
+<p>Robert, Christian P., and George Casella. 2005. <em>Monte Carlo Statistical Methods (Springer Texts in Statistics)</em>. Berlin, Heidelberg: Springer-Verlag.</p>
+</div>
+</div>
+</div>
 
 
 
