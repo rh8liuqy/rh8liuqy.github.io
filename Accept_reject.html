@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Kevin Liu" />
+
+
+<title>The Accept/Reject Algorithm</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Statistics by steps</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">The Accept/Reject Algorithm</h1>
+<h4 class="author">Kevin Liu</h4>
+<h4 class="date">5/21/2020</h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#the-acceptreject-algorithm"><span class="toc-section-number">1</span> The Accept/Reject Algorithm</a></li>
+<li><a href="#example-1"><span class="toc-section-number">2</span> Example 1</a></li>
+<li><a href="#example-2"><span class="toc-section-number">3</span> Example 2</a></li>
+<li><a href="#benchmark"><span class="toc-section-number">4</span> Benchmark</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+</div>
+
+<div id="the-acceptreject-algorithm" class="section level1">
+<h1><span class="header-section-number">1</span> The Accept/Reject Algorithm</h1>
+<p>Let <span class="math inline">\(Y \sim f_{Y}(y)\)</span> and <span class="math inline">\(V \sim f_{V}(V),\)</span> where <span class="math inline">\(f_{Y}\)</span> and <span class="math inline">\(f_{V}\)</span> have common support with</p>
+<p><span class="math display">\[M=\sup _{y} f_{Y}(y) / f_{V}(y)&lt;\infty \quad \Longrightarrow \quad \frac{f_Y(y)}{M f_V(y)} \le 1\]</span></p>
+<blockquote>
+<p>To generate a random variable <span class="math inline">\(Y \sim f_Y\)</span>:<br>
+a. Generate <span class="math inline">\(U \sim\)</span> uniform<span class="math inline">\((0,1), V \sim f_{V},\)</span> independent.<br>
+b. If <span class="math inline">\(U&lt;\frac{1}{M} f_{Y}(V) / f_{V}(V),\)</span> set <span class="math inline">\(Y=V ;\)</span> otherwise, return to step (a).</p>
+</blockquote>
+<p>Proof:</p>
+<p><span class="math display">\[\begin{aligned}
+P(V \leq y | \text { stop }) &amp;= P\left(V \leq y | U&lt;\frac{1}{M} f_{Y}(V) / f_{V}(V)\right)\\
+&amp;= \frac{P\left(V \leq y, U&lt;\frac{1}{M} f_{Y}(V) / f_{V}(V)\right)}{P\left(U&lt;\frac{1}{M} f_{Y}(V) / f_{V}(V)\right)}\\
+&amp;= \frac{\int_{-\infty}^{y} \int_{0}^{\frac{1}{M } f_{Y}(v) / f v(v)} 1 d u f_{V}(v) d v}{\int_{-\infty}^{\infty} \int_{0}^{\frac{1}{M} f_{y}(v) / f_{V}(v)} 1 d u f_{V}(v) d v}\\
+&amp;= \frac{\int_{-\infty}^{y} \frac{1}{M} f_{Y}(v) dy}{\int_{-\infty}^{\infty} \frac{1}{M} f_{Y}(v) dy}\\
+&amp;=\int_{-\infty}^{y} f_{Y}(v) d y\\
+&amp;= P(Y\le y)
+\end{aligned}\]</span></p>
+<p>Hence the Accept/Reject Algorithm works.</p>
+<p>Note that</p>
+<p><span class="math display">\[P(\text{stop}) = P\left(U&lt;\frac{1}{M} f_{Y}(V) / f_{V}(V)\right) = \int_{-\infty}^{\infty} \int_{0}^{\frac{1}{M} f_{y}(v) / f_{V}(v)} 1 d u f_{V}(v) d v = \frac{1}{M}\]</span></p>
+</div>
+<div id="example-1" class="section level1">
+<h1><span class="header-section-number">2</span> Example 1</h1>
+<p>I write <code>Python</code> code to reproduce Example 5.6.7 on <span class="citation">Casella and Berger (<a href="#ref-CaseBerg:01">2001</a>)</span>.</p>
+<blockquote>
+<p>Generate <span class="math inline">\(Y \sim\)</span> beta(a = 2.7, b = 6.3)<br>
+1. Generate <span class="math inline">\((U,V)\)</span> independent uniform(0,1).<br>
+2. If <span class="math inline">\(U &lt; \frac{1}{c} f_Y(V)\)</span> then, set <span class="math inline">\(Y = V\)</span>; otherwise, return to step 1. Where <span class="math inline">\(c = \text{max}_y f_Y(y) = 2.669\)</span></p>
+</blockquote>
+<pre class="python"><code>import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from scipy.special import gamma
+import seaborn as sns
+sns.set()
+np.random.seed(523)
+
+def f1(x):
+  a = 2.7
+  b = 6.3
+  beta = gamma(a) * gamma(b) /gamma(a + b)
+  p = x ** (a - 1) * (1-x) ** (b - 1)
+  return 1/beta * p
+
+mode = (2.7-1)/(2.7+6.3-2) ##Mode of Beta distribution
+c = f1(mode)
+
+def beta_gen(n):
+  i = 0
+  output = np.zeros(n)
+  while i &lt; n:
+    U = np.random.uniform(size = 1)
+    V = np.random.uniform(size = 1)
+    if U &lt; 1/c * f1(V):
+      output[i] = V
+      i = i + 1
+  return output
+
+px = np.arange(0,1+0.01,0.01)
+py = f1(px)
+
+Y = beta_gen(n = 1000)
+fig,ax = plt.subplots()
+temp = ax.hist(Y,density=True)
+ax.plot(px,py)
+plt.title(&quot;Beta(2.7, 6.3) || Example 1&quot;)
+plt.show()</code></pre>
+<p><img src="Accept_reject_files/figure-html/unnamed-chunk-1-1.png" width="480" style="display: block; margin: auto;" /></p>
+<pre class="python"><code>plt.close()</code></pre>
+</div>
+<div id="example-2" class="section level1">
+<h1><span class="header-section-number">3</span> Example 2</h1>
+<p>I reproduce Example 5.6.9 from <span class="citation">Casella and Berger (<a href="#ref-CaseBerg:01">2001</a>)</span>.</p>
+<blockquote>
+<p>Generate <span class="math inline">\(Y \sim\)</span> beta(a = 2.7, b = 6.3)<br>
+1. Generate <span class="math inline">\(U \sim\)</span> uniform(0,1), <span class="math inline">\(V \sim\)</span>beta(2,6)<br>
+2. If <span class="math inline">\(U&lt;\frac{1}{M} \frac{f_{Y}(V)}{f_{V}(V)},\)</span> set <span class="math inline">\(Y=V ;\)</span> otherwise, return to step 1. Where <span class="math inline">\(M = 1.67 = \text{sup}_y \frac{f_Y(y)}{f_V(y)}\)</span></p>
+</blockquote>
+<p>Where <span class="math inline">\(\text{beta}(2,6)\)</span> can be generated by this relationship</p>
+<p><span class="math display">\[Y=\frac{\sum_{j=1}^{a} \log \left(U_{j}\right)}{\sum_{j=1}^{a+b} \log \left(U_{j}\right)} \sim \operatorname{beta}(a, b)\]</span></p>
+<pre class="python"><code>##Beta(2,6) Generation
+def beta_gen2(n): 
+  i = 0
+  output = np.zeros(n)
+  while i &lt; n:
+    U = np.random.uniform(size = 2 + 6)
+    p1 = np.sum(np.log(U[0:2]))
+    p2 = np.sum(np.log(U))
+    output[i] = p1/p2
+    i = i + 1
+  return output
+
+##PDF of Beta(2,6)
+def f2(x):
+  a = 2
+  b = 6
+  beta = gamma(a) * gamma(b) /gamma(a + b)
+  p = x ** (a - 1) * (1-x) ** (b - 1)
+  return 1/beta * p
+
+def beta_gen3(n):
+  i = 0
+  M = 1.67
+  output = np.zeros(n)
+  while i &lt; n:
+    U = np.random.uniform(size = 1)
+    V = beta_gen2(1)
+    if U &lt; (1/M) * (f1(V)/f2(V)):
+      output[i] = V
+      i = i + 1
+  return output
+  
+Y = beta_gen3(n = 1000)
+fig,ax = plt.subplots()
+temp = ax.hist(Y,density=True)
+ax.plot(px,py)
+plt.title(&quot;Beta(2.7, 6.3) || Example 2&quot;)
+plt.show()</code></pre>
+<p><img src="Accept_reject_files/figure-html/unnamed-chunk-2-1.png" width="480" style="display: block; margin: auto;" /></p>
+<pre class="python"><code>plt.close()</code></pre>
+</div>
+<div id="benchmark" class="section level1">
+<h1><span class="header-section-number">4</span> Benchmark</h1>
+<p>In Example 1, the acceptance rate is <span class="math inline">\(\frac{1}{2.669} = 0.37467\)</span>.</p>
+<p>In Example 2, the acceptance rate is <span class="math inline">\(\frac{1}{1.67} = 0.59880\)</span>.</p>
+<p>It seems that algorithm in example 2 would be faster than algorithm in example 1. However, it is not true. Because in example 2, to get 1 Beta(2,6) sample we need 8 uniform(0,1) samples. This result surprises me.</p>
+<pre class="python"><code>import timeit
+
+method1 = timeit.repeat(lambda :beta_gen(n = 1000), repeat = 100, number = 1)
+method2 = timeit.repeat(lambda :beta_gen3(n = 1000), repeat = 100, number = 1)
+df1 = pd.DataFrame({&quot;seconds&quot;:method1,&quot;method&quot;:&quot;method1&quot;})
+df2 = pd.DataFrame({&quot;seconds&quot;:method2,&quot;method&quot;:&quot;method2&quot;})
+df_plot = pd.concat((df1,df2))
+fig,ax = plt.subplots()
+ax = sns.boxplot(x = &quot;method&quot;, y = &quot;seconds&quot;, data = df_plot)
+ax.set_title(&quot;Time(seconds) used by method 1 and 2 || repeat 100 times&quot;)
+plt.show()</code></pre>
+<p><img src="Accept_reject_files/figure-html/unnamed-chunk-3-1.png" width="480" style="display: block; margin: auto;" /></p>
+<pre class="python"><code>plt.close()</code></pre>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references">
+<div id="ref-CaseBerg:01">
+<p>Casella, George, and Roger Berger. 2001. <em>Statistical Inference</em>. Textbook Binding; Duxbury Resource Center.</p>
+</div>
+<div id="ref-10.5555/1051451">
+<p>Robert, Christian P., and George Casella. 2005. <em>Monte Carlo Statistical Methods (Springer Texts in Statistics)</em>. Berlin, Heidelberg: Springer-Verlag.</p>
+</div>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

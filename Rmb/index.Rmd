@@ -32,3 +32,4 @@ title: "What Do You Care What Other People Think"
     + [$p$-value is a statistic!(random variable)](p_value.html)
     + [Fisher Information Matrix under regularity conditions](Fisher_Information_Matrix.html)
     + [Box Muller Algorithm by `Python`](Box_Muller_Algorithm.html)
+    + [Accept/Rejection Algorithm by `Python`](Accept_reject.html)
