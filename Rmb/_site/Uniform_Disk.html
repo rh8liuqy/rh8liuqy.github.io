@@ -10,9 +10,10 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Kevin Liu" />
 
 
-<title>What Do You Care What Other People Think</title>
+<title>Generate Random Points over the Disk</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -289,50 +290,85 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">What Do You Care What Other People Think</h1>
+<h1 class="title toc-ignore">Generate Random Points over the Disk</h1>
+<h4 class="author">Kevin Liu</h4>
+<h4 class="date">5/24/2020</h4>
 
 </div>
 
-
-<p><img src="files/too-much-coffee-featured.jpg" width="200" /></p>
+<div id="TOC">
 <ul>
-<li>Topics about Generalized Linear Model(GLM)
-<ul>
-<li><a href="Important_Results_GLM.html">Some important results about GLM</a></li>
-<li><a href="Fisher_Scoring.html">GLM fitting with canonical link</a></li>
-<li><a href="logistic_regression_theory_hand_check.html">Logistic regression MLE with examples</a></li>
-</ul></li>
-<li>Topics about Data Visualization
-<ul>
-<li><a href="Data_Visulization_of_ARIMA_Model_Selection.html">Visualize Time Series Model Selection</a></li>
-<li><a href="ACF_PACF_by_ggplot2.html">ACF&amp;PACF by <code>ggplot2</code></a></li>
-<li><a href="Contour_matplotlib.html">Contour Plots by <code>matplotlib</code></a></li>
-<li><a href="grouped_display.html">Grouped Display by <code>lattice</code> and <code>matplotlib</code></a></li>
-<li><a href="Visulization_Classical_Monte_Carlo_Integration.html">Visualize Monte Carlo Integration Approximation of <span class="math inline">\(\pi\)</span></a></li>
-</ul></li>
-<li>Topics about Linear Mixed Model
-<ul>
-<li><a href="Linear_mixed_model_equations.html">Mixed Model Equations and REML</a></li>
-<li><a href="Example_Linear_mixed_model.html">Example for Mixed Model Equations and REML</a></li>
-<li><a href="Expectation_Maximization_Algorithm_With_One_Example.html">Expectation Maximization Algorithm With One Example</a></li>
-</ul></li>
-<li>Topics about Optimization
-<ul>
-<li><a href="Finite_Difference.html">Finite Difference</a></li>
-<li><a href="Newton_Raphson.html">Newton Raphson in Python</a></li>
-<li><a href="Classical_Monte_Carlo_Integration.html">Classical Monte Carlo Integration</a></li>
-</ul></li>
-<li>Miscellaneous
-<ul>
-<li><a href="OLS_QR.html">QR decomposition</a></li>
-<li><a href="Gaussian-Markov.html">Gauss–Markov theorem</a></li>
-<li><a href="p_value.html"><span class="math inline">\(p\)</span>-value is a statistic!(random variable)</a></li>
-<li><a href="Fisher_Information_Matrix.html">Fisher Information Matrix under regularity conditions</a></li>
-<li><a href="Box_Muller_Algorithm.html">Box Muller Algorithm by <code>Python</code></a></li>
-<li><a href="Accept_reject.html">Accept/Rejection Algorithm by <code>Python</code></a></li>
-<li><a href="Uniform_Disk.html">Generate Random Points over the Disk</a></li>
-</ul></li>
+<li><a href="#references">References</a></li>
 </ul>
+</div>
+
+<blockquote>
+<p>To generate random points over the disk with radius <span class="math inline">\(=r\)</span><br>
+1. Generate <span class="math inline">\(U_1 \sim\)</span> uniform(0,1) and <span class="math inline">\(U_2 \sim\)</span> uniform(0,1), independent.<br>
+2. Set <span class="math inline">\(X = r \sqrt{U_2} \cos(2\pi U_1)\)</span> and <span class="math inline">\(Y = r \sqrt{U_2} \sin(2\pi U_1)\)</span></p>
+</blockquote>
+<p>Proof:</p>
+<p><span class="math display">\[
+\begin{cases}
+X=r \sqrt{U_{2}} \cos \left(2 \pi U_{1}\right)\\
+Y=r \sqrt{U_{2}} \sin \left(2 \pi U_{1}\right)
+\end{cases}
+\Longrightarrow
+\begin{cases}
+U_1 = \frac{1}{2\pi}\arctan\frac{Y}{X}\\
+U_2 = \frac{X^2+Y^2}{r^2}
+\end{cases}
+\]</span></p>
+<p><span class="math display">\[
+\mathcal{J} =
+\begin{bmatrix}
+\frac{\partial U_1}{\partial X} &amp; \frac{\partial U_1}{\partial Y}\\
+\frac{\partial U_2}{\partial X} &amp; \frac{\partial U_2}{\partial Y}
+\end{bmatrix}
+=
+\begin{bmatrix}
+\frac{-Y}{2\pi(X^2+Y^2)} &amp; \frac{X}{2\pi(X^2+Y^2)}\\
+\frac{2X}{r^2} &amp; \frac{2Y}{r^2}
+\end{bmatrix}
+\Longrightarrow
+\det(\mathcal{J}) = \frac{1}{\pi r^2}
+\]</span></p>
+<p><span class="math display">\[
+f_{X,Y}(x,y) = f_{U_1,U_2}(\frac{1}{2 \pi} \arctan \frac{Y}{X}, \frac{X^{2}+Y^{2}}{r^{2}}) \det(\mathcal{J}) = \frac{1}{\pi r^2}
+\]</span></p>
+<p>Hence, be definition, <span class="math inline">\(f_{X,Y}(x,y)\)</span> is uniformly distributed in the disk with radius <span class="math inline">\(=r\)</span>.</p>
+<p>A <strong>common mistake</strong> is using <span class="math inline">\(\begin{cases} X=r U_{2} \cos \left(2 \pi U_{1}\right)\\ Y=r U_{2} \sin \left(2 \pi U_{1}\right) \end{cases}\)</span> instead of <span class="math inline">\(\begin{cases} X=r \sqrt{U_{2}} \cos \left(2 \pi U_{1}\right)\\ Y=r \sqrt{U_{2}} \sin \left(2 \pi U_{1}\right) \end{cases}\)</span>.</p>
+<p>Code in <code>python</code> to generate random points over the unit disk:</p>
+<pre class="python"><code>import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+np.random.seed(524)
+
+U1 = np.random.uniform(size = 10000)
+U2 = np.random.uniform(size = 10000)
+r = 1
+X = r * np.sqrt(U2) * np.cos(2 * np.pi * U1)
+Y = r * np.sqrt(U2) * np.sin(2 * np.pi * U1)
+
+circle = plt.Circle((0, 0), 1, color=&#39;g&#39;, fill=False)
+fig,ax = plt.subplots()
+ax.scatter(x = X, y = Y, s = 0.3)
+ax.add_artist(circle)
+plt.show()</code></pre>
+<p><img src="Uniform_Disk_files/figure-html/unnamed-chunk-1-1.png" width="480" style="display: block; margin: auto;" /></p>
+<pre class="python"><code>plt.close()</code></pre>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references">
+<div id="ref-CaseBerg:01">
+<p>Casella, George, and Roger Berger. 2001. <em>Statistical Inference</em>. Textbook Binding; Duxbury Resource Center.</p>
+</div>
+<div id="ref-10.5555/1051451">
+<p>Robert, Christian P., and George Casella. 2005. <em>Monte Carlo Statistical Methods (Springer Texts in Statistics)</em>. Berlin, Heidelberg: Springer-Verlag.</p>
+</div>
+</div>
+</div>
 
 
 

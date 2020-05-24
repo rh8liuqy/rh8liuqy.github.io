@@ -33,3 +33,4 @@ title: "What Do You Care What Other People Think"
     + [Fisher Information Matrix under regularity conditions](Fisher_Information_Matrix.html)
     + [Box Muller Algorithm by `Python`](Box_Muller_Algorithm.html)
     + [Accept/Rejection Algorithm by `Python`](Accept_reject.html)
+    + [Generate Random Points over the Disk](Uniform_Disk.html)
