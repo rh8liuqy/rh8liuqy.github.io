@@ -10,9 +10,10 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Kevin Liu" />
 
 
-<title>What Do You Care What Other People Think</title>
+<title>The Envelope Accept/Reject Algorithm</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -289,52 +290,51 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">What Do You Care What Other People Think</h1>
+<h1 class="title toc-ignore">The Envelope Accept/Reject Algorithm</h1>
+<h4 class="author">Kevin Liu</h4>
+<h4 class="date">5/25/2020</h4>
 
 </div>
 
-
-<p><img src="files/too-much-coffee-featured.jpg" width="200" /></p>
+<div id="TOC">
 <ul>
-<li>Topics about Generalized Linear Model(GLM)
-<ul>
-<li><a href="Important_Results_GLM.html">Some important results about GLM</a></li>
-<li><a href="Fisher_Scoring.html">GLM fitting with canonical link</a></li>
-<li><a href="logistic_regression_theory_hand_check.html">Logistic regression MLE with examples</a></li>
-</ul></li>
-<li>Topics about Data Visualization
-<ul>
-<li><a href="Data_Visulization_of_ARIMA_Model_Selection.html">Visualize Time Series Model Selection</a></li>
-<li><a href="ACF_PACF_by_ggplot2.html">ACF&amp;PACF by <code>ggplot2</code></a></li>
-<li><a href="Contour_matplotlib.html">Contour Plots by <code>matplotlib</code></a></li>
-<li><a href="grouped_display.html">Grouped Display by <code>lattice</code> and <code>matplotlib</code></a></li>
-<li><a href="Visulization_Classical_Monte_Carlo_Integration.html">Visualize Monte Carlo Integration Approximation of <span class="math inline">\(\pi\)</span></a></li>
-<li><a href="Area_Under_Curve.html">Area under curve by <code>matplotlib</code></a></li>
-</ul></li>
-<li>Topics about Linear Mixed Model
-<ul>
-<li><a href="Linear_mixed_model_equations.html">Mixed Model Equations and REML</a></li>
-<li><a href="Example_Linear_mixed_model.html">Example for Mixed Model Equations and REML</a></li>
-<li><a href="Expectation_Maximization_Algorithm_With_One_Example.html">Expectation Maximization Algorithm With One Example</a></li>
-</ul></li>
-<li>Topics about Optimization
-<ul>
-<li><a href="Finite_Difference.html">Finite Difference</a></li>
-<li><a href="Newton_Raphson.html">Newton Raphson in Python</a></li>
-<li><a href="Classical_Monte_Carlo_Integration.html">Classical Monte Carlo Integration</a></li>
-</ul></li>
-<li>Miscellaneous
-<ul>
-<li><a href="OLS_QR.html">QR decomposition</a></li>
-<li><a href="Gaussian-Markov.html">Gauss–Markov theorem</a></li>
-<li><a href="p_value.html"><span class="math inline">\(p\)</span>-value is a statistic!(random variable)</a></li>
-<li><a href="Fisher_Information_Matrix.html">Fisher Information Matrix under regularity conditions</a></li>
-<li><a href="Box_Muller_Algorithm.html">Box Muller Algorithm by <code>Python</code></a></li>
-<li><a href="Accept_reject.html">The Accept/Rejection Algorithm by <code>Python</code></a></li>
-<li><a href="Envelope_Accept_Reject.html">The Envelope Accept/Reject Algorithm</a></li>
-<li><a href="Uniform_Disk.html">Generate Random Points over the Disk</a></li>
-</ul></li>
+<li><a href="#references">References</a></li>
 </ul>
+</div>
+
+<p><strong>The Envelope Accept/Reject Algorithm</strong></p>
+<p>If there exist a <strong>density</strong> <span class="math inline">\(g_m\)</span>, a function <span class="math inline">\(g_l\)</span> and a constant M such that</p>
+<p><span class="math display">\[g_l(x) \le f(x) \le M g_m(x)\]</span></p>
+<p>then the aglorithm will generate random variables that are distributed according to <strong>density</strong> <span class="math inline">\(f(x)\)</span></p>
+<ol style="list-style-type: decimal">
+<li>Generate <span class="math inline">\(V \sim g_m(v)\)</span> , <span class="math inline">\(U \sim \mathcal{U}_{[0,1]}\)</span></li>
+<li>Take <span class="math inline">\(X = V\)</span> if <span class="math inline">\(U \le g_l(V)/Mg_m(V)\)</span></li>
+<li>Otherwise, take <span class="math inline">\(X = V\)</span> if <span class="math inline">\(U \le f(V)/Mg_m(V)\)</span></li>
+</ol>
+<p>Proof:</p>
+<p>From <span class="math inline">\(g_l(x) \le f(x) \le M g_m(x)\)</span>, we have <span class="math inline">\(\frac{g_{l}(x)}{M g_{m}(x)} \le \frac{f(x)}{M g_{m}(x)} \le 1\)</span>, hence</p>
+<p><span class="math display">\[\left\{U&lt;\frac{g_{l}(X)}{M g_{m}(X)} \text { or } U&lt;\frac{f(X)}{M g_{m}(X)}\right\} = \left\{U&lt;\frac{f(X)}{M g_{m}(X)}\right\}\]</span></p>
+<p><span class="math display">\[
+\begin{aligned}
+P(V \leq v | \text { Accept }) &amp;= P\left(V \leq v |\left\{U&lt;\frac{g_{l}(V)}{M g_{m}(V)} \text { or } U&lt;\frac{f(V)}{M g_{m}(V)}\right\}\right)\\
+&amp;= P\left(V \leq v | U &lt; \frac{f(V)}{M g_{m}(V)}\right) \\
+&amp;= \frac{P\left(V \leq v , U&lt;\frac{f(V)}{M g_{m}(V)}\right)}{P\left(  U&lt;\frac{f(V)}{M g_{m}(V)} \right)} \\
+&amp;= \frac{\int_{-\infty}^{v} \int_{0}^{\frac{f(v)}{M g_{m}(v)}} 1 du g_m(v)dv}{\int_{-\infty}^{\infty} \int_{0}^{\frac{f(v)}{M g_{m}(v)}} 1 du g_m(v)dv}\\
+&amp;= \frac{(1/M) \int_{-\infty}^{v} f(v) dv}{1/M}\\
+&amp;= P(X \le x)
+\end{aligned}\]</span></p>
+<p>The Envelope Accept/Reject Algorithm is a improved Accept/Reject Algorithm. When <span class="math inline">\(f(x)\)</span> is computational expensive to evaluate, we use function <span class="math inline">\(g_{l}(x)\)</span> in step 2 to save computation time.</p>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references">
+<div id="ref-CaseBerg:01">
+<p>Casella, George, and Roger Berger. 2001. <em>Statistical Inference</em>. Textbook Binding; Duxbury Resource Center.</p>
+</div>
+<div id="ref-10.5555/1051451">
+<p>Robert, Christian P., and George Casella. 2005. <em>Monte Carlo Statistical Methods (Springer Texts in Statistics)</em>. Berlin, Heidelberg: Springer-Verlag.</p>
+</div>
+</div>
+</div>
 
 
 

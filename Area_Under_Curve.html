@@ -10,9 +10,10 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Kevin Liu" />
 
 
-<title>What Do You Care What Other People Think</title>
+<title>Plot Area Under Curve</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -289,52 +290,58 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">What Do You Care What Other People Think</h1>
+<h1 class="title toc-ignore">Plot Area Under Curve</h1>
+<h4 class="author">Kevin Liu</h4>
+<h4 class="date">5/26/2020</h4>
 
 </div>
 
-
-<p><img src="files/too-much-coffee-featured.jpg" width="200" /></p>
+<div id="TOC">
 <ul>
-<li>Topics about Generalized Linear Model(GLM)
-<ul>
-<li><a href="Important_Results_GLM.html">Some important results about GLM</a></li>
-<li><a href="Fisher_Scoring.html">GLM fitting with canonical link</a></li>
-<li><a href="logistic_regression_theory_hand_check.html">Logistic regression MLE with examples</a></li>
-</ul></li>
-<li>Topics about Data Visualization
-<ul>
-<li><a href="Data_Visulization_of_ARIMA_Model_Selection.html">Visualize Time Series Model Selection</a></li>
-<li><a href="ACF_PACF_by_ggplot2.html">ACF&amp;PACF by <code>ggplot2</code></a></li>
-<li><a href="Contour_matplotlib.html">Contour Plots by <code>matplotlib</code></a></li>
-<li><a href="grouped_display.html">Grouped Display by <code>lattice</code> and <code>matplotlib</code></a></li>
-<li><a href="Visulization_Classical_Monte_Carlo_Integration.html">Visualize Monte Carlo Integration Approximation of <span class="math inline">\(\pi\)</span></a></li>
-<li><a href="Area_Under_Curve.html">Area under curve by <code>matplotlib</code></a></li>
-</ul></li>
-<li>Topics about Linear Mixed Model
-<ul>
-<li><a href="Linear_mixed_model_equations.html">Mixed Model Equations and REML</a></li>
-<li><a href="Example_Linear_mixed_model.html">Example for Mixed Model Equations and REML</a></li>
-<li><a href="Expectation_Maximization_Algorithm_With_One_Example.html">Expectation Maximization Algorithm With One Example</a></li>
-</ul></li>
-<li>Topics about Optimization
-<ul>
-<li><a href="Finite_Difference.html">Finite Difference</a></li>
-<li><a href="Newton_Raphson.html">Newton Raphson in Python</a></li>
-<li><a href="Classical_Monte_Carlo_Integration.html">Classical Monte Carlo Integration</a></li>
-</ul></li>
-<li>Miscellaneous
-<ul>
-<li><a href="OLS_QR.html">QR decomposition</a></li>
-<li><a href="Gaussian-Markov.html">Gauss–Markov theorem</a></li>
-<li><a href="p_value.html"><span class="math inline">\(p\)</span>-value is a statistic!(random variable)</a></li>
-<li><a href="Fisher_Information_Matrix.html">Fisher Information Matrix under regularity conditions</a></li>
-<li><a href="Box_Muller_Algorithm.html">Box Muller Algorithm by <code>Python</code></a></li>
-<li><a href="Accept_reject.html">The Accept/Rejection Algorithm by <code>Python</code></a></li>
-<li><a href="Envelope_Accept_Reject.html">The Envelope Accept/Reject Algorithm</a></li>
-<li><a href="Uniform_Disk.html">Generate Random Points over the Disk</a></li>
-</ul></li>
+<li><a href="#references">References</a></li>
 </ul>
+</div>
+
+<p>I reproduce figure 2.4 from <span class="citation">Robert and Casella (<a href="#ref-10.5555/1051451">2005</a>)</span>. This is a fun execrise using <code>matplotlib</code>.</p>
+<p>Plot <span class="math inline">\(f(x)\)</span> and <span class="math inline">\(g(x)\)</span> by <code>matplotlib</code>. Show area under both curves.</p>
+<p><span class="math display">\[f(x) = \exp \left(-x^{2} / 2\right)\left(\sin (6 x)^{2}+3 \cos (x)^{2} \sin (4 x)^{2}+1\right)\]</span></p>
+<p><span class="math display">\[g(x)=\exp \left(-x^{2} / 2\right) / \sqrt{2 \pi}\]</span></p>
+<pre class="python"><code>import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+def f(x):
+  p1 = np.exp(-(x**2)/2)
+  p2 = (np.sin(6*x))**2 + 3*((np.cos(x))**2)*(np.sin(4*x))**2 + 1
+  output = p1 * p2
+  return output
+
+def g(x):
+  output = 5 * np.exp(-(x**2)/2)
+  return output
+
+df_p1 = pd.DataFrame({&#39;x&#39;:np.arange(-4,4+0.01,0.01)})
+df_p1[&#39;y&#39;] = f(df_p1[&#39;x&#39;])
+df_p2 = pd.DataFrame({&#39;x&#39;:np.arange(-4,4+0.01,0.01)})
+df_p2[&#39;y&#39;] = g(df_p2[&#39;x&#39;])
+
+fig,ax = plt.subplots()
+ax.plot(df_p2[&#39;x&#39;], df_p2[&#39;y&#39;], color = &#39;#ff7f0e&#39;, label = &quot;g(x)&quot;)
+ax.fill_between(df_p2[&#39;x&#39;],df_p2[&#39;y&#39;], alpha = 0.2, color = &#39;#ff7f0e&#39;)
+ax.plot(df_p1[&#39;x&#39;], df_p1[&#39;y&#39;], color = &#39;#1f77b4&#39;, label = &quot;f(x)&quot;)
+ax.fill_between(df_p1[&#39;x&#39;],df_p1[&#39;y&#39;], alpha = 0.5, color = &#39;#1f77b4&#39;)
+temp = ax.legend()
+plt.show()</code></pre>
+<p><img src="Area_Under_Curve_files/figure-html/unnamed-chunk-1-1.png" width="480" style="display: block; margin: auto;" /></p>
+<pre class="python"><code>plt.close()</code></pre>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references">
+<div id="ref-10.5555/1051451">
+<p>Robert, Christian P., and George Casella. 2005. <em>Monte Carlo Statistical Methods (Springer Texts in Statistics)</em>. Berlin, Heidelberg: Springer-Verlag.</p>
+</div>
+</div>
+</div>
 
 
 

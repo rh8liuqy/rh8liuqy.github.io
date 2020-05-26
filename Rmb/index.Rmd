@@ -15,6 +15,7 @@ title: "What Do You Care What Other People Think"
     + [Contour Plots by `matplotlib`](Contour_matplotlib.html)
     + [Grouped Display by `lattice` and `matplotlib`](grouped_display.html)
     + [Visualize Monte Carlo Integration Approximation of $\pi$](Visulization_Classical_Monte_Carlo_Integration.html)
+    + [Area under curve by `matplotlib`](Area_Under_Curve.html)
 
 * Topics about Linear Mixed Model
     + [Mixed Model Equations and REML](Linear_mixed_model_equations.html)
@@ -32,5 +33,6 @@ title: "What Do You Care What Other People Think"
     + [$p$-value is a statistic!(random variable)](p_value.html)
     + [Fisher Information Matrix under regularity conditions](Fisher_Information_Matrix.html)
     + [Box Muller Algorithm by `Python`](Box_Muller_Algorithm.html)
-    + [Accept/Rejection Algorithm by `Python`](Accept_reject.html)
+    + [The Accept/Rejection Algorithm by `Python`](Accept_reject.html)
+    + [The Envelope Accept/Reject Algorithm](Envelope_Accept_Reject.html)
     + [Generate Random Points over the Disk](Uniform_Disk.html)
