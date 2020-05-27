@@ -307,9 +307,24 @@ $(document).ready(function () {
 
 <p>#Library loading</p>
 <pre class="r"><code>library(ggplot2)
-library(dplyr)
-library(tidyr)
+library(dplyr)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>library(tidyr)
 library(cowplot)</code></pre>
+<pre><code>## 
+## ********************************************************</code></pre>
+<pre><code>## Note: As of version 1.0.0, cowplot does not change the</code></pre>
+<pre><code>##   default ggplot2 theme anymore. To recover the previous</code></pre>
+<pre><code>##   behavior, execute:
+##   theme_set(theme_cowplot())</code></pre>
+<pre><code>## ********************************************************</code></pre>
 <div id="beautiful-acf-and-pacf-by-ggplot2" class="section level1">
 <h1><span class="header-section-number">1</span> Beautiful ACF and PACF by <code>ggplot2</code></h1>
 <p>Wolf yearly sunspot number is a classic time series data that have been analysis by many statisticians and scientists. In this blog, I want to emphasis on a graphic model selection method by <span class="citation">Heiberger and Teles (<a href="#ref-doi:10.1198/000313002317572808">2002</a>)</span> and <span class="citation">Richard M. Heiberger (<a href="#ref-HH2">2015</a>)</span>.</p>
