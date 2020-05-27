@@ -9,9 +9,10 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Kevin Liu" />
 
 
-<title>Qingyang Liu’s Website</title>
+<title>Gibbs Sampling - Bivariate Normal Distribution</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -289,52 +290,97 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Qingyang Liu’s Website</h1>
+<h1 class="title toc-ignore">Gibbs Sampling - Bivariate Normal Distribution</h1>
+<h4 class="author">Kevin Liu</h4>
+<h4 class="date">5/26/2020</h4>
 
 </div>
 
-
+<div id="TOC">
 <ul>
-<li>Topics about Generalized Linear Model(GLM)
-<ul>
-<li><a href="Important_Results_GLM.html">Some important results about GLM</a></li>
-<li><a href="Fisher_Scoring.html">GLM fitting with canonical link</a></li>
-<li><a href="logistic_regression_theory_hand_check.html">Logistic regression MLE with examples</a></li>
-</ul></li>
-<li>Topics about Data Visualization
-<ul>
-<li><a href="Data_Visulization_of_ARIMA_Model_Selection.html">Visualize Time Series Model Selection</a></li>
-<li><a href="ACF_PACF_by_ggplot2.html">ACF&amp;PACF by <code>ggplot2</code></a></li>
-<li><a href="Contour_matplotlib.html">Contour Plots by <code>matplotlib</code></a></li>
-<li><a href="grouped_display.html">Grouped Display by <code>lattice</code> and <code>matplotlib</code></a></li>
-<li><a href="Visulization_Classical_Monte_Carlo_Integration.html">Visualize Monte Carlo Integration Approximation of <span class="math inline">\(\pi\)</span></a></li>
-<li><a href="Area_Under_Curve.html">Area under curve by <code>matplotlib</code></a></li>
-</ul></li>
-<li>Topics about Linear Mixed Model
-<ul>
-<li><a href="Linear_mixed_model_equations.html">Mixed Model Equations and REML</a></li>
-<li><a href="Example_Linear_mixed_model.html">Example for Mixed Model Equations and REML</a></li>
-<li><a href="Expectation_Maximization_Algorithm_With_One_Example.html">Expectation Maximization Algorithm With One Example</a></li>
-</ul></li>
-<li>Topics about Optimization
-<ul>
-<li><a href="Finite_Difference.html">Finite Difference</a></li>
-<li><a href="Newton_Raphson.html">Newton Raphson in Python</a></li>
-<li><a href="Classical_Monte_Carlo_Integration.html">Classical Monte Carlo Integration</a></li>
-</ul></li>
-<li>Miscellaneous
-<ul>
-<li><a href="OLS_QR.html">QR decomposition</a></li>
-<li><a href="Gaussian-Markov.html">Gauss–Markov theorem</a></li>
-<li><a href="p_value.html"><span class="math inline">\(p\)</span>-value is a statistic!(random variable)</a></li>
-<li><a href="Fisher_Information_Matrix.html">Fisher Information Matrix under regularity conditions</a></li>
-<li><a href="Box_Muller_Algorithm.html">Box Muller Algorithm by <code>Python</code></a></li>
-<li><a href="Accept_reject.html">The Accept/Rejection Algorithm by <code>Python</code></a></li>
-<li><a href="Envelope_Accept_Reject.html">The Envelope Accept/Reject Algorithm</a></li>
-<li><a href="Uniform_Disk.html">Generate Random Points over the Disk</a></li>
-<li><a href="Gibbs_Bivariate_Normal.html">Gibbs Sampling - Bivariate Normal Distribution by <code>Python</code></a></li>
-</ul></li>
+<li><a href="#references">References</a></li>
 </ul>
+</div>
+
+<p>This is a example sample for bivariate normal distribution using Gibbs sampling method.</p>
+<p>Random variables <span class="math inline">\(X_1,X_2\)</span> follow bivariate normal distribution such that</p>
+<p><span class="math display">\[
+\left(\begin{array}{l}
+X_{1} \\
+X_{2}
+\end{array}\right) \sim \mathcal{N}\left[\left(\begin{array}{l}
+0 \\
+0
+\end{array}\right),\left(\begin{array}{ll}
+1 &amp; \rho \\
+\rho &amp; 1
+\end{array}\right)\right]
+\]</span>
+From property of <a href="https://en.wikipedia.org/wiki/Multivariate_normal_distribution#Bivariate_case_2">bivariate normal distribution</a>, we have that</p>
+<p><span class="math display">\[
+X_{1} | X_{2} \sim \mathcal{N}\left(\rho X_2,\left(1-\rho^{2}\right) \right)
+\]</span></p>
+<p>And</p>
+<p><span class="math display">\[
+X_{2} | X_{1} \sim \mathcal{N}\left(\rho X_1,\left(1-\rho^{2}\right) \right)
+\]</span></p>
+<ol style="list-style-type: decimal">
+<li>Assume <span class="math inline">\(\rho = 0.5\)</span>.</li>
+<li>We will have 10,000 draws with 1000 burn-in draws.</li>
+<li>We will plot generated bivariate normal samples along with theoretical bivariate normal pdf contour plot.</li>
+</ol>
+<pre class="python"><code>import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from scipy.stats import multivariate_normal
+np.random.seed(526)
+
+# Gibbs
+
+rho = 0.5
+beta1 = np.zeros(11000)
+beta2 = np.zeros(11000)
+beta2[0] = 1 ##initial value of beta2
+for i in np.arange(0,11000,1):
+  beta1[i] = rho * beta2[i] + np.sqrt(1-rho**2) * np.random.normal(0,1)
+  beta2[i] = rho * beta1[i] + np.sqrt(1-rho**2) * np.random.normal(0,1)
+beta1 = beta1[1000:11000]
+beta2 = beta2[1000:11000]
+
+# Visulization
+x, y = np.mgrid[-3:3:.01, -3:3:.01]
+pos = np.empty(x.shape + (2,))
+pos[:, :, 0] = x; pos[:, :, 1] = y
+rv = multivariate_normal([0, 0], [[1,rho], [rho,1]])
+
+fig,ax = plt.subplots()
+temp = ax.scatter(beta1,beta2,s=0.5)
+temp = ax.contour(x, y, rv.pdf(pos))
+plt.show()</code></pre>
+<p><img src="Gibbs_Bivariate_Normal_files/figure-html/unnamed-chunk-1-1.png" width="384" style="display: block; margin: auto;" /></p>
+<pre class="python"><code>plt.close()
+
+df1 = pd.DataFrame({&#39;x&#39;:np.arange(1,10000+1,1),&#39;y&#39;:beta1})
+df2 = pd.DataFrame({&#39;x&#39;:np.arange(1,10000+1,1),&#39;y&#39;:beta2})
+
+fig,(ax1,ax2) = plt.subplots(nrows=2,ncols=1)
+temp = ax1.plot(df1.x,df1.y)
+temp = ax1.set_xlabel(&quot;X1&quot;)
+temp = ax1.set_title(&quot;Gibbs Trace Plot&quot;)
+temp = ax2.plot(df2.x,df2.y)
+temp = ax2.set_xlabel(&quot;X2&quot;)
+plt.subplots_adjust(hspace=0.5)
+plt.show()</code></pre>
+<p><img src="Gibbs_Bivariate_Normal_files/figure-html/unnamed-chunk-1-2.png" width="384" style="display: block; margin: auto;" /></p>
+<pre class="python"><code>plt.close()</code></pre>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references">
+<div id="ref-10.5555/1051451">
+<p>Robert, Christian P., and George Casella. 2005. <em>Monte Carlo Statistical Methods (Springer Texts in Statistics)</em>. Berlin, Heidelberg: Springer-Verlag.</p>
+</div>
+</div>
+</div>
 
 
 

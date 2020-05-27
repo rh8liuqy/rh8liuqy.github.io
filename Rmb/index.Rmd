@@ -34,3 +34,4 @@ title: "Qingyang Liu's Website"
     + [The Accept/Rejection Algorithm by `Python`](Accept_reject.html)
     + [The Envelope Accept/Reject Algorithm](Envelope_Accept_Reject.html)
     + [Generate Random Points over the Disk](Uniform_Disk.html)
+    + [Gibbs Sampling - Bivariate Normal Distribution by `Python`](Gibbs_Bivariate_Normal.html)
