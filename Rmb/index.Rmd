@@ -1,8 +1,6 @@
 ---
-title: "What Do You Care What Other People Think"
+title: "Qingyang Liu's Website"
 ---
-
-![](./files/too-much-coffee-featured.jpg){width=200px}
 
 * Topics about Generalized Linear Model(GLM)
     + [Some important results about GLM](Important_Results_GLM.html)
