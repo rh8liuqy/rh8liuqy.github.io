@@ -13,7 +13,7 @@
 <meta name="author" content="Kevin Liu" />
 
 
-<title>Gibbs Sampling - Bivariate Normal Distribution</title>
+<title>Bayesian Poisson Regression</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -290,9 +290,9 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Gibbs Sampling - Bivariate Normal Distribution</h1>
+<h1 class="title toc-ignore">Bayesian Poisson Regression</h1>
 <h4 class="author">Kevin Liu</h4>
-<h4 class="date">5/26/2020</h4>
+<h4 class="date">5/31/2020</h4>
 
 </div>
 
@@ -302,76 +302,105 @@ $(document).ready(function () {
 </ul>
 </div>
 
-<p>This is a example sample for bivariate normal distribution using Gibbs sampling method.</p>
-<p>Random variables <span class="math inline">\(X_1,X_2\)</span> follow bivariate normal distribution such that</p>
-<p><span class="math display">\[
-\left(\begin{array}{l}
-X_{1} \\
-X_{2}
-\end{array}\right) \sim \mathcal{N}\left[\left(\begin{array}{l}
-0 \\
-0
-\end{array}\right),\left(\begin{array}{ll}
-1 &amp; \rho \\
-\rho &amp; 1
-\end{array}\right)\right]
-\]</span>
-From property of <a href="https://en.wikipedia.org/wiki/Multivariate_normal_distribution#Bivariate_case_2">bivariate normal distribution</a>, we have that</p>
-<p><span class="math display">\[
-X_{1} | X_{2} \sim \mathcal{N}\left(\rho X_2,\left(1-\rho^{2}\right) \right)
-\]</span></p>
-<p>And</p>
-<p><span class="math display">\[
-X_{2} | X_{1} \sim \mathcal{N}\left(\rho X_1,\left(1-\rho^{2}\right) \right)
-\]</span></p>
-<ol style="list-style-type: decimal">
-<li>Assume <span class="math inline">\(\rho = 0.5\)</span>.</li>
-<li>We will have 10,000 draws with 1000 burn-in draws.</li>
-<li>We will plot generated bivariate normal samples along with theoretical bivariate normal pdf contour plot.</li>
-</ol>
 <pre class="python"><code>import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from scipy.stats import multivariate_normal
-np.random.seed(526)
+import statsmodels.api as sm
+import arspy.ars
 
-# Gibbs
 
-rho = 0.5
-beta1 = np.zeros(11000+1)
-beta2 = np.zeros(11000+1)
+np.random.seed(530)
+y = np.zeros(1000)
+x0 = np.ones(1000)
+x1 = np.zeros(1000)
+for i in range(1000):
+  x1[i] = np.random.normal(loc = 0, scale = 1, size = 1)
+  eta = 2 + x1[i] * 3
+  y[i] = np.random.poisson(lam = np.exp(eta), size = 1)
 
-for i in np.arange(0,11000,1):
-  beta1[i+1] = rho * beta2[i] + np.sqrt(1-rho**2) * np.random.normal(0,1)
-  beta2[i+1] = rho * beta1[i+1] + np.sqrt(1-rho**2) * np.random.normal(0,1)
-beta1 = beta1[1000:11000]
-beta2 = beta2[1000:11000]
+y = np.round(y,0)
+X = np.column_stack([x0,x1])
+model = sm.Poisson(y,X)
+model.fit().summary()</code></pre>
+<pre><code>## Optimization terminated successfully.
+##          Current function value: 2.452539
+##          Iterations 14
+## &lt;class &#39;statsmodels.iolib.summary.Summary&#39;&gt;
+## &quot;&quot;&quot;
+##                           Poisson Regression Results                          
+## ==============================================================================
+## Dep. Variable:                      y   No. Observations:                 1000
+## Model:                        Poisson   Df Residuals:                      998
+## Method:                           MLE   Df Model:                            1
+## Date:                Sun, 31 May 2020   Pseudo R-squ.:                  0.9998
+## Time:                        17:15:56   Log-Likelihood:                -2452.5
+## converged:                       True   LL-Null:                   -1.3517e+07
+##                                         LLR p-value:                     0.000
+## ==============================================================================
+##                  coef    std err          z      P&gt;|z|      [0.025      0.975]
+## ------------------------------------------------------------------------------
+## const          1.9957      0.003    596.766      0.000       1.989       2.002
+## x1             3.0014      0.001   3508.839      0.000       3.000       3.003
+## ==============================================================================
+## &quot;&quot;&quot;</code></pre>
+<pre class="python"><code>df_output = pd.DataFrame({&#39;x0&#39;:x0,&#39;x1&#39;:x1,&#39;y&#39;:y})
+df_output.to_csv(&quot;data.csv&quot;,index = False)
 
-# Visulization
-x, y = np.mgrid[-3:3:.01, -3:3:.01]
-pos = np.empty(x.shape + (2,))
-pos[:, :, 0] = x; pos[:, :, 1] = y
-rv = multivariate_normal([0, 0], [[1,rho], [rho,1]])
+def log1(beta0,beta1):
+  p1 = beta0 * np.sum(x0*y)
+  eta = x0 * beta0 + x1 * beta1
+  p2 = - np.sum(np.exp(eta))
+  p3 = -(beta0**2)/(2*1e6)
+  output = p1 + p2 + p3
+  return output
 
-fig,ax = plt.subplots()
-temp = ax.scatter(beta1,beta2,s=0.5)
-temp = ax.contour(x, y, rv.pdf(pos))
+def log2(beta0,beta1):
+  p1 = beta1 * np.sum(x1*y)
+  eta = x0 * beta0 + x1 * beta1
+  p2 = - np.sum(np.exp(eta))
+  p3 = -(beta1**2)/(2*1e6)
+  output = p1 + p2 + p3
+  return output
+
+beta0_output = np.zeros(6001)
+beta1_output = np.zeros(6001)
+beta1_output[0] = 3 #initial value of beta1
+
+domain = (float(0), float(&quot;inf&quot;))
+
+def sample_beta0():
+  output = arspy.ars.adaptive_rejection_sampling(lambda x: log1(beta0=x,beta1=beta1_output[i]),\
+  a = 1, \
+  b = 10,\
+  domain = domain, \
+  n_samples = 1)[0]
+  return output
+
+def sample_beta1():
+  output = arspy.ars.adaptive_rejection_sampling(lambda x: log2(beta0=beta0_output[i+1],beta1=x),\
+  a = 1,\
+  b = 10,\
+  domain = domain, \
+  n_samples = 1)[0]
+  return output
+
+for i in range(6000):
+  beta0_output[i+1] = sample_beta0()
+  beta1_output[i+1] = sample_beta1()</code></pre>
+<pre><code>## C:\Users\Kevin_Liu\Anaconda3\lib\site-packages\arspy\hull.py:204: RuntimeWarning: divide by zero encountered in log
+##   return -log(abs(m)) + log(abs(exp(m * r + b - M) - exp(m * l + b - M))) + M</code></pre>
+<pre class="python"><code>fig,(ax1,ax2) = plt.subplots(nrows=2,ncols=1)
+temp = ax1.hist(beta0_output[1000:6001],density=True)
+temp = ax2.hist(beta1_output[1000:6001],density=True)
 plt.show()</code></pre>
-<p><img src="Gibbs_Bivariate_Normal_files/figure-html/unnamed-chunk-1-1.png" width="384" style="display: block; margin: auto;" /></p>
+<p><img src="Gibbs_Poisson_files/figure-html/unnamed-chunk-2-1.png" width="384" style="display: block; margin: auto;" /></p>
 <pre class="python"><code>plt.close()
 
-df1 = pd.DataFrame({&#39;x&#39;:np.arange(1,10000+1,1),&#39;y&#39;:beta1})
-df2 = pd.DataFrame({&#39;x&#39;:np.arange(1,10000+1,1),&#39;y&#39;:beta2})
-
 fig,(ax1,ax2) = plt.subplots(nrows=2,ncols=1)
-temp = ax1.plot(df1.x,df1.y)
-temp = ax1.set_xlabel(&quot;X1&quot;)
-temp = ax1.set_title(&quot;Gibbs Trace Plot&quot;)
-temp = ax2.plot(df2.x,df2.y)
-temp = ax2.set_xlabel(&quot;X2&quot;)
-plt.subplots_adjust(hspace=0.5)
+temp = ax1.plot(np.arange(0,len(beta0_output[1000:6001]),1) + 1, beta0_output[1000:6001])
+temp = ax2.plot(np.arange(0,len(beta1_output[1000:6001]),1) + 1, beta1_output[1000:6001])
 plt.show()</code></pre>
-<p><img src="Gibbs_Bivariate_Normal_files/figure-html/unnamed-chunk-1-2.png" width="384" style="display: block; margin: auto;" /></p>
+<p><img src="Gibbs_Poisson_files/figure-html/unnamed-chunk-2-2.png" width="384" style="display: block; margin: auto;" /></p>
 <pre class="python"><code>plt.close()</code></pre>
 <div id="references" class="section level1 unnumbered">
 <h1>References</h1>

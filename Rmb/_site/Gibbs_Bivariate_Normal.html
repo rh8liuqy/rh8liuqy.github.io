@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
 
 <meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
@@ -232,7 +233,6 @@ $(document).ready(function () {
   border: none;
   display: inline-block;
   border-radius: 4px;
-  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -338,12 +338,12 @@ np.random.seed(526)
 # Gibbs
 
 rho = 0.5
-beta1 = np.zeros(11000)
-beta2 = np.zeros(11000)
-beta2[0] = 1 ##initial value of beta2
+beta1 = np.zeros(11000+1)
+beta2 = np.zeros(11000+1)
+
 for i in np.arange(0,11000,1):
-  beta1[i] = rho * beta2[i] + np.sqrt(1-rho**2) * np.random.normal(0,1)
-  beta2[i] = rho * beta1[i] + np.sqrt(1-rho**2) * np.random.normal(0,1)
+  beta1[i+1] = rho * beta2[i] + np.sqrt(1-rho**2) * np.random.normal(0,1)
+  beta2[i+1] = rho * beta1[i+1] + np.sqrt(1-rho**2) * np.random.normal(0,1)
 beta1 = beta1[1000:11000]
 beta2 = beta2[1000:11000]
 
