@@ -14,6 +14,7 @@ title: "Qingyang Liu's Website"
     + [Grouped Display by `lattice` and `matplotlib`](grouped_display.html)
     + [Visualize Monte Carlo Integration Approximation of $\pi$](Visulization_Classical_Monte_Carlo_Integration.html)
     + [Area under curve by `matplotlib`](Area_Under_Curve.html)
+    + [Basic Image Process by `Python`](Image_Process.html)
 
 * Topics about Linear Mixed Model
     + [Mixed Model Equations and REML](Linear_mixed_model_equations.html)
@@ -22,7 +23,7 @@ title: "Qingyang Liu's Website"
     
 * Topics about Optimization
     + [Finite Difference](Finite_Difference.html)
-    + [Newton Raphson in Python](Newton_Raphson.html)
+    + [Newton Raphson in `Python`](Newton_Raphson.html)
     + [Classical Monte Carlo Integration](Classical_Monte_Carlo_Integration.html)
     
 * Miscellaneous
