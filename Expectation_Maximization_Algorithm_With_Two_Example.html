@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Kevin Liu" />
+
+
+<title>Expectation Maximization Algorithm - with one example</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Statistics by steps</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Expectation Maximization Algorithm - with one example</h1>
+<h4 class="author">Kevin Liu</h4>
+<h4 class="date">8/30/2018</h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#general-form-of-em-algorithm-for-mixture-distribution-with-2-parts."><span class="toc-section-number">1</span> General form of EM algorithm for mixture distribution with 2 parts.</a></li>
+<li><a href="#example"><span class="toc-section-number">2</span> Example</a><ul>
+<li><a href="#example---calculation-by-r"><span class="toc-section-number">2.1</span> Example - Calculation by <code>R</code></a></li>
+<li><a href="#example---histogram"><span class="toc-section-number">2.2</span> Example - Histogram</a></li>
+<li><a href="#example---em-algorithm-as-a-classification-tool-for-mixture-probabaility-density."><span class="toc-section-number">2.3</span> Example - EM algorithm as a classification tool for mixture probabaility density.</a></li>
+</ul></li>
+<li><a href="#appendix"><span class="toc-section-number">3</span> Appendix</a></li>
+</ul>
+</div>
+
+<p>Expectation Maximization Algorithm is a very important algorithm for mixture distribution. Here I derive the general form/step for mixture distribution with 2 distributions.</p>
+<div id="general-form-of-em-algorithm-for-mixture-distribution-with-2-parts." class="section level1">
+<h1><span class="header-section-number">1</span> General form of EM algorithm for mixture distribution with 2 parts.</h1>
+<p>For <span class="math inline">\(\mathbf{x} = (x_1,\dots,x_n)\)</span>, where <span class="math inline">\(x_i\)</span> is known numeric variable , with <span class="math inline">\(f_0\)</span> and <span class="math inline">\(f_1\)</span> being probability density functions. We assume that
+<span class="math display" id="eq:e1">\[\begin{equation}
+P(X_i = x_i) = \pi_0 f_0(x_i) + \pi_1 f_1(x_i)
+\tag{1.1}
+\end{equation}\]</span></p>
+<p>Important relationship between <span class="math inline">\(\pi_0\)</span> and <span class="math inline">\(\pi_1\)</span>
+<span class="math display" id="eq:e2">\[\begin{equation}
+\pi_0 + \pi_1 = 1
+\tag{1.2}
+\end{equation}\]</span></p>
+<p>Define <span class="math inline">\(\boldsymbol{\theta}\)</span> is a vector containing all parameters of <span class="math inline">\(f_0(x_i)\)</span> and <span class="math inline">\(f_1(x_i)\)</span>.</p>
+<p>Define <span class="math inline">\(Z_i\)</span> as group information, which is unknown. The complete mixture probability distribution function is</p>
+<p><span class="math display" id="eq:e3">\[\begin{equation}
+f(x_i,Z_i;\boldsymbol{\theta}) = \mathbf{I}(Z_i = 0 | \mathbf{X}, \boldsymbol{\theta})\pi_0 f_0(x_i) +
+\mathbf{I}(Z_i = 1 | \mathbf{X}, \boldsymbol{\theta})\pi_1 f_1(x_i)
+\tag{1.3}
+\end{equation}\]</span></p>
+<p>Complete likelihood function</p>
+<p><span class="math display" id="eq:e4">\[\begin{equation}
+L(\boldsymbol{\theta}; \mathbf{X},\mathbf{Z}) = \prod_{i=1}^{n} [\mathbf{I}(Z_i = 0  | \mathbf{X}, \boldsymbol{\theta})\pi_0 f_0(x_i) +
+\mathbf{I}(Z_i = 1  | \mathbf{X}, \boldsymbol{\theta})\pi_1 f_1(x_i)]
+\tag{1.4}
+\end{equation}\]</span></p>
+<p>Complete log-likelihood function
+<span class="math display" id="eq:e5">\[\begin{equation}
+\begin{split}
+\ell(\boldsymbol{\theta}; \mathbf{X},\mathbf{Z}) &amp;=
+\text{log}[\prod_{i=1}^{n} [\mathbf{I}(Z_i = 0 | \mathbf{X}, \boldsymbol{\theta})\pi_0 f_0(x_i) +
+\mathbf{I}(Z_i = 1 | \mathbf{X}, \boldsymbol{\theta})\pi_1 f_1(x_i)]] \\
+&amp;= \sum_{i=1}^{n} \text{log}[\mathbf{I}(Z_i = 0 | \mathbf{X}, \boldsymbol{\theta})\pi_0 f_0(x_i) +
+\mathbf{I}(Z_i = 1 | \mathbf{X}, \boldsymbol{\theta})\pi_1 f_1(x_i)] \\
+&amp;= \sum_{i=1}^{n} \mathbf{I}(Z_i = 0 | \mathbf{X}, \boldsymbol{\theta})\text{log}[\pi_0 f_0(x_i)] + 
+\mathbf{I}(Z_i = 1 | \mathbf{X}, \boldsymbol{\theta})\text{log}[\pi_1 f_1(x_i)]
+\end{split}
+\tag{1.5}
+\end{equation}\]</span></p>
+<p>The last step of <a href="#eq:e5">(1.5)</a> is true because <span class="math inline">\(Z_i\)</span> could be either <span class="math inline">\(0\)</span> or <span class="math inline">\(1\)</span>, but <span class="math inline">\(Z_i\)</span> can not be <span class="math inline">\(0\)</span> and <span class="math inline">\(1\)</span> simultaneous.</p>
+<p>The E step:</p>
+<p>The E step is about calculating expected value of the log-likelihood function of <span class="math inline">\(\boldsymbol{\theta}\)</span>,<font color = "red"> with respect to the current conditional distribution of <span class="math inline">\(\mathbf{Z}\)</span> given <span class="math inline">\(\mathbf{X}\)</span> and the current estimates of the parameters <span class="math inline">\(\boldsymbol{\theta}^{(t)}\)</span>. </font> The red highlighted part is extremely important.</p>
+<p><span class="math display" id="eq:e6">\[\begin{equation}
+\begin{split}
+Q(\boldsymbol{\theta} | \boldsymbol{\theta}^{(t)}) &amp; =
+E_{\mathbf{Z}|\mathbf{X}, \boldsymbol{\theta}^{(t)}}[\ell(\boldsymbol{\theta}^{(t)}; \mathbf{X},\mathbf{Z})] \\
+&amp;= E_{\mathbf{Z}|\mathbf{X}, \boldsymbol{\theta}^{(t)}} 
+[\sum_{i=1}^{n} \mathbf{I}(Z_i = 0 | \mathbf{X}, \boldsymbol{\theta}^{(t)})\text{log}[\pi_0 f_0(x_i)] + 
+\mathbf{I}(Z_i = 1 | \mathbf{X}, \boldsymbol{\theta}^{(t)})\text{log}[\pi_1 f_1(x_i)]] \\
+&amp;\stackrel{(A.1)}{=}
+\sum_{i=1}^{n}E_{\mathbf{Z}|\mathbf{X}, \boldsymbol{\theta}^{(t)}}
+[\mathbf{I}(Z_i = 0 | \mathbf{X}, \boldsymbol{\theta}^{(t)})\text{log}[\pi_0 f_0(x_i)] + 
+\mathbf{I}(Z_i = 1 | \mathbf{X}, \boldsymbol{\theta}^{(t)})\text{log}[\pi_1 f_1(x_i)]]
+\\
+&amp;\stackrel{(A.2)}{=}
+\sum_{i=1}^{n} 
+\text{log}[\pi_0 f_0(x_i)] E_{\mathbf{Z}|\mathbf{X}, \boldsymbol{\theta}^{(t)}}[\mathbf{I}(Z_i = 0 | \mathbf{X}, \boldsymbol{\theta}^{(t)})] +
+\text{log}[\pi_1 f_1(x_i)] E_{\mathbf{Z}|\mathbf{X}, \boldsymbol{\theta}^{(t)}}[\mathbf{I}(Z_i = 1 | \mathbf{X}, \boldsymbol{\theta}^{(t)})]\\
+&amp;\stackrel{(A.3)}{=} 
+\sum_{i=1}^{n} \text{log}[\pi_0 f_0(x_i)] P(\mathbf{I}(Z_i = 0 | \mathbf{X}, \boldsymbol{\theta}^{(t)})) +
+\text{log}[\pi_1 f_1(x_i)] P(\mathbf{I}(Z_i = 1 | \mathbf{X}, \boldsymbol{\theta}^{(t)}))\\
+&amp;\stackrel{(A.4)}{=} 
+\sum_{i=1}^{n} \text{log}[\pi_0 f_0(x_i)] T_{i,0} + 
+\text{log}[\pi_1 f_1(x_i)] T_{i,1}
+\end{split}
+\tag{1.6}
+\end{equation}\]</span></p>
+<p>The M step is relatively easy. It is about finding the parameters that maximize this quantity.</p>
+<p><span class="math display" id="eq:e7">\[\begin{equation}
+\begin{split}
+
+\boldsymbol{\theta}^{(t+1)} = \text{argmax} Q(\boldsymbol{\theta} | \boldsymbol{\theta}^{(t)}) 
+
+\end{split}
+\tag{1.7}
+\end{equation}\]</span></p>
+<p>We should repeat <a href="#eq:e6">(1.6)</a> and <a href="#eq:e7">(1.7)</a> until convergence.</p>
+</div>
+<div id="example" class="section level1">
+<h1><span class="header-section-number">2</span> Example</h1>
+<p>This example comes from Prof.Zhao who works in Temple University and introduced me the EM algorithm. He made an good homework for EM. I decide to share the homework.</p>
+<p>Assume</p>
+<p><span class="math display" id="eq:e8">\[\begin{equation}
+\begin{cases}
+f_0(x_i) = 1(0 \le x_i \le 1)\\
+f_1(x_i)=\beta(1-x_i)^{\beta-1}
+\end{cases}
+\tag{2.1}
+\end{equation}\]</span></p>
+<p><a href="#eq:e6">(1.6)</a> becomes</p>
+<p><span class="math display" id="eq:e9">\[\begin{equation}
+\begin{split}
+Q(\boldsymbol{\theta} | \boldsymbol{\theta}^{(t)}) &amp;=
+\sum_{i=1}^{n}
+T^{(t)}_{0,i}
+\text{log}(\pi_0 \times 1)
++
+T^{(t)}_{1,i}
+\text{log}(\pi_1 \times \beta(1-x_i)^{\beta-1})\\
+&amp;\stackrel{(1.2)}{=} 
+\sum_{i=1}^{n}
+T^{(t)}_{0,i}
+\text{log}(\pi_0 \times 1)
++
+T^{(t)}_{1,i}
+\text{log}((1-\pi_0) \times \beta(1-x_i)^{\beta-1})
+\end{split}
+\tag{2.2}
+\end{equation}\]</span></p>
+<p>From calculus, we know that first derivatives must be 0. (Note: <span class="math inline">\(T^{(t)}_{j,i}\)</span>, which is defined in appendix A.4, should be treated as constant)</p>
+<p><span class="math display" id="eq:e10">\[\begin{equation}
+\frac{\partial Q(\boldsymbol{\theta} | \boldsymbol{\theta}^{(t)})}{\partial \pi_0} =
+\sum_{i=1}^{n}
+T^{(t)}_{0,i}
+\frac{1}{\pi_0}
++
+\sum_{i=1}^{n}
+T^{(t)}_{1,i}
+\frac{1}{\pi_0 - 1} = 0
+\tag{2.3}
+\end{equation}\]</span></p>
+<p>This implies</p>
+<p><span class="math display" id="eq:e11">\[\begin{equation}
+\pi_0^{(t+1)} = \frac{\sum_{i=1}^{n}
+T^{(t)}_{0,i}}{\sum_{i=1}^{n}
+T^{(t)}_{0,i} + \sum_{i=1}^{n}
+T^{(t)}_{1,i}}
+=
+\frac{\sum_{i=1}^{n}
+T^{(t)}_{0,i}}{\sum_{i=1}^{n} (
+T^{(t)}_{0,i} + T^{(t)}_{1,i})}
+= \frac{\sum_{i=1}^{n}
+T^{(t)}_{0,i}}{n}
+\tag{2.4}
+\end{equation}\]</span></p>
+<p>Similarly, we have that</p>
+<p><span class="math display" id="eq:e12">\[\begin{equation}
+\frac{\partial Q(\boldsymbol{\theta} | \boldsymbol{\theta}^{(t)})}{\partial \beta} = 
+\sum_{i=1}^{n}
+T^{(t)}_{1,i}
+(\frac{1}{\beta} + log(1-x_i)) = 0
+\tag{2.5}
+\end{equation}\]</span></p>
+<p>This implies</p>
+<p><span class="math display" id="eq:e13">\[\begin{equation}
+\beta^{(t+1)} = \frac{\sum_{i=1}^{n}
+T^{(t)}_{1,i}}{-\sum_{i=1}^{n}
+T^{(t)}_{1,i} log(1-x_i)}
+\tag{2.6}
+\end{equation}\]</span></p>
+<div id="example---calculation-by-r" class="section level2">
+<h2><span class="header-section-number">2.1</span> Example - Calculation by <code>R</code></h2>
+<p>Create a loop in <code>R</code> to get <span class="math inline">\(\pi_0\)</span> and <span class="math inline">\(\beta\)</span>.
+With initial value of <span class="math inline">\(0.69\)</span> and <span class="math inline">\(11\)</span>, at 32th iteration, <span class="math inline">\(\pi_0 = 0.69679\)</span> and <span class="math inline">\(\beta = 11.09328\)</span>. (Initial value are chosen on purpose so it doesn’t require too many iterations until converge).</p>
+<p>Link:<a href="./files/pvalue.csv">pvalue.csv</a>. Note that <code>pvalue.csv</code> is simulated data.</p>
+<pre class="r"><code>pvalue &lt;- read.csv(&quot;files/pvalue.csv&quot;)
+
+em &lt;- function(X,s) {
+  T0.all &lt;- s[1]/ (s[1]+(1-s[1])*s[2]*(1-X)^(s[2]-1))
+  s[1] &lt;- mean(T0.all)
+  s[2] &lt;- -sum(1-T0.all)/sum((1-T0.all)*(log(1-X)))
+  return(s)
+}
+
+s.old &lt;- c(0.69, 11)
+s.new &lt;- s.old
+delta &lt;- 0.0001
+Delta &lt;- 1
+ITR &lt;- 1
+while( Delta &gt; delta ){
+  s.new &lt;- em(X = pvalue$X, s.old)
+  Delta &lt;- sum( (s.new-s.old)^2 )
+  Delta &lt;- max( abs(s.new-s.old) )
+  ITR &lt;- ITR+1
+  s.old &lt;- s.new
+  print( paste(ITR, &quot;-th iteration: pi0=&quot;, s.new[1], &quot;, beta=&quot;, s.new[2] ) )
+}</code></pre>
+<pre><code>## [1] &quot;2 -th iteration: pi0= 0.692953136521137 , beta= 10.9669224885903&quot;
+## [1] &quot;3 -th iteration: pi0= 0.694245784180573 , beta= 10.9727031763405&quot;
+## [1] &quot;4 -th iteration: pi0= 0.69491869223006 , beta= 10.988768636732&quot;
+## [1] &quot;5 -th iteration: pi0= 0.695335476190631 , beta= 11.0058596812566&quot;
+## [1] &quot;6 -th iteration: pi0= 0.695629559921737 , beta= 11.0212140150885&quot;
+## [1] &quot;7 -th iteration: pi0= 0.695853527007361 , beta= 11.0342459020068&quot;
+## [1] &quot;8 -th iteration: pi0= 0.696030723377971 , beta= 11.0450623202825&quot;
+## [1] &quot;9 -th iteration: pi0= 0.696173386989525 , beta= 11.0539564879985&quot;
+## [1] &quot;10 -th iteration: pi0= 0.696289132284208 , beta= 11.0612405367788&quot;
+## [1] &quot;11 -th iteration: pi0= 0.69638334812323 , beta= 11.0671951901675&quot;
+## [1] &quot;12 -th iteration: pi0= 0.696460145936134 , beta= 11.0720589742552&quot;
+## [1] &quot;13 -th iteration: pi0= 0.696522781969357 , beta= 11.0760300668865&quot;
+## [1] &quot;14 -th iteration: pi0= 0.696573879508717 , beta= 11.0792715728663&quot;
+## [1] &quot;15 -th iteration: pi0= 0.69661556770814 , beta= 11.0819171723944&quot;
+## [1] &quot;16 -th iteration: pi0= 0.696649580151097 , beta= 11.0840762181639&quot;
+## [1] &quot;17 -th iteration: pi0= 0.696677330204864 , beta= 11.0858380773616&quot;
+## [1] &quot;18 -th iteration: pi0= 0.696699970779702 , beta= 11.0872757467545&quot;
+## [1] &quot;19 -th iteration: pi0= 0.696718442513196 , beta= 11.0884488331594&quot;
+## [1] &quot;20 -th iteration: pi0= 0.696733512901597 , beta= 11.0894059997384&quot;
+## [1] &quot;21 -th iteration: pi0= 0.696745808174843 , beta= 11.0901869694761&quot;
+## [1] &quot;22 -th iteration: pi0= 0.696755839292428 , beta= 11.0908241640833&quot;
+## [1] &quot;23 -th iteration: pi0= 0.696764023154213 , beta= 11.0913440437445&quot;
+## [1] &quot;24 -th iteration: pi0= 0.696770699909498 , beta= 11.0917682018197&quot;
+## [1] &quot;25 -th iteration: pi0= 0.696776147082404 , beta= 11.092114259032&quot;
+## [1] &quot;26 -th iteration: pi0= 0.696780591098877 , beta= 11.0923965936944&quot;
+## [1] &quot;27 -th iteration: pi0= 0.696784216692932 , beta= 11.0926269379243&quot;
+## [1] &quot;28 -th iteration: pi0= 0.696787174582047 , beta= 11.0928148643702&quot;
+## [1] &quot;29 -th iteration: pi0= 0.696789587729988 , beta= 11.0929681835058&quot;
+## [1] &quot;30 -th iteration: pi0= 0.69679155645687 , beta= 11.0930932678943&quot;
+## [1] &quot;31 -th iteration: pi0= 0.69679316260856 , beta= 11.0931953168253&quot;
+## [1] &quot;32 -th iteration: pi0= 0.696794472958494 , beta= 11.0932785722746&quot;</code></pre>
+</div>
+<div id="example---histogram" class="section level2">
+<h2><span class="header-section-number">2.2</span> Example - Histogram</h2>
+<pre class="r"><code>library(ggplot2)
+pi0 &lt;- s.new[1]
+pi1 &lt;- 1-pi0
+beta &lt;- s.new[2]
+hist.plot &lt;- hist(pvalue$X, br=40, plot = FALSE)
+df.plot &lt;- data.frame(x = hist.plot$breaks[-1], y = hist.plot$density)
+list.density &lt;- density(pvalue$X)
+df.plot2 &lt;- data.frame(x = list.density$x, y = list.density$y)
+df.plot2 &lt;- subset(df.plot2, x &gt;=0 &amp; x &lt;=1)
+df.plot2[&quot;color&quot;] &lt;- &quot;Gaussian Kernel Density Estimation&quot;
+
+df.plot3 &lt;- data.frame(x = df.plot2$x)
+df.plot3[&quot;y&quot;] &lt;- (pi0*1+ pi1*beta*(1-df.plot3$x)^(beta-1))
+df.plot3[&quot;color&quot;] &lt;- &quot;EM Estimation&quot;
+
+df.line &lt;- rbind(df.plot2,df.plot3)
+rm(df.plot2,df.plot3)
+
+ggplot(data = df.plot, aes(x = x, y = y)) +
+  geom_col(fill = &quot;#B9CFE7&quot;, colour = &quot;black&quot;) +
+  geom_line(data = df.line ,aes(x = x, y = y, color = color),size = 1) +
+  scale_y_continuous(&quot;density&quot;) +
+  theme_bw() +
+  scale_color_manual(values = c(&quot;#F0E442&quot;,&quot;#FF9999&quot;), name = element_blank()) +
+  theme(legend.position = &quot;bottom&quot;)</code></pre>
+<p><img src="Expectation_Maximization_Algorithm_With_Two_Example_files/figure-html/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>From the histogram, we can easily see that EM density estimation fits the real density very well. Not surprise to us, EM density estimation is a better choice comparing with Gaussian kernel density estimation for this data set.</p>
+</div>
+<div id="example---em-algorithm-as-a-classification-tool-for-mixture-probabaility-density." class="section level2">
+<h2><span class="header-section-number">2.3</span> Example - EM algorithm as a classification tool for mixture probabaility density.</h2>
+<p>We can classify <span class="math inline">\(x_i\)</span> to be 1st group if <span class="math inline">\(T_{0,i}=P(z_i=0|\mathbf{x};\boldsymbol{\theta}^{(\text{32th iteration})}) \stackrel{(1.8)}{=} \frac{0.69679 \times 1}{0.69679 \times 1 + (1-0.69679) \times 11.09327(1-x_i)^{(11.09327 -1)}} &gt; 0.5\)</span>.</p>
+<p>Use <code>R</code> to calculate</p>
+<pre class="r"><code>pvalue[&quot;p0&quot;] &lt;- s.new[1]/(s.new[1] + (1-s.new[1]) * s.new[2] * (1-pvalue$X)^(s.new[2] - 1))
+pvalue[pvalue$p0 &gt;= 0.5, &quot;estimated_group&quot;] &lt;- as.integer(0)
+pvalue[pvalue$p0 &lt; 0.5, &quot;estimated_group&quot;] &lt;- as.integer(1)
+pvalue[pvalue$group == pvalue$estimated_group,&quot;Diff&quot;] &lt;- &quot;Right classified&quot;
+pvalue[pvalue$group != pvalue$estimated_group,&quot;Diff&quot;] &lt;- &quot;False classified&quot;
+table(pvalue$Diff)</code></pre>
+<pre><code>## 
+## False classified Right classified 
+##              321             1679</code></pre>
+<p>The total number of false classified is <span class="math inline">\(321\)</span>. The false classified rate is <span class="math inline">\(321/(321+1679) = 0.1605\)</span>.</p>
+</div>
+</div>
+<div id="appendix" class="section level1">
+<h1><span class="header-section-number">3</span> Appendix</h1>
+<p>For <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are random variables,
+<span class="math display">\[\begin{equation}
+E[X+Y] = E[X] + E[Y]
+\tag{A.1}
+\end{equation}\]</span></p>
+<p>For <span class="math inline">\(X\)</span> is a random variable and <span class="math inline">\(a\)</span> is a scalar,
+<span class="math display">\[\begin{equation}
+E[aX] = aE[X]
+\tag{A.2}
+\end{equation}\]</span></p>
+<p>For <span class="math inline">\(A\)</span> is an event, <span class="math inline">\(\mathbf{I}_A\)</span> is <a href="https://en.wikipedia.org/wiki/Indicator_function">indicator function</a> of the set <span class="math inline">\(A\)</span>,</p>
+<p><span class="math display">\[\begin{equation}
+E[\mathbf{I}_A] = P(A)
+\tag{A.3}
+\end{equation}\]</span></p>
+<p>For <span class="math inline">\(Z_i\)</span> is group information, which is unknown and <span class="math inline">\(X_i\)</span> is known data and both <span class="math inline">\(Z_i\)</span> and <span class="math inline">\(X_i\)</span> are considered as random variables.</p>
+<p><span class="math display">\[\begin{equation}
+\begin{cases}
+T_{i,0} = P(Z_i = 0 | X_i = x_i; \tilde{\boldsymbol{\theta}}) = 
+\frac{P(Z_i = 0 \cap X_i = x_i; \tilde{\boldsymbol{\theta}})}
+{ P(X_i = x_i; \tilde{\boldsymbol{\theta}})} 
+= \frac{\pi_0 f_0(x_i)}{\pi_0 f_0(x_i) + \pi_1 f_1(x_i)} \\
+T_{i,1} = P(Z_i = 1 | X_i = x_i; \tilde{\boldsymbol{\theta}}) = 
+\frac{P(Z_i = 1 \cap X_i = x_i; \tilde{\boldsymbol{\theta}})}
+{ P(X_i = x_i; \tilde{\boldsymbol{\theta}})} 
+= \frac{\pi_1 f_1(x_i)}{\pi_0 f_0(x_i) + \pi_1 f_1(x_i)}
+\end{cases}
+\tag{A.4}
+\end{equation}\]</span></p>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

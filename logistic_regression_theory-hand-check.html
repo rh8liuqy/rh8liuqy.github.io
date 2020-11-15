@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Kevin Liu" />
+
+
+<title>MLE of Logistic Regression</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Statistics by steps</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">MLE of Logistic Regression</h1>
+<h4 class="author">Kevin Liu</h4>
+<h4 class="date">5/8/2018</h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#logit-link"><span class="toc-section-number">0.1</span> Logit link</a></li>
+<li><a href="#partial-derivatives-of-log-likelihood-function"><span class="toc-section-number">0.2</span> Partial Derivatives of log-likelihood function</a></li>
+<li><a href="#mle-logit-link-via-newton-raphson"><span class="toc-section-number">0.3</span> MLE-logit link via Newton-Raphson</a></li>
+<li><a href="#mle-logit-link-via-fisher-socring"><span class="toc-section-number">0.4</span> MLE-logit link via Fisher Socring</a></li>
+<li><a href="#mle-logit-link-via-irls"><span class="toc-section-number">0.5</span> MLE-logit link via IRLS</a></li>
+<li><a href="#mle-probit-link-via-newton-raphson"><span class="toc-section-number">0.6</span> MLE-probit link via Newton-Raphson</a></li>
+<li><a href="#mle-probit-link-via-fisher-socring"><span class="toc-section-number">0.7</span> MLE-probit link via Fisher Socring</a></li>
+<li><a href="#mle-probit-link-via-irls"><span class="toc-section-number">0.8</span> MLE-probit link via IRLS</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+</div>
+
+<p>#Maximum Likelihood Estimation in Logistic Regression (logit link)</p>
+<p>##Bernoulli distribution</p>
+<p>The pmf of bernoulli distribution is
+<span class="math display" id="eq:Bernoulli">\[\begin{equation} 
+P(Y=y) = p^{y} (1-p) ^{1-y}
+\tag{1}
+\end{equation}\]</span>
+where <span class="math inline">\(y\)</span> is <span class="math inline">\(1\)</span> or <span class="math inline">\(0\)</span>.</p>
+<p>##Likelihood of Logistic Regression</p>
+<p><span class="math display" id="eq:likelihood">\[\begin{equation} 
+\begin{split}
+L(\boldsymbol{\beta} | \mathbf{y} ; \mathbf{x}) &amp;= 
+L(\beta_0,\beta_1|(y_1,...,y_n);(x_1,...,x_n)) \\
+&amp;= \prod^{n}_{i=1} p_{i}^{y_i}(1-p_i)^{1-y_i}
+\end{split}
+\tag{2}
+\end{equation}\]</span></p>
+<p>##Log-likelihood of Logistic Regression</p>
+<p><span class="math display" id="eq:loglikelihood">\[\begin{equation} 
+\begin{split}
+\ell (\boldsymbol{\beta} | \mathbf{y} ; \mathbf{x}) &amp; = log(\prod^{n}_{i=1} p_{i}^{y_i}(1-p_{i})^{1-y_i}) \\
+&amp; = \sum_{i=1}^{n} log(p_{i}^{y_i}) + log((1-p_{i})^{1-y_i}) \\
+&amp; = \sum_{i=1}^{n} y_{i} log(p_{i}) + (1-y_{i})log(1-p_{i})
+\end{split}
+\tag{3}
+\end{equation}\]</span></p>
+<div id="logit-link" class="section level2">
+<h2><span class="header-section-number">0.1</span> Logit link</h2>
+<p><span class="math display" id="eq:logit">\[\begin{equation} 
+\begin{split}
+logit(p_i) &amp;= log(\frac{p_i}{1-p_i}) \\
+&amp;= \beta_0 + \beta_1 x_1
+\end{split}
+\tag{4}
+\end{equation}\]</span></p>
+<p>Obviously, <span class="math inline">\(p_i\)</span> is</p>
+<p><span class="math display" id="eq:pi">\[\begin{equation} 
+\begin{split}
+p_i &amp;= \frac{exp(\beta_0+x_1 \beta_1)}{1 + exp(\beta_0+x_1 \beta_1)} 
+\end{split}
+\tag{5}
+\end{equation}\]</span></p>
+<p>First partial derivative with respect to the variable <span class="math inline">\(\beta_0\)</span></p>
+<p><span class="math display" id="eq:debeta0">\[\begin{equation} 
+\begin{split}
+\frac{\partial p_i}{\partial \beta_0} &amp;= \frac{exp(\beta_0+x_1 \beta_1)}{(1+exp(\beta_0+x_1 \beta_1))^2}\\
+&amp;= p_i (1-p_i)
+\end{split}
+\tag{6}
+\end{equation}\]</span></p>
+<p>Similiarly, we have</p>
+<p><span class="math display" id="eq:debeta1">\[\begin{equation} 
+\begin{split}
+\frac{\partial p_i}{\partial \beta_1} &amp;= \frac{x_1 exp(\beta_0+x_1 \beta_1)}{(1+exp(\beta_0+x_1 \beta_1))^2}\\
+&amp;= x_1 p_i (1-p_i)
+\end{split}
+\tag{7}
+\end{equation}\]</span></p>
+</div>
+<div id="partial-derivatives-of-log-likelihood-function" class="section level2">
+<h2><span class="header-section-number">0.2</span> Partial Derivatives of log-likelihood function</h2>
+<p>Combine equations <a href="#eq:loglikelihood">(3)</a> - <a href="#eq:debeta1">(7)</a></p>
+<p><span class="math display" id="eq:plog0">\[\begin{equation} 
+\begin{split}
+\frac{\partial \ell (\boldsymbol{\beta} | \mathbf{y} ; \mathbf{x})}{\partial \beta_0} &amp; = \sum_{i=1}^{n} y_i \frac{\partial log(p_i)}{\partial p_i} \frac{\partial p_i}{\partial \beta_0} + (1-y_i) \frac{\partial log(1-p_i)}{\partial p_i} \frac{\partial p_i}{\partial \beta_0}\\
+&amp; = \sum_{i=1}^{n}\frac{y_i}{p_i} \frac{\partial p_i}{\partial \beta_0} - \frac{1 - y_i}{1- p_i} \frac{\partial p_i}{\partial \beta_0} \\
+&amp; = \sum_{i=1}^{n} y_i - p_i = 0
+\end{split}
+\tag{8}
+\end{equation}\]</span></p>
+<p><span class="math display" id="eq:plog1">\[\begin{equation} 
+\begin{split}
+\frac{\partial \ell (\boldsymbol{\beta} | \mathbf{y} ; \mathbf{x})}{\partial \beta_1} &amp; = \sum_{i=1}^{n} y_i \frac{\partial log(p_i)}{\partial p_i} \frac{\partial p_i}{\partial \beta_1} + (1-y_i) \frac{\partial log(1-p_i)}{\partial p_i} \frac{\partial p_i}{\partial \beta_1}\\
+&amp; = \sum_{i=1}^{n}\frac{y_i}{p_i} \frac{\partial p_i}{\partial \beta_1} - \frac{1 - y_i}{1- p_i} \frac{\partial p_i}{\partial \beta_1} \\
+&amp; = \sum_{i=1}^{n} x_i (y_i - p_i) = 0
+\end{split}
+\tag{9}
+\end{equation}\]</span></p>
+<p>#Maximum Likelihood Estimation in Logistic Regression (probit link)</p>
+<p>##Normal distribution</p>
+<p>We define <span class="math inline">\(\varphi(x)\)</span> as pdf function of <strong>standard normal distribution</strong> and define <span class="math inline">\(\Phi(x)\)</span> as cdf function of <strong>standard normal distribution</strong>. Here we don’t need to show what exactly <span class="math inline">\(\varphi(x)\)</span> and <span class="math inline">\(\Phi(x)\)</span> are.</p>
+<p>For this section, only relationship between <span class="math inline">\(\varphi(x)\)</span> and <span class="math inline">\(\Phi(x)\)</span> matters.</p>
+<p><span class="math display" id="eq:pdf-cdf">\[\begin{equation} 
+\begin{split}
+\varphi(x) = \frac{d\Phi(x)}{dx}
+\end{split}
+\tag{10}
+\end{equation}\]</span></p>
+<p>##Likelihood and loglikelihood of Logistic Regression with probit link</p>
+<p>Likelihood and loglikelihood of Logistic Regression with probit link are as same as <a href="#eq:likelihood">(2)</a> and <a href="#eq:loglikelihood">(3)</a></p>
+<p>##Probit link</p>
+<p><span class="math display" id="eq:probit">\[\begin{equation} 
+\begin{split}
+probit(p_i) = \Phi^{-1}(p_i) = \beta_0 + \beta_1 x_i
+\end{split}
+\tag{11}
+\end{equation}\]</span></p>
+<p>Equivalently</p>
+<p><span class="math display" id="eq:p-probit">\[\begin{equation} 
+\begin{split}
+p_i = \Phi(\Phi^{-1}(p_i)) = \Phi(\beta_0+\beta_1 x_i)
+\end{split}
+\tag{12}
+\end{equation}\]</span></p>
+<p>Based on equation <a href="#eq:pdf-cdf">(10)</a>, <span class="math inline">\(\frac{\partial \Phi(\beta_0 + \beta_1 x_i)}{\partial (\beta_0 + \beta_1 x_i)} = \varphi(\beta_0 + \beta_1 x_i)\)</span>. First partial derivative with respect to the variable <span class="math inline">\(\beta_0\)</span>:</p>
+<p><span class="math display" id="eq:pdervative0-probit">\[\begin{equation} 
+\begin{split}
+\frac{\partial p_i}{\partial \beta_0} = \frac{\partial \Phi(\beta_0+\beta_1 x_i)}{\partial (\beta_0+\beta_1 x_i)} \frac{\partial (\beta_0+\beta_1 x_i)}{\partial \beta_0} = \varphi(\beta_0+\beta_1 x_i)
+\end{split}
+\tag{13}
+\end{equation}\]</span></p>
+<p>Similarly, we have</p>
+<p><span class="math display" id="eq:pdervative1-probit">\[\begin{equation} 
+\begin{split}
+\frac{\partial p_i}{\partial \beta_1} = \frac{\partial \Phi(\beta_0+\beta_1 x_i)}{\partial (\beta_0+\beta_1 x_i)} \frac{\partial (\beta_0+\beta_1 x_i)}{\partial \beta_1} = \varphi(\beta_0+\beta_1 x_i) x_i
+\end{split}
+\tag{14}
+\end{equation}\]</span></p>
+<p>##Partial Derivatives of log-likelihood function</p>
+<p><span class="math display" id="eq:pdervative0-loglikelihood-probit">\[\begin{equation} 
+\begin{split}
+\frac{\partial \ell (\boldsymbol{\beta} | \mathbf{y} ; \mathbf{x})}{\partial \beta_0} &amp; = \sum_{i=1}^{n} y_i \frac{\partial log(p_i)}{\partial p_i} \frac{\partial p_i}{\partial \beta_0} + (1-y_i) \frac{\partial log(1-p_i)}{\partial p_i} \frac{\partial p_i}{\partial \beta_0}\\
+&amp; = \sum_{i=1}^{n}\frac{y_i}{p_i} \frac{\partial p_i}{\partial \beta_0} - \frac{1 - y_i}{1- p_i} \frac{\partial p_i}{\partial \beta_0} \\
+&amp; = \sum_{i=1}^{n} \frac{y_i \varphi(\beta_0 + \beta_1 x_i)}{\Phi(\beta_0 + \beta_1 x_i)} - \frac{(1-y_i)\varphi(\beta_0 + \beta_1 x_i)}{1 - \Phi(\beta_0 + \beta_1 x_i)} \\
+&amp; = \sum_{i=1}^{n} \frac{\varphi(\beta_0 + \beta_1 x_i)(y_i - \Phi(\beta_0 + \beta_1 x_i))}{\Phi(\beta_0 + \beta_1 x_i)(1-\Phi(\beta_0+\beta_1 x_i))}
+\end{split}
+\tag{15}
+\end{equation}\]</span></p>
+<p><span class="math display" id="eq:pdervative1-loglikelihood-probit">\[\begin{equation} 
+\begin{split}
+\frac{\partial \ell (\boldsymbol{\beta} | \mathbf{y} ; \mathbf{x})}{\partial \beta_1} &amp; = \sum_{i=1}^{n} y_i \frac{\partial log(p_i)}{\partial p_i} \frac{\partial p_i}{\partial \beta_1} + (1-y_i) \frac{\partial log(1-p_i)}{\partial p_i} \frac{\partial p_i}{\partial \beta_1}\\
+&amp; = \sum_{i=1}^{n}\frac{y_i}{p_i} \frac{\partial p_i}{\partial \beta_1} - \frac{1 - y_i}{1- p_i} \frac{\partial p_i}{\partial \beta_1} \\
+&amp; = \sum_{i=1}^{n} \frac{y_i \varphi(\beta_0 + \beta_1 x_i)x_i}{\Phi(\beta_0 + \beta_1 x_i)} - \frac{(1-y_i)\varphi(\beta_0 + \beta_1 x_i)x_i}{1 - \Phi(\beta_0 + \beta_1 x_i)} \\
+&amp; = \sum_{i=1}^{n} \frac{\varphi(\beta_0 + \beta_1 x_i)(y_i - \Phi(\beta_0 + \beta_1 x_i))}{\Phi(\beta_0 + \beta_1 x_i)(1-\Phi(\beta_0+\beta_1 x_i))}x_i
+\end{split}
+\tag{16}
+\end{equation}\]</span></p>
+<p>#Packages and version information</p>
+<pre class="r"><code>library(tidyverse)
+library(cowplot)
+library(numDeriv)
+sessionInfo()</code></pre>
+<pre><code>## R version 3.5.3 (2019-03-11)
+## Platform: x86_64-apple-darwin15.6.0 (64-bit)
+## Running under: macOS  10.15.3
+## 
+## Matrix products: default
+## BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
+## LAPACK: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRlapack.dylib
+## 
+## locale:
+## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+##  [1] numDeriv_2016.8-1.1 forcats_0.4.0       stringr_1.4.0      
+##  [4] purrr_0.3.3         readr_1.3.1         tibble_2.1.3       
+##  [7] tidyverse_1.3.0     optimization_1.0-7  Rcpp_1.0.2         
+## [10] lme4_1.1-21         Matrix_1.2-15       tidyr_1.0.2        
+## [13] cowplot_1.0.0       dplyr_0.8.3         ggplot2_3.2.1      
+## 
+## loaded via a namespace (and not attached):
+##  [1] lubridate_1.7.4    lattice_0.20-38    assertthat_0.2.1  
+##  [4] digest_0.6.20      R6_2.4.0           cellranger_1.1.0  
+##  [7] backports_1.1.4    reprex_0.3.0       evaluate_0.14     
+## [10] httr_1.4.1         highr_0.8          pillar_1.4.2      
+## [13] rlang_0.4.4        lazyeval_0.2.2     readxl_1.3.1      
+## [16] minqa_1.2.4        rstudioapi_0.10    nloptr_1.2.1      
+## [19] rmarkdown_1.15     labeling_0.3       splines_3.5.3     
+## [22] munsell_0.5.0      broom_0.5.2        compiler_3.5.3    
+## [25] modelr_0.1.5       xfun_0.9           pkgconfig_2.0.2   
+## [28] htmltools_0.3.6    tidyselect_0.2.5   bookdown_0.17     
+## [31] crayon_1.3.4       dbplyr_1.4.2       withr_2.1.2       
+## [34] MASS_7.3-51.1      grid_3.5.3         nlme_3.1-137      
+## [37] jsonlite_1.6       gtable_0.3.0       lifecycle_0.1.0   
+## [40] DBI_1.0.0          magrittr_1.5       scales_1.0.0      
+## [43] cli_1.1.0          stringi_1.4.3      fs_1.3.1          
+## [46] xml2_1.2.2         ellipsis_0.2.0.1   generics_0.0.2    
+## [49] vctrs_0.2.2        boot_1.3-20        RColorBrewer_1.1-2
+## [52] tools_3.5.3        glue_1.3.1         hms_0.5.3         
+## [55] yaml_2.2.0         colorspace_1.4-1   rvest_0.3.5       
+## [58] knitr_1.24         haven_2.2.0</code></pre>
+<p>#MLE of logistic regression - Three Methods
+In this section, I will use three methods, Newton-Raphson, Fisher Scoring and IRLS(iteratively reweighted least squares) to estimate <span class="math inline">\(\beta_0, \beta_1\)</span>. The data set used in this section came from execrise 17.1 of <span class="citation">Richard M. Heiberger (<a href="#ref-HH2">2015</a>)</span>.</p>
+</div>
+<div id="mle-logit-link-via-newton-raphson" class="section level2">
+<h2><span class="header-section-number">0.3</span> MLE-logit link via Newton-Raphson</h2>
+<p>Newton-Raphson’s equation is</p>
+<p><span class="math display" id="eq:Logit-Newton-Raphson">\[\begin{equation} 
+\begin{split}
+\boldsymbol{\beta}^{(t+1)} = \boldsymbol{\beta}^{(t)} - (\boldsymbol{H}^{(t)})^{-1}\boldsymbol{u}^{(t)}
+\end{split}
+\tag{17}
+\end{equation}\]</span></p>
+<p>Where</p>
+<p><span class="math inline">\(\boldsymbol{\beta}^{(t)} = \begin{bmatrix} \beta_{0}^{(t)}\\ \beta_{1}^{(t)} \end{bmatrix}\)</span></p>
+<p>From equation <a href="#eq:plog0">(8)</a> and <a href="#eq:plog1">(9)</a>, we have</p>
+<p><span class="math inline">\(\boldsymbol{u}^{(t)} = \begin{bmatrix} u_{0}^{(t)}\\ u_{1}^{(t)} \end{bmatrix} = \begin{bmatrix} \frac{\partial \boldsymbol{\ell} (\boldsymbol(\beta)^{(t)}|\boldsymbol{y};\boldsymbol{x})}{\partial \beta_0}\\ \frac{\partial \boldsymbol{\ell} (\boldsymbol(\beta)^{(t)}|\boldsymbol{y};\boldsymbol{x})}{\partial \beta_1} \end{bmatrix} = \begin{bmatrix} \sum_{i=1}^{n} y_i - p_i^{(t)}\\ \sum_{i=1}^{n} x_i(y_i - p_i^{(t)}) \end{bmatrix}\)</span></p>
+<p>From equation <a href="#eq:loglikelihood">(3)</a>, we have</p>
+<p><span class="math inline">\(\ell (\boldsymbol{\beta}^{(t)} | \mathbf{y} ; \mathbf{x}) = \sum_{i=1}^{n} y_{i} log(p_{i}^{(t)}) + (1-y_{i})log(1-p_{i}^{(t)})\)</span></p>
+<p>From equation <a href="#eq:pi">(5)</a>, we have</p>
+<p><span class="math inline">\(p_{i}^{(t)} = \frac{exp(\beta_{0}^{(t)}+x_1 \beta_{1}^{(t)})}{1 + exp(\beta_{0}^{(t)}+x_{1} \beta_{1}^{(t)})}\)</span></p>
+<p><span class="math inline">\(\boldsymbol{H}^{(t)}\)</span> can be considered as Jacobian matrix of <span class="math inline">\(\boldsymbol{u}(\cdot)\)</span>,</p>
+<p><span class="math inline">\(\boldsymbol{H}^{(t)} = \begin{bmatrix} \frac{\partial u_{0}^{(t)}}{\partial \beta_0} &amp; \frac{\partial u_{0}^{(t)}}{\partial \beta_1}\\ \frac{\partial u_{1}^{(t)}}{\partial \beta_0} &amp; \frac{\partial u_{1}^{(t)}}{\partial \beta_1} \end{bmatrix}\)</span></p>
+<p>Last, <span class="math inline">\(\boldsymbol{H}^{(t)}\)</span> can also be considered as Hessian matrix of <span class="math inline">\(\boldsymbol{\ell}(\cdot)\)</span>,</p>
+<p><span class="math inline">\(\boldsymbol{H}^{(t)} = \begin{bmatrix} \frac{\partial^2 \boldsymbol{\ell}(\boldsymbol{\beta}^{(t)} | \boldsymbol{y};\boldsymbol{x})}{\partial \beta_0^2} &amp; \frac{\partial^2 \boldsymbol{\ell}(\boldsymbol{\beta}^{(t)} | \boldsymbol{y};\boldsymbol{x})}{\partial \beta_0 \beta_1} \\ \frac{\partial^2 \boldsymbol{\ell}(\boldsymbol{\beta}^{(t)} | \boldsymbol{y};\boldsymbol{x})}{\partial \beta_0 \beta_1} &amp; \frac{\partial^2 \boldsymbol{\ell}(\boldsymbol{\beta}^{(t)} | \boldsymbol{y};\boldsymbol{x})}{\partial \beta_1^2} \end{bmatrix}\)</span></p>
+<pre class="r"><code>##Create a simple data frame
+df1 &lt;- tibble(xx = 1:4,
+              y = c(1,0,1,0))
+df1</code></pre>
+<pre><code>## # A tibble: 4 x 2
+##      xx     y
+##   &lt;int&gt; &lt;dbl&gt;
+## 1     1     1
+## 2     2     0
+## 3     3     1
+## 4     4     0</code></pre>
+<p>Using equations <a href="#eq:plog0">(8)</a> and <a href="#eq:plog1">(9)</a>, we can get same coefficients’ estimation via <a href="http://fourier.eng.hmc.edu/e161/lectures/ica/node13.html">Newton-Raphson Method</a>.</p>
+<pre class="r"><code>func.u &lt;- function(x) c(sum(df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx))),
+                        sum(df1$xx * (df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx)))))
+
+delta &lt;- matrix(1:2,nrow = 2)
+x &lt;- array(c(2,-1))
+
+while(abs(sum(delta)) &gt; 0.0001){
+  xx &lt;- x ##current x value
+  x &lt;- as.matrix(x) - solve(jacobian(func.u, x = x)) %*% func.u(x) ##new x value
+  delta &lt;- x - as.matrix(xx)
+}
+x</code></pre>
+<pre><code>##            [,1]
+## [1,]  2.2704607
+## [2,] -0.9081843</code></pre>
+</div>
+<div id="mle-logit-link-via-fisher-socring" class="section level2">
+<h2><span class="header-section-number">0.4</span> MLE-logit link via Fisher Socring</h2>
+<p>Fisher Socring’s equation is</p>
+<p><span class="math display" id="eq:Logit-Fisher-Socring">\[\begin{equation} 
+\begin{split}
+\boldsymbol{\beta}^{(t+1)} = \boldsymbol{\beta}^{(t)} + (\boldsymbol{J}^{(t)})^{-1}\boldsymbol{u}^{(t)}
+\end{split}
+\tag{18}
+\end{equation}\]</span></p>
+<p>Where</p>
+<p><span class="math inline">\(\boldsymbol{J}^{(t)} = \boldsymbol{X}^{T} \boldsymbol{W}^{(t)} \boldsymbol{X}\)</span>, <span class="math inline">\(\boldsymbol{X}\)</span> is design matrix.</p>
+<p><span class="math inline">\(\boldsymbol{W}^{(t)} = \text{diag} ((\frac{\partial \mu_i^{(t)}}{\partial (\beta_0 + x_i\beta_1)})^2 \frac{1}{\text{var}(y_i)})\)</span></p>
+<p><span class="math inline">\(\frac{\partial \mu_i^{(t)}}{\partial (\beta_0 + x_i\beta_1)} = \frac{exp(\beta_0 + x_i\beta_1)^{(t)}}{(1+exp(\beta_0 + x_i\beta_1)^{(t)})^2}\)</span></p>
+<p>From eq <a href="#eq:pi">(5)</a>, we have</p>
+<p><span class="math inline">\(\text{var}(y_i) = p_i(1-p_i) = \frac{exp(\beta_0 + x_i\beta_1)^{(t)}}{(1+exp(\beta_0 + x_i\beta_1)^{(t)})^2}\)</span></p>
+<p>So</p>
+<p><span class="math inline">\((\frac{\partial \mu_i^{(t)}}{\partial (\beta_0 + x_i\beta_1)})^2 \frac{1}{\text{var}(y_i)} = \frac{exp(\beta_0 + x_i\beta_1)^{(t)}}{(1+exp(\beta_0 + x_i\beta_1)^{(t)})^2}\)</span></p>
+<p>Eventually, we have</p>
+<p><span class="math inline">\(\boldsymbol{W}^{(t)} = \text{diag}(\frac{exp(\beta_0 + x_i\beta_1)}{(1+exp(\beta_0 + x_i\beta_1))^2})^{(t)}\)</span></p>
+<pre class="r"><code>X &lt;- cbind(rep(1,4),df1$xx)
+X &lt;- as.matrix(X)
+
+func1 &lt;- function(x) {
+  x &lt;- X %*% matrix(c(x[1],x[2]), nrow = 2)
+  exp(x)/(1+exp(x))^2
+}
+
+model1 &lt;- function(x) c(sum(df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx))),
+                        sum(df1$xx * (df1$y - exp(x[1] + x[2] * df1$xx)/ (1 + exp(x[1] + x[2] * df1$xx)))))
+
+delta &lt;- matrix(1:2,nrow = 2)
+x &lt;- array(c(2,-1))
+
+while (abs(sum(delta)) &gt; 0.0001) {
+  xx &lt;- x ##current x value
+  W &lt;- diag(array(func1(x = x)))
+  J &lt;- t(X) %*% W %*% X 
+  x &lt;- as.matrix(x) + solve(J) %*% model1(x)
+  delta &lt;- x - as.matrix(xx)
+}
+x</code></pre>
+<pre><code>##            [,1]
+## [1,]  2.2704607
+## [2,] -0.9081843</code></pre>
+</div>
+<div id="mle-logit-link-via-irls" class="section level2">
+<h2><span class="header-section-number">0.5</span> MLE-logit link via IRLS</h2>
+<p>Iteratively reweighted least squares’ equation is</p>
+<p><span class="math display" id="eq:Logit-IRLS">\[\begin{equation} 
+\begin{split}
+\boldsymbol{\beta}^{(t+1)} = (\boldsymbol{J}^{(t)})^{-1}\boldsymbol{X}^{T}\boldsymbol{W}^{(t)}\boldsymbol{Z}^{(t)}
+\end{split}
+\tag{19}
+\end{equation}\]</span></p>
+<p>Where</p>
+<p><span class="math inline">\(\boldsymbol{Z}^{(t)} = \boldsymbol{X} \boldsymbol{\beta}^{(t)} + (\boldsymbol{D}^{(t)})^{-1}(\boldsymbol{y} - \boldsymbol{p}^{(t)})\)</span></p>
+<p><span class="math inline">\(\boldsymbol{D}^{(t)} = \text{ diag }(\frac{\partial \mu_i ^{(t)}}{\partial (\beta_0 + \beta_1x_i)}) = \text{diag}(\frac{exp(\beta_0 + x_i\beta_1)}{(1+exp(\beta_0 + x_i\beta_1))^2})^{(t)}\)</span></p>
+<pre class="r"><code>X &lt;- cbind(rep(1,4),df1$xx)
+X &lt;- as.matrix(X) #design matrix X
+
+func.mu &lt;- function(x) {
+  upeta &lt;- X %*% matrix(c(x[1],x[2]), nrow = 2)
+  return(exp(upeta)/(1+exp(upeta)))
+}
+
+func.W &lt;- function(x) {
+  upeta &lt;- X %*% matrix(c(x[1],x[2]), nrow = 2)
+  return(exp(upeta)/(1+exp(upeta))^2)
+}
+
+func.D &lt;- function(x) {
+  upeta &lt;- X %*% matrix(c(x[1],x[2]), nrow = 2)
+  return(exp(upeta)/(1+exp(upeta))^2)
+}
+
+delta &lt;- matrix(1:2,nrow = 2)
+x &lt;- array(c(2,-1)) #inital values for beta0 and beta1
+
+while (abs(sum(delta)) &gt; 0.0001) {
+  xx &lt;- x ##current x value
+  W &lt;- diag(array(func.W(x = x)))
+  J &lt;- t(X) %*% W %*% X
+  D &lt;- diag(array(func.D(x = x)))
+  z &lt;- X %*% x + solve(D) %*% (df1$y - func.mu(x))
+  x &lt;- solve(J) %*% t(X) %*% W %*% z
+  delta &lt;- x - as.matrix(xx)
+}
+x</code></pre>
+<pre><code>##            [,1]
+## [1,]  2.2704607
+## [2,] -0.9081843</code></pre>
+</div>
+<div id="mle-probit-link-via-newton-raphson" class="section level2">
+<h2><span class="header-section-number">0.6</span> MLE-probit link via Newton-Raphson</h2>
+<p>Probit link Newton-Raphson equation looks as same as <a href="#eq:Logit-Newton-Raphson">(17)</a></p>
+<p><span class="math display" id="eq:Probit-Newton-Raphson">\[\begin{equation} 
+\begin{split}
+\boldsymbol{\beta}^{(t+1)} = \boldsymbol{\beta}^{(t)} - (\boldsymbol{H}^{(t)})^{-1}\boldsymbol{u}^{(t)}
+\end{split}
+\tag{20}
+\end{equation}\]</span></p>
+<p>However, <span class="math inline">\(\boldsymbol{u}^{(t)}\)</span> is acutally different so is <span class="math inline">\(\boldsymbol{H}^{(t)}\)</span>.</p>
+<p><span class="math inline">\(\boldsymbol{u}^{(t)} = \begin{bmatrix} \frac{\partial \boldsymbol{\ell} (\boldsymbol(\beta)^{(t)}|\boldsymbol{y};\boldsymbol{x})}{\partial \beta_0}\\ \frac{\partial \boldsymbol{\ell} (\boldsymbol(\beta)^{(t)}|\boldsymbol{y};\boldsymbol{x})}{\partial \beta_1} \end{bmatrix}\)</span>, <span class="math inline">\(\frac{\partial \boldsymbol{\ell} (\cdot) }{\partial \beta_0}\)</span> and <span class="math inline">\(\frac{\partial \boldsymbol{\ell} (\cdot) }{\partial \beta_1}\)</span> are as same as equations <a href="#eq:pdervative0-loglikelihood-probit">(15)</a> and <a href="#eq:pdervative1-loglikelihood-probit">(16)</a>.</p>
+<p><span class="math inline">\(\boldsymbol{H}^{(t)} = \begin{bmatrix} \frac{\partial^2 \boldsymbol{\ell}(\boldsymbol{\beta}^{(t)} | \boldsymbol{y};\boldsymbol{x})}{\partial \beta_0^2} &amp; \frac{\partial^2 \boldsymbol{\ell}(\boldsymbol{\beta}^{(t)} | \boldsymbol{y};\boldsymbol{x})}{\partial \beta_0 \beta_1} \\ \frac{\partial^2 \boldsymbol{\ell}(\boldsymbol{\beta}^{(t)} | \boldsymbol{y};\boldsymbol{x})}{\partial \beta_0 \beta_1} &amp; \frac{\partial^2 \boldsymbol{\ell}(\boldsymbol{\beta}^{(t)} | \boldsymbol{y};\boldsymbol{x})}{\partial \beta_1^2} \end{bmatrix}\)</span>, <span class="math inline">\(\boldsymbol{H}^{(t)}\)</span> are determined by <span class="math inline">\(\boldsymbol{u}^{(t)}\)</span>, hence will be different from [equations from MLE-logit section] <a href="#mle-logit-link-via-newton-raphson">MLE-logit link via Newton-Raphson</a>.</p>
+<pre class="r"><code>model2 &lt;- function(x) c(sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
+                                   ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))),
+                        sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
+                                   ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))*df1$xx)
+)
+
+delta &lt;- matrix(1:2,nrow = 2)
+x &lt;- array(c(2,-2))
+
+while(abs(sum(delta)) &gt; 0.0001){
+  xx &lt;- x ##current x value
+  x &lt;- as.matrix(x) - solve(jacobian(model2, x = x)) %*% model2(x) ##new x value
+  delta &lt;- x - as.matrix(xx)
+}
+x</code></pre>
+<pre><code>##           [,1]
+## [1,]  1.477002
+## [2,] -0.590801</code></pre>
+</div>
+<div id="mle-probit-link-via-fisher-socring" class="section level2">
+<h2><span class="header-section-number">0.7</span> MLE-probit link via Fisher Socring</h2>
+<p>Fisher Socring’s equation is</p>
+<p><span class="math display" id="eq:Probit-Fisher-Socring">\[\begin{equation} 
+\begin{split}
+\boldsymbol{\beta}^{(t+1)} = \boldsymbol{\beta}^{(t)} + (\boldsymbol{J}^{(t)})^{-1}\boldsymbol{u}^{(t)}
+\end{split}
+\tag{21}
+\end{equation}\]</span></p>
+<p>Where
+<span class="math inline">\(\boldsymbol{J}^{(t)} = \boldsymbol{X}^{T} \boldsymbol{W}^{(t)} \boldsymbol{X}\)</span></p>
+<p><span class="math inline">\(\boldsymbol{W}^{(t)} = \text{ diag }((\frac{\partial \mu_i^{(t)}}{\partial (\beta_0 + x_i\beta_1)})^2 \frac{1}{\text{var}(y_i)})\)</span></p>
+<p><span class="math inline">\(\frac{\partial \mu_i}{\partial \beta_0 + x_1\beta_1} = \frac{\partial p_i}{\partial \beta_0 + x_1\beta_1} = \varphi(\beta_0 + x_1\beta_1)\)</span></p>
+<p><span class="math inline">\(\text{Var}(y_i) = p_i (1-p_i) = \Phi(\beta_0 + x_1\beta_1)(1-\Phi(\beta_0 + x_1\beta_1))\)</span></p>
+<p><span class="math inline">\(\boldsymbol{W}^{(t)} = \text{ diag }(\frac{\varphi^2(\beta_0 + x_1\beta_1)}{\Phi(\beta_0 + x_1\beta_1)(1-\Phi(\beta_0 + x_1\beta_1))})^{(t)}\)</span></p>
+<pre class="r"><code>X &lt;- cbind(rep(1,4),df1$xx)
+X &lt;- as.matrix(X)
+
+func2 &lt;- function(x) {
+  x &lt;- X %*% matrix(c(x[1],x[2]), nrow = 2)
+  dnorm(x)^2/(pnorm(x)*(1-pnorm(x)))
+}
+
+model2 &lt;- function(x) c(sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
+                                   ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))),
+                        sum((dnorm(x[1]+x[2] * df1$xx))*(df1$y - pnorm(x[1]+x[2] * df1$xx))/
+                                   ((pnorm(x[1]+x[2] * df1$xx))*(1-pnorm(x[1]+x[2] * df1$xx)))*df1$xx)
+)
+
+delta &lt;- matrix(1:2,nrow = 2)
+x &lt;- array(c(2,-1))
+
+while (abs(sum(delta)) &gt; 0.0001) {
+  xx &lt;- x ##current x value
+  W &lt;- diag(array(func2(x = x)))
+  J &lt;- t(X) %*% W %*% X 
+  x &lt;- as.matrix(x) + solve(J) %*% model2(x)
+  delta &lt;- x - as.matrix(xx)
+}
+x</code></pre>
+<pre><code>##            [,1]
+## [1,]  1.4769988
+## [2,] -0.5907995</code></pre>
+</div>
+<div id="mle-probit-link-via-irls" class="section level2">
+<h2><span class="header-section-number">0.8</span> MLE-probit link via IRLS</h2>
+<p>Iteratively reweighted least squares’ equation is</p>
+<p><span class="math display" id="eq:Probit-IRLS">\[\begin{equation} 
+\begin{split}
+\boldsymbol{\beta}^{(t+1)} = (\boldsymbol{J}^{(t)})^{-1}\boldsymbol{X}^{T}\boldsymbol{W}^{(t)}\boldsymbol{Z}^{(t)}
+\end{split}
+\tag{22}
+\end{equation}\]</span></p>
+<p>Where</p>
+<p><span class="math inline">\(\boldsymbol{Z}^{(t)} = \boldsymbol{X} \boldsymbol{\beta}^{(t)} + (\boldsymbol{D}^{(t)})^{-1}(\boldsymbol{y} - \boldsymbol{p}^{(t)})\)</span></p>
+<p><span class="math inline">\(\boldsymbol{D}^{(t)} = \text{ diag }(\frac{\partial \mu_i ^{(t)}}{\partial (\beta_0 + \beta_1x_i)}) = \text{diag }(\varphi(\beta_0 + \beta_1x_i))^{(t)}\)</span></p>
+<pre class="r"><code>df1 &lt;- data.frame(xx = 1:4,
+                  y = c(1,0,1,0))
+
+X &lt;- cbind(rep(1,4),df1$xx)
+X &lt;- as.matrix(X) #design matrix X
+
+func.mu &lt;- function(x) {
+  upeta &lt;- X %*% matrix(c(x[1],x[2]), nrow = 2)
+  return(pnorm(upeta))
+}
+
+func.W &lt;- function(x) {
+  upeta &lt;- X %*% matrix(c(x[1],x[2]), nrow = 2)
+  return((dnorm(upeta))^2/(pnorm(upeta)*(1-pnorm(upeta))))
+}
+
+func.D &lt;- function(x) {
+  upeta &lt;- X %*% matrix(c(x[1],x[2]), nrow = 2)
+  return(dnorm(upeta))
+}
+
+delta &lt;- matrix(1:2,nrow = 2)
+x &lt;- array(c(2,-1)) #inital values for beta0 and beta1
+
+while (abs(sum(delta)) &gt; 0.0001) {
+  xx &lt;- x ##current x value
+  W &lt;- diag(array(func.W(x = x)))
+  J &lt;- t(X) %*% W %*% X
+  D &lt;- diag(array(func.D(x = x)))
+  z &lt;- X %*% x + solve(D) %*% (df1$y - func.mu(x))
+  x &lt;- solve(J) %*% t(X) %*% W %*% z
+  delta &lt;- x - as.matrix(xx)
+}
+x</code></pre>
+<pre><code>##            [,1]
+## [1,]  1.4769988
+## [2,] -0.5907995</code></pre>
+<p>##R <code>glm</code> output</p>
+<p>Using <code>stats::glm</code> function we have identical estimations comparing from <a href="#mle-logit-link-via-newton-raphson">MLE-logit link via Newton-Raphson</a> to <a href="#mle-logit-link-via-irls">MLE-logit link via IRLS</a>.</p>
+<p>However, for probit link, estimations we have from <a href="#mle-probit-link-via-newton-raphson">MLE-probit link via Newton-Raphson</a> to <a href="#mle-probit-link-via-irls">MLE-probit link via IRLS</a> are slightly different from estimations via <code>stats::glm</code> function. There must be hiden secret that I don’t know. It will be inteseting to find out how exactly <code>stats::glm</code> do estimation for logistic regression.</p>
+<pre class="r"><code>##Logit logistic regression
+glm1 &lt;- glm(y ~ xx, data=df1, family=binomial)
+glm1$coefficients</code></pre>
+<pre><code>## (Intercept)          xx 
+##   2.2704607  -0.9081843</code></pre>
+<pre class="r"><code>##Build probit logistic regression
+glm2 &lt;- glm(y ~ xx, data=df1, family=binomial(link = &quot;probit&quot;))
+glm2$coefficients</code></pre>
+<pre><code>## (Intercept)          xx 
+##   1.4769772  -0.5907909</code></pre>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<p><span class="citation">Agresti (<a href="#ref-FLGLM">2016</a>)</span>
+<span class="citation">Richard M. Heiberger (<a href="#ref-HH2">2015</a>)</span></p>
+<div id="refs" class="references">
+<div id="ref-FLGLM">
+<p>Agresti, Alan. 2016. <em>Foundations of Linear and Generalized Linear Models</em>. First Edition.</p>
+</div>
+<div id="ref-HH2">
+<p>Richard M. Heiberger, Burt Holland. 2015. <em>Statistical Analysis and Data Display an Intermediate Course with Examples in R</em>. Second Edition.</p>
+</div>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

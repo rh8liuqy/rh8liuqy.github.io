@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 <meta name="author" content="Kevin Liu" />
 
+<meta name="date" content="2020-11-14" />
 
 <title>GLM fitting with canonical link by Newton-Rapshon and Fisher Scoring</title>
 
@@ -233,6 +233,7 @@ $(document).ready(function () {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -292,7 +293,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">GLM fitting with canonical link by Newton-Rapshon and Fisher Scoring</h1>
 <h4 class="author">Kevin Liu</h4>
-<h4 class="date">5/13/2020</h4>
+<h4 class="date">11/14/2020</h4>
 
 </div>
 
@@ -358,7 +359,7 @@ I(\boldsymbol{\theta})=\mathrm{E}(-H(\boldsymbol{\theta}))
 f\left(y_{i} ; \theta_{i}, \phi\right)=\exp \left\{\left[y_{i} \theta_{i}-b\left(\theta_{i}\right)\right] / a(\phi)+c\left(y_{i}, \phi\right)\right\}
 \tag{3.1}
 \end{equation}\]</span></p>
-<p>A well known relationship between mean/variance and <span class="math inline">\(b(\theta)\)</span> is shown below <span class="citation">(Agresti <a href="#ref-FLGLM">2016</a>)</span></p>
+<p>A well known relationship between mean/variance and <span class="math inline">\(b(\theta)\)</span> is shown below <span class="citation">(Agresti <a href="#ref-FLGLM" role="doc-biblioref">2016</a>)</span></p>
 <p><span class="math display" id="eq:mean">\[\begin{equation}
 \mu_{i}=E\left(y_{i}\right)=b^{\prime}\left(\theta_{i}\right) \quad \text { and } \quad \operatorname{var}\left(y_{i}\right)=b^{\prime \prime}\left(\theta_{i}\right) a(\phi)
 \tag{3.2}
@@ -383,7 +384,7 @@ f\left(y_{i} ; \theta_{i}, \phi\right)=\exp \left\{\left[y_{i} \theta_{i}-b\left
 \tag{3.6}
 \end{equation}\]</span></p>
 <p>Equation <a href="#eq:free2">(3.6)</a> is free of random variable <span class="math inline">\(y_i\)</span>. Hence, <span class="math inline">\(-E(\frac{\partial^{2} \ell\left(\eta_{i}\right)}{\partial \beta_{j} \partial \beta_{h}})=-\frac{\partial^{2} \ell\left(\eta_{i}\right)}{\partial \beta_{j} \partial \beta_{h}}\)</span>. In other words, <em>Observed Information</em> and <em>Expected Information</em> are same for GLM with canonical link.</p>
-<p>Overall, <strong>Fisher scoring and Newton-Raphson are identical for GLM using canonical link</strong>.<span class="citation">(Nelder and Wedderburn <a href="#ref-10.2307/2344614">1972</a>)</span></p>
+<p>Overall, <strong>Fisher scoring and Newton-Raphson are identical for GLM using canonical link</strong>.<span class="citation">(Nelder and Wedderburn <a href="#ref-10.2307/2344614" role="doc-biblioref">1972</a>)</span></p>
 </div>
 <div id="references" class="section level1 unnumbered">
 <h1>References</h1>
