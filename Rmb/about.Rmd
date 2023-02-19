@@ -2,4 +2,4 @@
 title: "About This Website"
 ---
 
-If you have questions or found error about this website, please contact author via [qingyang@email.sc.edu](`qingyang@email.sc.edu`).
+If you have questions or found error about this website, please contact the author via [qingyang@email.sc.edu](`qingyang@email.sc.edu`).

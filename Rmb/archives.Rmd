@@ -1,0 +1,40 @@
+---
+title: "Archived Articles"
+---
+
+Here are the articles I wrote during 2017 and 2019.
+
+* Topics about Generalized Linear Model(GLM)
+    + [Some important results about GLM](Important_Results_GLM.html)
+    + [GLM fitting with canonical link](Fisher_Scoring.html)
+    + [Logistic regression MLE with examples](logistic_regression_theory-hand-check.html)
+    
+* Topics about Data Visualization
+    + [Visualize Time Series Model Selection](Data_Visulization_of_ARIMA_Model_Selection.html)
+    + [ACF&PACF by `ggplot2`](ACF_PACF_by_ggplot2.html)
+    + [Contour Plots by `matplotlib`](Contour_matplotlib.html)
+    + [Grouped Display by `lattice` and `matplotlib`](grouped_display.html)
+    + [Visualize Monte Carlo Integration Approximation of $\pi$](Visulization_Classical_Monte_Carlo_Integration.html)
+    + [Area under curve by `matplotlib`](Area_Under_Curve.html)
+    + [Basic Image Process by `Python`](Image_Process.html)
+
+* Topics about Linear Mixed Model
+    + [Mixed Model Equations and REML](Linear_mixed_model_equations.html)
+    + [Example for Mixed Model Equations and REML](Example_Linear_mixed_model.html)
+    + [Expectation Maximization Algorithm With One Example](Expectation_Maximization_Algorithm_With_One_Example.html)
+    
+* Topics about Optimization
+    + [Finite Difference](Finite_Difference.html)
+    + [Newton Raphson in `Python`](Newton_Raphson.html)
+    + [Classical Monte Carlo Integration](Classical_Monte_Carlo_Integration.html)
+    
+* Miscellaneous
+    + [QR decomposition](OLS_QR.html)
+    + [Gauss–Markov theorem](Gaussian-Markov.html)
+    + [$p$-value is a statistic!(random variable)](p_value.html)
+    + [Fisher Information Matrix under regularity conditions](Fisher_Information_Matrix.html)
+    + [Box Muller Algorithm by `Python`](Box_Muller_Algorithm.html)
+    + [The Accept/Rejection Algorithm by `Python`](Accept_reject.html)
+    + [The Envelope Accept/Reject Algorithm](Envelope_Accept_Reject.html)
+    + [Generate Random Points over the Disk](Uniform_Disk.html)
+    + [Gibbs Sampling - Bivariate Normal Distribution by `Python`](Gibbs_Bivariate_Normal.html)

@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
@@ -15,22 +14,35 @@
 
 <title>Visualize ARIMA Model Selection</title>
 
-<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 
-<style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
-  pre:not([class]) {
-    background-color: white;
-  }
-</style>
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
 <script type="text/javascript">
 if (window.hljs) {
   hljs.configure({languages: []});
@@ -43,30 +55,28 @@ if (window.hljs) {
 
 
 
+
+
 <style type="text/css">
-h1 {
-  font-size: 34px;
+/* for pandoc --citeproc since 2.11 */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
 }
-h1.title {
-  font-size: 38px;
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
 }
-h2 {
-  font-size: 30px;
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
 }
-h3 {
-  font-size: 24px;
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
 }
-h4 {
-  font-size: 18px;
-}
-h5 {
-  font-size: 16px;
-}
-h6 {
-  font-size: 12px;
-}
-.table th:not([align]) {
-  text-align: left;
+div.csl-indent {
+  margin-left: 2em;
 }
 </style>
 
@@ -78,10 +88,6 @@ h6 {
   max-width: 940px;
   margin-left: auto;
   margin-right: auto;
-}
-code {
-  color: inherit;
-  background-color: rgba(0, 0, 0, 0.04);
 }
 img {
   max-width:100%;
@@ -98,40 +104,16 @@ button.code-folding-btn:focus {
 summary {
   display: list-item;
 }
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
 </style>
 
 
 <style type="text/css">
-/* padding for bootstrap navbar */
-body {
-  padding-top: 51px;
-  padding-bottom: 40px;
-}
-/* offset scroll position for anchor links (for fixed navbar)  */
-.section h1 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h2 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h3 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h4 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h5 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h6 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
 .dropdown-submenu {
   position: relative;
 }
@@ -159,7 +141,7 @@ body {
   margin-right: -10px;
 }
 .dropdown-submenu:hover>a:after {
-  border-left-color: #ffffff;
+  border-left-color: #adb5bd;
 }
 .dropdown-submenu.pull-left {
   float: none;
@@ -171,7 +153,7 @@ body {
 }
 </style>
 
-<script>
+<script type="text/javascript">
 // manage active state of menu based on current page
 $(document).ready(function () {
   // active menu anchor
@@ -181,11 +163,28 @@ $(document).ready(function () {
     href = "index.html";
   var menuAnchor = $('a[href="' + href + '"]');
 
-  // mark it active
-  menuAnchor.parent().addClass('active');
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
 
-  // if it's got a parent navbar menu mark it active as well
-  menuAnchor.closest('li.dropdown').addClass('active');
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
 });
 </script>
 
@@ -197,7 +196,6 @@ $(document).ready(function () {
   max-height: 500px;
   min-height: 44px;
   overflow-y: auto;
-  background: white;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
@@ -233,6 +231,7 @@ $(document).ready(function () {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -263,7 +262,7 @@ $(document).ready(function () {
 <div class="navbar navbar-default  navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
@@ -276,6 +275,9 @@ $(document).ready(function () {
   <a href="index.html">Home</a>
 </li>
 <li>
+  <a href="archives.html">Archives</a>
+</li>
+<li>
   <a href="about.html">About</a>
 </li>
       </ul>
@@ -286,7 +288,7 @@ $(document).ready(function () {
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-<div class="fluid-row" id="header">
+<div id="header">
 
 
 
@@ -298,36 +300,21 @@ $(document).ready(function () {
 
 <div id="TOC">
 <ul>
-<li><a href="#beautiful-acf-and-pacf-by-ggplot2"><span class="toc-section-number">1</span> Beautiful ACF and PACF by <code>ggplot2</code></a></li>
-<li><a href="#data-transformation"><span class="toc-section-number">2</span> Data transformation</a></li>
-<li><a href="#visualized-model-comparison"><span class="toc-section-number">3</span> Visualized Model Comparison</a></li>
-<li><a href="#references">References</a></li>
+<li><a href="#beautiful-acf-and-pacf-by-ggplot2" id="toc-beautiful-acf-and-pacf-by-ggplot2"><span class="toc-section-number">1</span> Beautiful ACF and PACF by <code>ggplot2</code></a></li>
+<li><a href="#data-transformation" id="toc-data-transformation"><span class="toc-section-number">2</span> Data transformation</a></li>
+<li><a href="#visualized-model-comparison" id="toc-visualized-model-comparison"><span class="toc-section-number">3</span> Visualized Model Comparison</a></li>
+<li><a href="#references" id="toc-references">References</a></li>
 </ul>
 </div>
 
 <p>#Library loading</p>
 <pre class="r"><code>library(ggplot2)
-library(dplyr)</code></pre>
-<pre><code>## 
-## Attaching package: &#39;dplyr&#39;</code></pre>
-<pre><code>## The following objects are masked from &#39;package:stats&#39;:
-## 
-##     filter, lag</code></pre>
-<pre><code>## The following objects are masked from &#39;package:base&#39;:
-## 
-##     intersect, setdiff, setequal, union</code></pre>
-<pre class="r"><code>library(tidyr)
+library(dplyr)
+library(tidyr)
 library(cowplot)</code></pre>
-<pre><code>## 
-## ********************************************************</code></pre>
-<pre><code>## Note: As of version 1.0.0, cowplot does not change the</code></pre>
-<pre><code>##   default ggplot2 theme anymore. To recover the previous</code></pre>
-<pre><code>##   behavior, execute:
-##   theme_set(theme_cowplot())</code></pre>
-<pre><code>## ********************************************************</code></pre>
-<div id="beautiful-acf-and-pacf-by-ggplot2" class="section level1">
+<div id="beautiful-acf-and-pacf-by-ggplot2" class="section level1" number="1">
 <h1><span class="header-section-number">1</span> Beautiful ACF and PACF by <code>ggplot2</code></h1>
-<p>Wolf yearly sunspot number is a classic time series data that have been analysis by many statisticians and scientists. In this blog, I want to emphasis on a graphic model selection method by <span class="citation">Heiberger and Teles (<a href="#ref-doi:10.1198/000313002317572808">2002</a>)</span> and <span class="citation">Richard M. Heiberger (<a href="#ref-HH2">2015</a>)</span>.</p>
+<p>Wolf yearly sunspot number is a classic time series data that have been analysis by many statisticians and scientists. In this blog, I want to emphasis on a graphic model selection method by <span class="citation">Heiberger and Teles (<a href="#ref-doi:10.1198/000313002317572808" role="doc-biblioref">2002</a>)</span> and <span class="citation">Richard M. Heiberger (<a href="#ref-HH2" role="doc-biblioref">2015</a>)</span>.</p>
 <p>As shown in figure <a href="#fig:ACFPACF">1.1</a>, the first to do in time series modeling is drawing plot for original data with its ACF and PACF plots. We notice that the orignal time series is stationary in mean but not stationary in variance. Box-cox data transformation is needed in <a href="#data-transformation">Section 2</a>.</p>
 <pre class="r"><code>data(&quot;sunspot.year&quot;)
 
@@ -371,14 +358,14 @@ arima.plot &lt;- function(data = sunspot.year, title = &quot;Main Title&quot;,la
 }
 
 arima.plot(title = &quot;Sunspots from year 1700 to year 1988&quot;)</code></pre>
-<div class="figure" style="text-align: center"><span id="fig:ACFPACF"></span>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:ACFPACF"></span>
 <img src="Data_Visulization_of_ARIMA_Model_Selection_files/figure-html/ACFPACF-1.png" alt="Time series plot with ACF and PACF" width="672" />
 <p class="caption">
 Figure 1.1: Time series plot with ACF and PACF
 </p>
 </div>
 </div>
-<div id="data-transformation" class="section level1">
+<div id="data-transformation" class="section level1" number="2">
 <h1><span class="header-section-number">2</span> Data transformation</h1>
 <p>Using <a href="https://en.wikipedia.org/wiki/Power_transform">box-cox transformation method</a>, we have that <span class="math inline">\(\hat{\lambda} = 0.46\)</span>. For the purpose of easy interpretation (people without statistic background will ask what does <span class="math inline">\(\hat{\lambda} = 0.46\)</span> mean), we use <span class="math inline">\(\hat{\lambda} = 0.5\)</span>, which means that we should square root the original data,<span class="math inline">\(\sqrt{y_{t}}\)</span>. After transformation, variance becomes smaller, ACF tails off after lag 3 and PACF cuts off after lag 2, as shown in figure <a href="#fig:data-transformation">2.2</a>. This implies that ARIMA(3,0,2) should be a appropriate model for this data.</p>
 <pre class="r"><code>boxcox &lt;- function(y, lambda = seq(-2, 2, 0.01), method = c(&quot;mle&quot;, &quot;yule-walker&quot;, &quot;burg&quot;, &quot;ols&quot;, &quot;yw&quot;),...) {
@@ -419,7 +406,7 @@ ggplot(data = df.lambda, aes( x = lambda, y = loglik)) +
                              round(df.lambda.max$loglik,2))) +
   scale_x_continuous(breaks = -3:3) +
   theme_bw()</code></pre>
-<div class="figure" style="text-align: center"><span id="fig:boxcox"></span>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:boxcox"></span>
 <img src="Data_Visulization_of_ARIMA_Model_Selection_files/figure-html/boxcox-1.png" alt="Box cox data transformation" width="672" />
 <p class="caption">
 Figure 2.1: Box cox data transformation
@@ -427,14 +414,14 @@ Figure 2.1: Box cox data transformation
 </div>
 <pre class="r"><code>sunspots.sqrt &lt;- sqrt(sunspot.year)
 arima.plot(data = sunspots.sqrt,title = &quot;Sunspots from year 1700 to year 1988&quot;)</code></pre>
-<div class="figure" style="text-align: center"><span id="fig:data-transformation"></span>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:data-transformation"></span>
 <img src="Data_Visulization_of_ARIMA_Model_Selection_files/figure-html/data-transformation-1.png" alt="Square rooted time series with ACF and PACF" width="672" />
 <p class="caption">
 Figure 2.2: Square rooted time series with ACF and PACF
 </p>
 </div>
 </div>
-<div id="visualized-model-comparison" class="section level1">
+<div id="visualized-model-comparison" class="section level1" number="3">
 <h1><span class="header-section-number">3</span> Visualized Model Comparison</h1>
 <p>The main purpose of this <a href="#visualized-model-comparison">section</a> is to determine which ARIMA is the most appropriate model based on residual analysis.</p>
 <p>According to experience, for non-seasonal ARIMA mode, value of <span class="math inline">\(p\)</span> and <span class="math inline">\(q\)</span> won’t be larger than <span class="math inline">\(3\)</span>. I choose <span class="math inline">\(p = 3 \text{ and } q = 2\)</span>.
@@ -544,7 +531,7 @@ fig.residual &lt;- ggplot(data = df.arima.residual.plot, aes(x = time, y = resid
 
 cowplot::plot_grid(fig.acf, fig.pacf, fig.residual, nrow = 3)  </code></pre>
 <pre><code>## Don&#39;t know how to automatically pick scale for object of type ts. Defaulting to continuous.</code></pre>
-<div class="figure" style="text-align: center"><span id="fig:ARIMAloop"></span>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:ARIMAloop"></span>
 <img src="Data_Visulization_of_ARIMA_Model_Selection_files/figure-html/ARIMAloop-1.png" alt="Residual diagnostics" width="672" />
 <p class="caption">
 Figure 3.1: Residual diagnostics
@@ -562,7 +549,7 @@ ggplot(data = df.aic.plot, aes(x = p, y = q)) +
   theme_bw() +
   theme(panel.grid.minor = element_blank()) + 
   scale_fill_distiller(palette = &quot;Spectral&quot;, direction = -1)</code></pre>
-<div class="figure" style="text-align: center"><span id="fig:AIC"></span>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:AIC"></span>
 <img src="Data_Visulization_of_ARIMA_Model_Selection_files/figure-html/AIC-1.png" alt="Information criteria" width="672" />
 <p class="caption">
 Figure 3.2: Information criteria
@@ -590,7 +577,7 @@ ggplot(data = df.box.test, aes(x = lag, y = p.value)) +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         strip.background = element_rect(fill = &quot;#f8ddc4&quot;))</code></pre>
-<div class="figure" style="text-align: center"><span id="fig:gof"></span>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:gof"></span>
 <img src="Data_Visulization_of_ARIMA_Model_Selection_files/figure-html/gof-1.png" alt="Goodness of fit:Box-Pierce" width="672" />
 <p class="caption">
 Figure 3.3: Goodness of fit:Box-Pierce
@@ -599,18 +586,18 @@ Figure 3.3: Goodness of fit:Box-Pierce
 </div>
 <div id="references" class="section level1 unnumbered">
 <h1>References</h1>
-<p><span class="citation">Richard M. Heiberger (<a href="#ref-HH2">2015</a>)</span>
-<span class="citation">Heiberger and Teles (<a href="#ref-doi:10.1198/000313002317572808">2002</a>)</span>
-<span class="citation">Wei (<a href="#ref-Wei">1990</a>)</span></p>
-<div id="refs" class="references">
-<div id="ref-doi:10.1198/000313002317572808">
-<p>Heiberger, Richard M, and Paulo Teles. 2002. “Displays for Direct Comparison of Arima Models.” <em>The American Statistician</em> 56 (2): 131–38. <a href="https://doi.org/10.1198/000313002317572808">https://doi.org/10.1198/000313002317572808</a>.</p>
+<p><span class="citation">Richard M. Heiberger (<a href="#ref-HH2" role="doc-biblioref">2015</a>)</span>
+<span class="citation">Heiberger and Teles (<a href="#ref-doi:10.1198/000313002317572808" role="doc-biblioref">2002</a>)</span>
+<span class="citation">Wei (<a href="#ref-Wei" role="doc-biblioref">1990</a>)</span></p>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-doi:10.1198/000313002317572808" class="csl-entry">
+Heiberger, Richard M, and Paulo Teles. 2002. <span>“Displays for Direct Comparison of ARIMA Models.”</span> <em>The American Statistician</em> 56 (2): 131–38. <a href="https://doi.org/10.1198/000313002317572808">https://doi.org/10.1198/000313002317572808</a>.
 </div>
-<div id="ref-HH2">
-<p>Richard M. Heiberger, Burt Holland. 2015. <em>Statistical Analysis and Data Display an Intermediate Course with Examples in R</em>. Second Edition.</p>
+<div id="ref-HH2" class="csl-entry">
+Richard M. Heiberger, Burt Holland. 2015. <em>Statistical Analysis and Data Display an Intermediate Course with Examples in r</em>. Second Edition.
 </div>
-<div id="ref-Wei">
-<p>Wei, William. 1990. <em>Time Series Analysis: Univariate and Multivariate Methods</em>. Second Edition.</p>
+<div id="ref-Wei" class="csl-entry">
+Wei, William. 1990. <em>Time Series Analysis: Univariate and Multivariate Methods</em>. Second Edition.
 </div>
 </div>
 </div>
@@ -624,7 +611,7 @@ Figure 3.3: Goodness of fit:Box-Pierce
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();
@@ -642,7 +629,7 @@ $(document).ready(function () {
 
 $(document).ready(function () {
   $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
+    $(this).parent().toggleClass('nav-tabs-open');
   });
 });
 </script>

@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
@@ -15,22 +14,35 @@
 
 <title>Classical Monte Carlo Integration</title>
 
-<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 
-<style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
-  pre:not([class]) {
-    background-color: white;
-  }
-</style>
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
 <script type="text/javascript">
 if (window.hljs) {
   hljs.configure({languages: []});
@@ -43,30 +55,28 @@ if (window.hljs) {
 
 
 
+
+
 <style type="text/css">
-h1 {
-  font-size: 34px;
+/* for pandoc --citeproc since 2.11 */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
 }
-h1.title {
-  font-size: 38px;
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
 }
-h2 {
-  font-size: 30px;
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
 }
-h3 {
-  font-size: 24px;
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
 }
-h4 {
-  font-size: 18px;
-}
-h5 {
-  font-size: 16px;
-}
-h6 {
-  font-size: 12px;
-}
-.table th:not([align]) {
-  text-align: left;
+div.csl-indent {
+  margin-left: 2em;
 }
 </style>
 
@@ -78,10 +88,6 @@ h6 {
   max-width: 940px;
   margin-left: auto;
   margin-right: auto;
-}
-code {
-  color: inherit;
-  background-color: rgba(0, 0, 0, 0.04);
 }
 img {
   max-width:100%;
@@ -98,40 +104,16 @@ button.code-folding-btn:focus {
 summary {
   display: list-item;
 }
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
 </style>
 
 
 <style type="text/css">
-/* padding for bootstrap navbar */
-body {
-  padding-top: 51px;
-  padding-bottom: 40px;
-}
-/* offset scroll position for anchor links (for fixed navbar)  */
-.section h1 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h2 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h3 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h4 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h5 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h6 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
 .dropdown-submenu {
   position: relative;
 }
@@ -159,7 +141,7 @@ body {
   margin-right: -10px;
 }
 .dropdown-submenu:hover>a:after {
-  border-left-color: #ffffff;
+  border-left-color: #adb5bd;
 }
 .dropdown-submenu.pull-left {
   float: none;
@@ -171,7 +153,7 @@ body {
 }
 </style>
 
-<script>
+<script type="text/javascript">
 // manage active state of menu based on current page
 $(document).ready(function () {
   // active menu anchor
@@ -181,11 +163,28 @@ $(document).ready(function () {
     href = "index.html";
   var menuAnchor = $('a[href="' + href + '"]');
 
-  // mark it active
-  menuAnchor.parent().addClass('active');
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
 
-  // if it's got a parent navbar menu mark it active as well
-  menuAnchor.closest('li.dropdown').addClass('active');
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
 });
 </script>
 
@@ -197,7 +196,6 @@ $(document).ready(function () {
   max-height: 500px;
   min-height: 44px;
   overflow-y: auto;
-  background: white;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
@@ -233,6 +231,7 @@ $(document).ready(function () {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -263,7 +262,7 @@ $(document).ready(function () {
 <div class="navbar navbar-default  navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
@@ -276,6 +275,9 @@ $(document).ready(function () {
   <a href="index.html">Home</a>
 </li>
 <li>
+  <a href="archives.html">Archives</a>
+</li>
+<li>
   <a href="about.html">About</a>
 </li>
       </ul>
@@ -286,7 +288,7 @@ $(document).ready(function () {
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-<div class="fluid-row" id="header">
+<div id="header">
 
 
 
@@ -298,24 +300,26 @@ $(document).ready(function () {
 
 <div id="TOC">
 <ul>
-<li><a href="#introduction"><span class="toc-section-number">1</span> Introduction</a><ul>
-<li><a href="#weak-law-of-large-numbers-for-mean"><span class="toc-section-number">1.1</span> Weak law of large numbers for mean</a></li>
-<li><a href="#weak-law-of-large-numbers-for-variance"><span class="toc-section-number">1.2</span> Weak law of large numbers for variance</a></li>
+<li><a href="#introduction" id="toc-introduction"><span class="toc-section-number">1</span> Introduction</a>
+<ul>
+<li><a href="#weak-law-of-large-numbers-for-mean" id="toc-weak-law-of-large-numbers-for-mean"><span class="toc-section-number">1.1</span> Weak law of large numbers for mean</a></li>
+<li><a href="#weak-law-of-large-numbers-for-variance" id="toc-weak-law-of-large-numbers-for-variance"><span class="toc-section-number">1.2</span> Weak law of large numbers for variance</a></li>
 </ul></li>
-<li><a href="#classical-monte-carlo-integration"><span class="toc-section-number">2</span> Classical Monte Carlo Integration</a><ul>
-<li><a href="#example-1"><span class="toc-section-number">2.1</span> Example 1</a></li>
-<li><a href="#example-2"><span class="toc-section-number">2.2</span> Example 2</a></li>
-<li><a href="#example-3---a-bivariate-integration"><span class="toc-section-number">2.3</span> Example 3 - a bivariate integration</a></li>
+<li><a href="#classical-monte-carlo-integration" id="toc-classical-monte-carlo-integration"><span class="toc-section-number">2</span> Classical Monte Carlo Integration</a>
+<ul>
+<li><a href="#example-1" id="toc-example-1"><span class="toc-section-number">2.1</span> Example 1</a></li>
+<li><a href="#example-2" id="toc-example-2"><span class="toc-section-number">2.2</span> Example 2</a></li>
+<li><a href="#example-3---a-bivariate-integration" id="toc-example-3---a-bivariate-integration"><span class="toc-section-number">2.3</span> Example 3 - a bivariate integration</a></li>
 </ul></li>
-<li><a href="#references">References</a></li>
+<li><a href="#references" id="toc-references">References</a></li>
 </ul>
 </div>
 
-<div id="introduction" class="section level1">
+<div id="introduction" class="section level1" number="1">
 <h1><span class="header-section-number">1</span> Introduction</h1>
 <p>I write this webpage to record my study about classical Monte Carlo Integration.
 In my understanding, classical Monte Carlo Integration is a byproduct of <a href="https://en.wikipedia.org/wiki/Law_of_large_numbers">law of large numbers</a>:</p>
-<div id="weak-law-of-large-numbers-for-mean" class="section level2">
+<div id="weak-law-of-large-numbers-for-mean" class="section level2" number="1.1">
 <h2><span class="header-section-number">1.1</span> Weak law of large numbers for mean</h2>
 <p>Let <span class="math inline">\(X_1,...,X_n\)</span> be i.i.d random variables with <span class="math inline">\(E\left(X_{1}\right)=E\left(X_{2}\right)=\ldots=\mu\)</span> and <span class="math inline">\(\text{var}(X_1)=\text{var}(X_2)=...=\text{var}(X_n)=\sigma^2&lt;\infty\)</span>.</p>
 <p>Define <span class="math inline">\(\bar{X}_{n}=\frac{1}{n}\left(X_{1}+\cdots+X_{n}\right)\)</span>,</p>
@@ -324,7 +328,7 @@ In my understanding, classical Monte Carlo Integration is a byproduct of <a href
 \tag{1.1}
 \end{equation}\]</span></p>
 </div>
-<div id="weak-law-of-large-numbers-for-variance" class="section level2">
+<div id="weak-law-of-large-numbers-for-variance" class="section level2" number="1.2">
 <h2><span class="header-section-number">1.2</span> Weak law of large numbers for variance</h2>
 <p>Define sample variance as <span class="math inline">\(S^2_n=\frac{1}{n}\sum_{i=1}^n(X_i-\bar{X}_n)^2\)</span>.</p>
 <p><span class="math display" id="eq:largenumberssigma">\[\begin{equation}
@@ -333,7 +337,7 @@ In my understanding, classical Monte Carlo Integration is a byproduct of <a href
 \end{equation}\]</span></p>
 </div>
 </div>
-<div id="classical-monte-carlo-integration" class="section level1">
+<div id="classical-monte-carlo-integration" class="section level1" number="2">
 <h1><span class="header-section-number">2</span> Classical Monte Carlo Integration</h1>
 <p>If we are <strong>interested at integral</strong> <span class="math inline">\(\int_{\mathcal{X}} g(x) d x\)</span>, then we can do a transformation such that <span class="math inline">\(h(x) f(x) = g(x)\)</span> and <span class="math inline">\(\int_{\mathcal{X}} g(x) d x = \int_{\mathcal{X}} h(x) f(x) d x\)</span>, where <span class="math inline">\(f(x)\)</span> is a probability density function.</p>
 <blockquote>
@@ -368,9 +372,9 @@ In my understanding, classical Monte Carlo Integration is a byproduct of <a href
 \operatorname{var}\left(\bar{h}_{n}\right) \approx \frac{\sum_{j=1}^{n}\left(h\left(x_{j}\right)-\bar{h}_{n}\right)^{2}}{n^2}
 \tag{2.5}
 \end{equation}\]</span></p>
-<div id="example-1" class="section level2">
+<div id="example-1" class="section level2" number="2.1">
 <h2><span class="header-section-number">2.1</span> Example 1</h2>
-<p>This is example 3.4 from page 84 <span class="citation">Robert and Casella (<a href="#ref-10.5555/1051451">2005</a>)</span>. I reproduce similar results from book by <code>python</code>.</p>
+<p>This is example 3.4 from page 84 <span class="citation">Robert and Casella (<a href="#ref-10.5555/1051451" role="doc-biblioref">2005</a>)</span>. I reproduce similar results from book by <code>python</code>.</p>
 <p>We are interested at <span class="math inline">\(\int_0^1 [\cos(50x) + \sin(20x)]^2dx\)</span>.</p>
 <p>Set <span class="math inline">\(g(x) = [\cos(50x) + \sin(20x)]^2\)</span> and <span class="math inline">\(\mathcal{X} = [0,1]\)</span>.</p>
 <p>Set <span class="math inline">\(h(x) = [\cos(50x) + \sin(20x)]^2\)</span> and <span class="math inline">\(f(x) = I(0\le x \le 1)\)</span> is pdf of uniform(0,1) distribution.</p>
@@ -419,13 +423,13 @@ ax3.plot(df1[&quot;x&quot;],df1[&quot;mean&quot;])
 ax3.set_xlabel(&quot;Mean and Standard Error&quot;)
 ax3.set_ybound(0.9,1.10)
 plt.show()</code></pre>
-<p><img src="Classical_Monte_Carlo_Integration_files/figure-html/unnamed-chunk-1-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p><img src="Classical_Monte_Carlo_Integration_files/figure-html/unnamed-chunk-1-1.png" width="480" style="display: block; margin: auto;" /></p>
 <pre class="python"><code>plt.close()</code></pre>
 <p>Left is plot for <span class="math inline">\([\cos (50 x)+\sin (20 x)]^{2}\)</span>. Middle plot is histogram of <span class="math inline">\(10,000\)</span> values of <span class="math inline">\(h\left(x_{i}\right)\)</span>, simulated from uniform(0.1). Right plot is mean and confidence interval.</p>
 </div>
-<div id="example-2" class="section level2">
+<div id="example-2" class="section level2" number="2.2">
 <h2><span class="header-section-number">2.2</span> Example 2</h2>
-<p>I reproduce similar results from Rxample 3.5. <span class="citation">Robert and Casella (<a href="#ref-10.5555/1051451">2005</a>)</span>.</p>
+<p>I reproduce similar results from Rxample 3.5. <span class="citation">Robert and Casella (<a href="#ref-10.5555/1051451" role="doc-biblioref">2005</a>)</span>.</p>
 <p>We are interested at, for given t, the approximation of</p>
 <p><span class="math display" id="eq:CDF">\[\begin{equation}
 \Phi(t)=\int_{-\infty}^{t} \frac{1}{\sqrt{2 \pi}} e^{-y^{2} / 2} d y
@@ -457,7 +461,7 @@ df_output.index = map(lambda x: &quot;10^{}&quot;.format(x),np.arange(2,9,1))</c
 <table>
 <thead>
 <tr class="header">
-<th></th>
+<th align="left"></th>
 <th align="right">t = 0</th>
 <th align="right">t = 0.67</th>
 <th align="right">t = 0.84</th>
@@ -468,7 +472,7 @@ df_output.index = map(lambda x: &quot;10^{}&quot;.format(x),np.arange(2,9,1))</c
 </thead>
 <tbody>
 <tr class="odd">
-<td>10^2</td>
+<td align="left">10^2</td>
 <td align="right">0.5000</td>
 <td align="right">0.8100</td>
 <td align="right">0.7600</td>
@@ -477,7 +481,7 @@ df_output.index = map(lambda x: &quot;10^{}&quot;.format(x),np.arange(2,9,1))</c
 <td align="right">1.0000</td>
 </tr>
 <tr class="even">
-<td>10^3</td>
+<td align="left">10^3</td>
 <td align="right">0.4800</td>
 <td align="right">0.7540</td>
 <td align="right">0.7890</td>
@@ -486,7 +490,7 @@ df_output.index = map(lambda x: &quot;10^{}&quot;.format(x),np.arange(2,9,1))</c
 <td align="right">0.9890</td>
 </tr>
 <tr class="odd">
-<td>10^4</td>
+<td align="left">10^4</td>
 <td align="right">0.4965</td>
 <td align="right">0.7465</td>
 <td align="right">0.8104</td>
@@ -495,7 +499,7 @@ df_output.index = map(lambda x: &quot;10^{}&quot;.format(x),np.arange(2,9,1))</c
 <td align="right">0.9904</td>
 </tr>
 <tr class="even">
-<td>10^5</td>
+<td align="left">10^5</td>
 <td align="right">0.5029</td>
 <td align="right">0.7491</td>
 <td align="right">0.8008</td>
@@ -504,7 +508,7 @@ df_output.index = map(lambda x: &quot;10^{}&quot;.format(x),np.arange(2,9,1))</c
 <td align="right">0.9894</td>
 </tr>
 <tr class="odd">
-<td>10^6</td>
+<td align="left">10^6</td>
 <td align="right">0.5002</td>
 <td align="right">0.7494</td>
 <td align="right">0.7997</td>
@@ -513,7 +517,7 @@ df_output.index = map(lambda x: &quot;10^{}&quot;.format(x),np.arange(2,9,1))</c
 <td align="right">0.9899</td>
 </tr>
 <tr class="even">
-<td>10^7</td>
+<td align="left">10^7</td>
 <td align="right">0.4999</td>
 <td align="right">0.7487</td>
 <td align="right">0.7994</td>
@@ -522,7 +526,7 @@ df_output.index = map(lambda x: &quot;10^{}&quot;.format(x),np.arange(2,9,1))</c
 <td align="right">0.9899</td>
 </tr>
 <tr class="odd">
-<td>10^8</td>
+<td align="left">10^8</td>
 <td align="right">0.5000</td>
 <td align="right">0.7486</td>
 <td align="right">0.7995</td>
@@ -534,7 +538,7 @@ df_output.index = map(lambda x: &quot;10^{}&quot;.format(x),np.arange(2,9,1))</c
 </table>
 <p>It is known that <span class="math inline">\(\Phi(t = 0) = 0.5\)</span>, <span class="math inline">\(\Phi(t = 0.67) = 0.75\)</span>, <span class="math inline">\(\Phi(t = 0.84) = 0.8\)</span>, <span class="math inline">\(\Phi(t = 1.28) = 0.9\)</span>, <span class="math inline">\(\Phi(t = 1.65) = 0.95\)</span> and <span class="math inline">\(\Phi(t = 2.32) = 0.99\)</span>.</p>
 </div>
-<div id="example-3---a-bivariate-integration" class="section level2">
+<div id="example-3---a-bivariate-integration" class="section level2" number="2.3">
 <h2><span class="header-section-number">2.3</span> Example 3 - a bivariate integration</h2>
 <p>It is known that</p>
 <p><span class="math display" id="eq:pi1">\[\begin{equation}
@@ -585,18 +589,18 @@ ax.axhline(3.1415926,linestyle = &#39;--&#39;, color = &#39;r&#39;)
 ax.set_xlabel(&quot;Number of simulation&quot;)
 plt.title(&quot;Trace plot of Monte Carlo Approximation of pi&quot;)
 plt.show()</code></pre>
-<p><img src="Classical_Monte_Carlo_Integration_files/figure-html/unnamed-chunk-4-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p><img src="Classical_Monte_Carlo_Integration_files/figure-html/unnamed-chunk-4-1.png" width="480" style="display: block; margin: auto;" /></p>
 <pre class="python"><code>plt.close()</code></pre>
 </div>
 </div>
 <div id="references" class="section level1 unnumbered">
 <h1>References</h1>
-<div id="refs" class="references">
-<div id="ref-CaseBerg:01">
-<p>Casella, George, and Roger Berger. 2001. <em>Statistical Inference</em>. Textbook Binding; Duxbury Resource Center.</p>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-CaseBerg:01" class="csl-entry">
+Casella, George, and Roger Berger. 2001. <em>Statistical Inference</em>. <span>Textbook Binding</span>; <span>Duxbury Resource Center</span>.
 </div>
-<div id="ref-10.5555/1051451">
-<p>Robert, Christian P., and George Casella. 2005. <em>Monte Carlo Statistical Methods (Springer Texts in Statistics)</em>. Berlin, Heidelberg: Springer-Verlag.</p>
+<div id="ref-10.5555/1051451" class="csl-entry">
+Robert, Christian P., and George Casella. 2005. <em>Monte Carlo Statistical Methods (Springer Texts in Statistics)</em>. Berlin, Heidelberg: Springer-Verlag.
 </div>
 </div>
 </div>
@@ -610,7 +614,7 @@ plt.show()</code></pre>
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();
@@ -628,7 +632,7 @@ $(document).ready(function () {
 
 $(document).ready(function () {
   $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
+    $(this).parent().toggleClass('nav-tabs-open');
   });
 });
 </script>

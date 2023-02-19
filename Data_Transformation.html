@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
@@ -16,22 +15,35 @@
 
 <title>Data Transformation with dplyr and pandas</title>
 
-<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 
-<style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
-  pre:not([class]) {
-    background-color: white;
-  }
-</style>
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
 <script type="text/javascript">
 if (window.hljs) {
   hljs.configure({languages: []});
@@ -44,30 +56,28 @@ if (window.hljs) {
 
 
 
+
+
 <style type="text/css">
-h1 {
-  font-size: 34px;
+/* for pandoc --citeproc since 2.11 */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
 }
-h1.title {
-  font-size: 38px;
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
 }
-h2 {
-  font-size: 30px;
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
 }
-h3 {
-  font-size: 24px;
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
 }
-h4 {
-  font-size: 18px;
-}
-h5 {
-  font-size: 16px;
-}
-h6 {
-  font-size: 12px;
-}
-.table th:not([align]) {
-  text-align: left;
+div.csl-indent {
+  margin-left: 2em;
 }
 </style>
 
@@ -79,10 +89,6 @@ h6 {
   max-width: 940px;
   margin-left: auto;
   margin-right: auto;
-}
-code {
-  color: inherit;
-  background-color: rgba(0, 0, 0, 0.04);
 }
 img {
   max-width:100%;
@@ -99,40 +105,16 @@ button.code-folding-btn:focus {
 summary {
   display: list-item;
 }
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
 </style>
 
 
 <style type="text/css">
-/* padding for bootstrap navbar */
-body {
-  padding-top: 51px;
-  padding-bottom: 40px;
-}
-/* offset scroll position for anchor links (for fixed navbar)  */
-.section h1 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h2 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h3 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h4 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h5 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h6 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
 .dropdown-submenu {
   position: relative;
 }
@@ -160,7 +142,7 @@ body {
   margin-right: -10px;
 }
 .dropdown-submenu:hover>a:after {
-  border-left-color: #ffffff;
+  border-left-color: #adb5bd;
 }
 .dropdown-submenu.pull-left {
   float: none;
@@ -172,7 +154,7 @@ body {
 }
 </style>
 
-<script>
+<script type="text/javascript">
 // manage active state of menu based on current page
 $(document).ready(function () {
   // active menu anchor
@@ -182,11 +164,28 @@ $(document).ready(function () {
     href = "index.html";
   var menuAnchor = $('a[href="' + href + '"]');
 
-  // mark it active
-  menuAnchor.parent().addClass('active');
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
 
-  // if it's got a parent navbar menu mark it active as well
-  menuAnchor.closest('li.dropdown').addClass('active');
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
 });
 </script>
 
@@ -198,7 +197,6 @@ $(document).ready(function () {
   max-height: 500px;
   min-height: 44px;
   overflow-y: auto;
-  background: white;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
@@ -234,6 +232,7 @@ $(document).ready(function () {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -264,7 +263,7 @@ $(document).ready(function () {
 <div class="navbar navbar-default  navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
@@ -277,6 +276,9 @@ $(document).ready(function () {
   <a href="index.html">Home</a>
 </li>
 <li>
+  <a href="archives.html">Archives</a>
+</li>
+<li>
   <a href="about.html">About</a>
 </li>
       </ul>
@@ -287,7 +289,7 @@ $(document).ready(function () {
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-<div class="fluid-row" id="header">
+<div id="header">
 
 
 
@@ -299,48 +301,50 @@ $(document).ready(function () {
 
 <div id="TOC">
 <ul>
-<li><a href="#load-nycflights-13"><span class="toc-section-number">1</span> load nycflights 13</a></li>
-<li><a href="#filter-rows"><span class="toc-section-number">2</span> Filter rows</a><ul>
-<li><a href="#and-operator"><span class="toc-section-number">2.1</span> AND operator</a></li>
-<li><a href="#in-operator"><span class="toc-section-number">2.2</span> IN operator</a></li>
+<li><a href="#load-nycflights-13" id="toc-load-nycflights-13"><span class="toc-section-number">1</span> load nycflights 13</a></li>
+<li><a href="#filter-rows" id="toc-filter-rows"><span class="toc-section-number">2</span> Filter rows</a>
+<ul>
+<li><a href="#and-operator" id="toc-and-operator"><span class="toc-section-number">2.1</span> AND operator</a></li>
+<li><a href="#in-operator" id="toc-in-operator"><span class="toc-section-number">2.2</span> IN operator</a></li>
 </ul></li>
-<li><a href="#sort-rows"><span class="toc-section-number">3</span> Sort Rows</a></li>
-<li><a href="#select-column"><span class="toc-section-number">4</span> Select column</a></li>
-<li><a href="#unselect-column"><span class="toc-section-number">5</span> unselect column</a></li>
-<li><a href="#references">References</a></li>
+<li><a href="#sort-rows" id="toc-sort-rows"><span class="toc-section-number">3</span> Sort Rows</a></li>
+<li><a href="#select-column" id="toc-select-column"><span class="toc-section-number">4</span> Select column</a></li>
+<li><a href="#unselect-column" id="toc-unselect-column"><span class="toc-section-number">5</span> unselect column</a></li>
+<li><a href="#references" id="toc-references">References</a></li>
 </ul>
 </div>
 
 <p>I use two popular package <code>dplyr</code> in <code>r</code> and <code>pandas</code> in <code>python</code> to accomplish same data transformation goals. Hope this webpage could help anyone who are learning <code>R</code> from <code>Python</code> or <code>Python</code> from <code>R</code>.</p>
-<div id="load-nycflights-13" class="section level1">
+<div id="load-nycflights-13" class="section level1" number="1">
 <h1><span class="header-section-number">1</span> load nycflights 13</h1>
 <p>To demonstrate data management in both packages, I use <code>nycflights13::flights</code>.</p>
 <p>R code</p>
 <pre class="r"><code>library(tidyverse)</code></pre>
-<pre><code>## -- Attaching packages --------------- tidyverse 1.2.1 --</code></pre>
-<pre><code>## v tibble  2.1.3     v purrr   0.3.2
-## v tidyr   0.8.3     v stringr 1.4.0
-## v readr   1.3.1     v forcats 0.4.0</code></pre>
-<pre><code>## -- Conflicts ------------------ tidyverse_conflicts() --
-## x dplyr::filter() masks stats::filter()
-## x dplyr::lag()    masks stats::lag()</code></pre>
+<pre><code>## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.2 ──
+## ✔ tibble  3.1.8     ✔ purrr   0.3.4
+## ✔ tidyr   1.2.0     ✔ stringr 1.4.0
+## ✔ readr   2.1.2     ✔ forcats 0.5.1
+## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()</code></pre>
 <pre class="r"><code>library(knitr)
-library(nycflights13)
-data(flights)
+library(nycflights13)</code></pre>
+<pre><code>## Warning: package &#39;nycflights13&#39; was built under R version 4.2.2</code></pre>
+<pre class="r"><code>data(flights)
 head(as_tibble(flights))</code></pre>
-<pre><code>## # A tibble: 6 x 19
-##    year month   day dep_time sched_dep_time dep_delay arr_time
-##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
-## 1  2013     1     1      517            515         2      830
-## 2  2013     1     1      533            529         4      850
-## 3  2013     1     1      542            540         2      923
-## 4  2013     1     1      544            545        -1     1004
-## 5  2013     1     1      554            600        -6      812
-## 6  2013     1     1      554            558        -4      740
-## # ... with 12 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;,
-## #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;, dest &lt;chr&gt;,
-## #   air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;,
-## #   time_hour &lt;dttm&gt;</code></pre>
+<pre><code>## # A tibble: 6 × 19
+##    year month   day dep_time sched_dep…¹ dep_d…² arr_t…³ sched…⁴ arr_d…⁵ carrier
+##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;       &lt;int&gt;   &lt;dbl&gt;   &lt;int&gt;   &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;  
+## 1  2013     1     1      517         515       2     830     819      11 UA     
+## 2  2013     1     1      533         529       4     850     830      20 UA     
+## 3  2013     1     1      542         540       2     923     850      33 AA     
+## 4  2013     1     1      544         545      -1    1004    1022     -18 B6     
+## 5  2013     1     1      554         600      -6     812     837     -25 DL     
+## 6  2013     1     1      554         558      -4     740     728      12 UA     
+## # … with 9 more variables: flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;,
+## #   dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;,
+## #   time_hour &lt;dttm&gt;, and abbreviated variable names ¹​sched_dep_time,
+## #   ²​dep_delay, ³​arr_time, ⁴​sched_arr_time, ⁵​arr_delay</code></pre>
 <pre class="r"><code>##only run following code for once for sake of time
 ##write.csv(flights,&quot;flights.csv&quot;,row.names = FALSE)</code></pre>
 <p>Python Code</p>
@@ -357,29 +361,29 @@ df1.head()</code></pre>
 ## 
 ## [5 rows x 19 columns]</code></pre>
 </div>
-<div id="filter-rows" class="section level1">
+<div id="filter-rows" class="section level1" number="2">
 <h1><span class="header-section-number">2</span> Filter rows</h1>
-<div id="and-operator" class="section level2">
+<div id="and-operator" class="section level2" number="2.1">
 <h2><span class="header-section-number">2.1</span> AND operator</h2>
 <p>R Code</p>
 <pre class="r"><code>flights %&gt;% filter(month == 1, day == 1)</code></pre>
-<pre><code>## # A tibble: 842 x 19
-##     year month   day dep_time sched_dep_time dep_delay arr_time
-##    &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
-##  1  2013     1     1      517            515         2      830
-##  2  2013     1     1      533            529         4      850
-##  3  2013     1     1      542            540         2      923
-##  4  2013     1     1      544            545        -1     1004
-##  5  2013     1     1      554            600        -6      812
-##  6  2013     1     1      554            558        -4      740
-##  7  2013     1     1      555            600        -5      913
-##  8  2013     1     1      557            600        -3      709
-##  9  2013     1     1      557            600        -3      838
-## 10  2013     1     1      558            600        -2      753
-## # ... with 832 more rows, and 12 more variables: sched_arr_time &lt;int&gt;,
-## #   arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;,
+<pre><code>## # A tibble: 842 × 19
+##     year month   day dep_time sched_de…¹ dep_d…² arr_t…³ sched…⁴ arr_d…⁵ carrier
+##    &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;      &lt;int&gt;   &lt;dbl&gt;   &lt;int&gt;   &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;  
+##  1  2013     1     1      517        515       2     830     819      11 UA     
+##  2  2013     1     1      533        529       4     850     830      20 UA     
+##  3  2013     1     1      542        540       2     923     850      33 AA     
+##  4  2013     1     1      544        545      -1    1004    1022     -18 B6     
+##  5  2013     1     1      554        600      -6     812     837     -25 DL     
+##  6  2013     1     1      554        558      -4     740     728      12 UA     
+##  7  2013     1     1      555        600      -5     913     854      19 B6     
+##  8  2013     1     1      557        600      -3     709     723     -14 EV     
+##  9  2013     1     1      557        600      -3     838     846      -8 B6     
+## 10  2013     1     1      558        600      -2     753     745       8 AA     
+## # … with 832 more rows, 9 more variables: flight &lt;int&gt;, tailnum &lt;chr&gt;,
 ## #   origin &lt;chr&gt;, dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
-## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;</code></pre>
+## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;, and abbreviated variable names
+## #   ¹​sched_dep_time, ²​dep_delay, ³​arr_time, ⁴​sched_arr_time, ⁵​arr_delay</code></pre>
 <p>Python Code</p>
 <pre class="python"><code>filter_row = (df1[&#39;month&#39;] == 1) &amp; (df1[&#39;day&#39;] == 1)
 df1[filter_row].head()</code></pre>
@@ -392,27 +396,27 @@ df1[filter_row].head()</code></pre>
 ## 
 ## [5 rows x 19 columns]</code></pre>
 </div>
-<div id="in-operator" class="section level2">
+<div id="in-operator" class="section level2" number="2.2">
 <h2><span class="header-section-number">2.2</span> IN operator</h2>
 <p>R code</p>
 <pre class="r"><code>flights %&gt;% filter(month %in% c(11,12))</code></pre>
-<pre><code>## # A tibble: 55,403 x 19
-##     year month   day dep_time sched_dep_time dep_delay arr_time
-##    &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
-##  1  2013    11     1        5           2359         6      352
-##  2  2013    11     1       35           2250       105      123
-##  3  2013    11     1      455            500        -5      641
-##  4  2013    11     1      539            545        -6      856
-##  5  2013    11     1      542            545        -3      831
-##  6  2013    11     1      549            600       -11      912
-##  7  2013    11     1      550            600       -10      705
-##  8  2013    11     1      554            600        -6      659
-##  9  2013    11     1      554            600        -6      826
-## 10  2013    11     1      554            600        -6      749
-## # ... with 55,393 more rows, and 12 more variables: sched_arr_time &lt;int&gt;,
-## #   arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;,
+<pre><code>## # A tibble: 55,403 × 19
+##     year month   day dep_time sched_de…¹ dep_d…² arr_t…³ sched…⁴ arr_d…⁵ carrier
+##    &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;      &lt;int&gt;   &lt;dbl&gt;   &lt;int&gt;   &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;  
+##  1  2013    11     1        5       2359       6     352     345       7 B6     
+##  2  2013    11     1       35       2250     105     123    2356      87 B6     
+##  3  2013    11     1      455        500      -5     641     651     -10 US     
+##  4  2013    11     1      539        545      -6     856     827      29 UA     
+##  5  2013    11     1      542        545      -3     831     855     -24 AA     
+##  6  2013    11     1      549        600     -11     912     923     -11 UA     
+##  7  2013    11     1      550        600     -10     705     659       6 US     
+##  8  2013    11     1      554        600      -6     659     701      -2 US     
+##  9  2013    11     1      554        600      -6     826     827      -1 DL     
+## 10  2013    11     1      554        600      -6     749     751      -2 DL     
+## # … with 55,393 more rows, 9 more variables: flight &lt;int&gt;, tailnum &lt;chr&gt;,
 ## #   origin &lt;chr&gt;, dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
-## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;</code></pre>
+## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;, and abbreviated variable names
+## #   ¹​sched_dep_time, ²​dep_delay, ³​arr_time, ⁴​sched_arr_time, ⁵​arr_delay</code></pre>
 <p>Python Code</p>
 <pre class="python"><code>filter_row = df1[&#39;month&#39;].isin([11,12])
 df1[filter_row].head()</code></pre>
@@ -426,27 +430,27 @@ df1[filter_row].head()</code></pre>
 ## [5 rows x 19 columns]</code></pre>
 </div>
 </div>
-<div id="sort-rows" class="section level1">
+<div id="sort-rows" class="section level1" number="3">
 <h1><span class="header-section-number">3</span> Sort Rows</h1>
 <p>R code</p>
 <pre class="r"><code>flights %&gt;% arrange(desc(arr_delay))</code></pre>
-<pre><code>## # A tibble: 336,776 x 19
-##     year month   day dep_time sched_dep_time dep_delay arr_time
-##    &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
-##  1  2013     1     9      641            900      1301     1242
-##  2  2013     6    15     1432           1935      1137     1607
-##  3  2013     1    10     1121           1635      1126     1239
-##  4  2013     9    20     1139           1845      1014     1457
-##  5  2013     7    22      845           1600      1005     1044
-##  6  2013     4    10     1100           1900       960     1342
-##  7  2013     3    17     2321            810       911      135
-##  8  2013     7    22     2257            759       898      121
-##  9  2013    12     5      756           1700       896     1058
-## 10  2013     5     3     1133           2055       878     1250
-## # ... with 336,766 more rows, and 12 more variables: sched_arr_time &lt;int&gt;,
-## #   arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;,
+<pre><code>## # A tibble: 336,776 × 19
+##     year month   day dep_time sched_de…¹ dep_d…² arr_t…³ sched…⁴ arr_d…⁵ carrier
+##    &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;      &lt;int&gt;   &lt;dbl&gt;   &lt;int&gt;   &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;  
+##  1  2013     1     9      641        900    1301    1242    1530    1272 HA     
+##  2  2013     6    15     1432       1935    1137    1607    2120    1127 MQ     
+##  3  2013     1    10     1121       1635    1126    1239    1810    1109 MQ     
+##  4  2013     9    20     1139       1845    1014    1457    2210    1007 AA     
+##  5  2013     7    22      845       1600    1005    1044    1815     989 MQ     
+##  6  2013     4    10     1100       1900     960    1342    2211     931 DL     
+##  7  2013     3    17     2321        810     911     135    1020     915 DL     
+##  8  2013     7    22     2257        759     898     121    1026     895 DL     
+##  9  2013    12     5      756       1700     896    1058    2020     878 AA     
+## 10  2013     5     3     1133       2055     878    1250    2215     875 MQ     
+## # … with 336,766 more rows, 9 more variables: flight &lt;int&gt;, tailnum &lt;chr&gt;,
 ## #   origin &lt;chr&gt;, dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
-## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;</code></pre>
+## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;, and abbreviated variable names
+## #   ¹​sched_dep_time, ²​dep_delay, ³​arr_time, ⁴​sched_arr_time, ⁵​arr_delay</code></pre>
 <p>Python Code</p>
 <pre class="python"><code>df1.sort_values(by=[&#39;arr_delay&#39;],ascending=False).head()</code></pre>
 <pre><code>##         year  month  day  dep_time  ...  distance  hour  minute            time_hour
@@ -458,11 +462,11 @@ df1[filter_row].head()</code></pre>
 ## 
 ## [5 rows x 19 columns]</code></pre>
 </div>
-<div id="select-column" class="section level1">
+<div id="select-column" class="section level1" number="4">
 <h1><span class="header-section-number">4</span> Select column</h1>
 <p>R code</p>
 <pre class="r"><code>flights %&gt;% select(year:day)</code></pre>
-<pre><code>## # A tibble: 336,776 x 3
+<pre><code>## # A tibble: 336,776 × 3
 ##     year month   day
 ##    &lt;int&gt; &lt;int&gt; &lt;int&gt;
 ##  1  2013     1     1
@@ -475,7 +479,7 @@ df1[filter_row].head()</code></pre>
 ##  8  2013     1     1
 ##  9  2013     1     1
 ## 10  2013     1     1
-## # ... with 336,766 more rows</code></pre>
+## # … with 336,766 more rows</code></pre>
 <p>Python Code</p>
 <pre class="python"><code>df1.loc[:,&quot;year&quot;:&quot;day&quot;].head()</code></pre>
 <pre><code>##    year  month  day
@@ -485,26 +489,27 @@ df1[filter_row].head()</code></pre>
 ## 3  2013      1    1
 ## 4  2013      1    1</code></pre>
 </div>
-<div id="unselect-column" class="section level1">
+<div id="unselect-column" class="section level1" number="5">
 <h1><span class="header-section-number">5</span> unselect column</h1>
 <p>R code</p>
 <pre class="r"><code>flights %&gt;% select(-(year:day))</code></pre>
-<pre><code>## # A tibble: 336,776 x 16
-##    dep_time sched_dep_time dep_delay arr_time sched_arr_time arr_delay
-##       &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;
-##  1      517            515         2      830            819        11
-##  2      533            529         4      850            830        20
-##  3      542            540         2      923            850        33
-##  4      544            545        -1     1004           1022       -18
-##  5      554            600        -6      812            837       -25
-##  6      554            558        -4      740            728        12
-##  7      555            600        -5      913            854        19
-##  8      557            600        -3      709            723       -14
-##  9      557            600        -3      838            846        -8
-## 10      558            600        -2      753            745         8
-## # ... with 336,766 more rows, and 10 more variables: carrier &lt;chr&gt;,
-## #   flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;, dest &lt;chr&gt;, air_time &lt;dbl&gt;,
-## #   distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;, time_hour &lt;dttm&gt;</code></pre>
+<pre><code>## # A tibble: 336,776 × 16
+##    dep_t…¹ sched…² dep_d…³ arr_t…⁴ sched…⁵ arr_d…⁶ carrier flight tailnum origin
+##      &lt;int&gt;   &lt;int&gt;   &lt;dbl&gt;   &lt;int&gt;   &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt; 
+##  1     517     515       2     830     819      11 UA        1545 N14228  EWR   
+##  2     533     529       4     850     830      20 UA        1714 N24211  LGA   
+##  3     542     540       2     923     850      33 AA        1141 N619AA  JFK   
+##  4     544     545      -1    1004    1022     -18 B6         725 N804JB  JFK   
+##  5     554     600      -6     812     837     -25 DL         461 N668DN  LGA   
+##  6     554     558      -4     740     728      12 UA        1696 N39463  EWR   
+##  7     555     600      -5     913     854      19 B6         507 N516JB  EWR   
+##  8     557     600      -3     709     723     -14 EV        5708 N829AS  LGA   
+##  9     557     600      -3     838     846      -8 B6          79 N593JB  JFK   
+## 10     558     600      -2     753     745       8 AA         301 N3ALAA  LGA   
+## # … with 336,766 more rows, 6 more variables: dest &lt;chr&gt;, air_time &lt;dbl&gt;,
+## #   distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;, time_hour &lt;dttm&gt;, and abbreviated
+## #   variable names ¹​dep_time, ²​sched_dep_time, ³​dep_delay, ⁴​arr_time,
+## #   ⁵​sched_arr_time, ⁶​arr_delay</code></pre>
 <p>Python Code</p>
 <pre class="python"><code>sel_col = df1.loc[:,&quot;year&quot;:&quot;day&quot;].columns
 sel_col = ~np.isin(df1.columns,sel_col)
@@ -520,10 +525,10 @@ df1.loc[:,sel_col].head()</code></pre>
 </div>
 <div id="references" class="section level1 unnumbered">
 <h1>References</h1>
-<p><span class="citation">Wickham and Grolemund (<a href="#ref-R_for_data_science">2017</a>)</span></p>
-<div id="refs" class="references">
-<div id="ref-R_for_data_science">
-<p>Wickham, Hadley, and Garrett Grolemund. 2017. <em>R for Data Science: Import, Tidy, Transform, Visualize, and Model Data</em>. 1st ed. O’Reilly Media, Inc.</p>
+<p><span class="citation">Wickham and Grolemund (<a href="#ref-R_for_data_science" role="doc-biblioref">2017</a>)</span></p>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-R_for_data_science" class="csl-entry">
+Wickham, Hadley, and Garrett Grolemund. 2017. <em>R for Data Science: Import, Tidy, Transform, Visualize, and Model Data</em>. 1st ed. O’Reilly Media, Inc.
 </div>
 </div>
 </div>
@@ -537,7 +542,7 @@ df1.loc[:,sel_col].head()</code></pre>
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();
@@ -555,7 +560,7 @@ $(document).ready(function () {
 
 $(document).ready(function () {
   $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
+    $(this).parent().toggleClass('nav-tabs-open');
   });
 });
 </script>

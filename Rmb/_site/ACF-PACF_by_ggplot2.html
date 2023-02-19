@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
@@ -15,22 +14,35 @@
 
 <title>ACF&amp;PACF by ggplot2</title>
 
-<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 
-<style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
-  pre:not([class]) {
-    background-color: white;
-  }
-</style>
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
 <script type="text/javascript">
 if (window.hljs) {
   hljs.configure({languages: []});
@@ -43,30 +55,28 @@ if (window.hljs) {
 
 
 
+
+
 <style type="text/css">
-h1 {
-  font-size: 34px;
+/* for pandoc --citeproc since 2.11 */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
 }
-h1.title {
-  font-size: 38px;
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
 }
-h2 {
-  font-size: 30px;
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
 }
-h3 {
-  font-size: 24px;
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
 }
-h4 {
-  font-size: 18px;
-}
-h5 {
-  font-size: 16px;
-}
-h6 {
-  font-size: 12px;
-}
-.table th:not([align]) {
-  text-align: left;
+div.csl-indent {
+  margin-left: 2em;
 }
 </style>
 
@@ -78,10 +88,6 @@ h6 {
   max-width: 940px;
   margin-left: auto;
   margin-right: auto;
-}
-code {
-  color: inherit;
-  background-color: rgba(0, 0, 0, 0.04);
 }
 img {
   max-width:100%;
@@ -98,40 +104,16 @@ button.code-folding-btn:focus {
 summary {
   display: list-item;
 }
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
 </style>
 
 
 <style type="text/css">
-/* padding for bootstrap navbar */
-body {
-  padding-top: 51px;
-  padding-bottom: 40px;
-}
-/* offset scroll position for anchor links (for fixed navbar)  */
-.section h1 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h2 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h3 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h4 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h5 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h6 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
 .dropdown-submenu {
   position: relative;
 }
@@ -159,7 +141,7 @@ body {
   margin-right: -10px;
 }
 .dropdown-submenu:hover>a:after {
-  border-left-color: #ffffff;
+  border-left-color: #adb5bd;
 }
 .dropdown-submenu.pull-left {
   float: none;
@@ -171,7 +153,7 @@ body {
 }
 </style>
 
-<script>
+<script type="text/javascript">
 // manage active state of menu based on current page
 $(document).ready(function () {
   // active menu anchor
@@ -181,11 +163,28 @@ $(document).ready(function () {
     href = "index.html";
   var menuAnchor = $('a[href="' + href + '"]');
 
-  // mark it active
-  menuAnchor.parent().addClass('active');
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
 
-  // if it's got a parent navbar menu mark it active as well
-  menuAnchor.closest('li.dropdown').addClass('active');
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
 });
 </script>
 
@@ -197,7 +196,6 @@ $(document).ready(function () {
   max-height: 500px;
   min-height: 44px;
   overflow-y: auto;
-  background: white;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
@@ -233,6 +231,7 @@ $(document).ready(function () {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -263,7 +262,7 @@ $(document).ready(function () {
 <div class="navbar navbar-default  navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
@@ -276,6 +275,9 @@ $(document).ready(function () {
   <a href="index.html">Home</a>
 </li>
 <li>
+  <a href="archives.html">Archives</a>
+</li>
+<li>
   <a href="about.html">About</a>
 </li>
       </ul>
@@ -286,7 +288,7 @@ $(document).ready(function () {
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-<div class="fluid-row" id="header">
+<div id="header">
 
 
 
@@ -298,17 +300,17 @@ $(document).ready(function () {
 
 <div id="TOC">
 <ul>
-<li><a href="#correlogram-formula"><span class="toc-section-number">1</span> Correlogram formula</a></li>
-<li><a href="#correlogram-by-statsacf"><span class="toc-section-number">2</span> Correlogram by <code>stats::acf</code></a></li>
-<li><a href="#correlogram-by-ggplot2"><span class="toc-section-number">3</span> Correlogram by <code>ggplot2</code></a></li>
-<li><a href="#correlogram---large-sample-size"><span class="toc-section-number">4</span> Correlogram - large sample size</a></li>
-<li><a href="#correlogram---small-sample-size"><span class="toc-section-number">5</span> Correlogram - small sample size</a></li>
-<li><a href="#references">References</a></li>
+<li><a href="#correlogram-formula" id="toc-correlogram-formula"><span class="toc-section-number">1</span> Correlogram formula</a></li>
+<li><a href="#correlogram-by-statsacf" id="toc-correlogram-by-statsacf"><span class="toc-section-number">2</span> Correlogram by <code>stats::acf</code></a></li>
+<li><a href="#correlogram-by-ggplot2" id="toc-correlogram-by-ggplot2"><span class="toc-section-number">3</span> Correlogram by <code>ggplot2</code></a></li>
+<li><a href="#correlogram---large-sample-size" id="toc-correlogram---large-sample-size"><span class="toc-section-number">4</span> Correlogram - large sample size</a></li>
+<li><a href="#correlogram---small-sample-size" id="toc-correlogram---small-sample-size"><span class="toc-section-number">5</span> Correlogram - small sample size</a></li>
+<li><a href="#references" id="toc-references">References</a></li>
 </ul>
 </div>
 
 <p>When I study time series analysis, I were confused by the difference of ACF/PACF plot generated by SAS and <code>R</code>, using default method. I decided to do some research about the difference. More specific, why the lines, which indicates whether the autocorrelations are significantly difference from zero are different. Generally speaking, there are different methods to calculate confident interval for autocorrelations and partial autocorelations. In this article, I use <code>ggplot2</code> to create two kinds of Correlogram, one for small sample size, one for large sample size.</p>
-<div id="correlogram-formula" class="section level1">
+<div id="correlogram-formula" class="section level1" number="1">
 <h1><span class="header-section-number">1</span> Correlogram formula</h1>
 <p>Sample ACF(Autocorrelation function)</p>
 <p><span class="math inline">\(\hat{\rho}(h) = \hat{\gamma}(h)/\hat{\gamma}(0)\)</span></p>
@@ -328,7 +330,7 @@ $(document).ready(function () {
 <p><span class="math inline">\(\text{var}(\hat{\phi}_{hh}) = 1/T\)</span></p>
 <p>White noise test for PACF (<span class="math inline">\(95\%\)</span> confident interval) is as same as white noise test for ACF.</p>
 </div>
-<div id="correlogram-by-statsacf" class="section level1">
+<div id="correlogram-by-statsacf" class="section level1" number="2">
 <h1><span class="header-section-number">2</span> Correlogram by <code>stats::acf</code></h1>
 <p>The correlogram plot by <code>stats::acf</code> only has method of white noise test for small sample size.</p>
 <pre class="r"><code>data(&quot;sunspot.year&quot;)</code></pre>
@@ -339,7 +341,7 @@ acf(sunspot.year, type = &quot;partial&quot;)</code></pre>
 <p><img src="ACF-PACF_by_ggplot2_files/figure-html/deafult_acf-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>par(opar)</code></pre>
 </div>
-<div id="correlogram-by-ggplot2" class="section level1">
+<div id="correlogram-by-ggplot2" class="section level1" number="3">
 <h1><span class="header-section-number">3</span> Correlogram by <code>ggplot2</code></h1>
 <p>I create a function called <code>ggplot.corr</code> for two types (for both large/small sample size) of white noise tests mentioned in <a href="#correlogram-formula">section1</a>.</p>
 <pre class="r"><code>ggplot.corr &lt;- function(data, lag.max = 24, ci = 0.95, large.sample.size = TRUE, horizontal = TRUE,...) {
@@ -417,26 +419,26 @@ acf(sunspot.year, type = &quot;partial&quot;)</code></pre>
   cowplot::plot_grid(plot.acf, plot.pacf, nrow = numofrow)
 }</code></pre>
 </div>
-<div id="correlogram---large-sample-size" class="section level1">
+<div id="correlogram---large-sample-size" class="section level1" number="4">
 <h1><span class="header-section-number">4</span> Correlogram - large sample size</h1>
 <pre class="r"><code>ggplot.corr(data = sunspot.year, lag.max = 24, ci= 0.95, large.sample.size = TRUE, horizontal = TRUE)</code></pre>
 <p><img src="ACF-PACF_by_ggplot2_files/figure-html/large_sample-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
-<div id="correlogram---small-sample-size" class="section level1">
+<div id="correlogram---small-sample-size" class="section level1" number="5">
 <h1><span class="header-section-number">5</span> Correlogram - small sample size</h1>
 <pre class="r"><code>ggplot.corr(data = sunspot.year, lag.max = 24, ci= 0.95, large.sample.size = FALSE, horizontal = TRUE)</code></pre>
 <p><img src="ACF-PACF_by_ggplot2_files/figure-html/small_sample-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="references" class="section level1 unnumbered">
 <h1>References</h1>
-<p><span class="citation">Wei (<a href="#ref-Wei">1990</a>)</span>
-<span class="citation">SAS (<a href="#ref-SAS_time_series">n.d.</a>)</span></p>
-<div id="refs" class="references">
-<div id="ref-SAS_time_series">
-<p>SAS. n.d. <em>SAS Ets (R) 14.1 User’s Guide the Timeseries Procedure</em>. <a href="http://support.sas.com/documentation/cdl/en/etsug/68148/HTML/default/viewer.htm#etsug_timeseries_details08.htm">http://support.sas.com/documentation/cdl/en/etsug/68148/HTML/default/viewer.htm#etsug_timeseries_details08.htm</a>.</p>
+<p><span class="citation">Wei (<a href="#ref-Wei" role="doc-biblioref">1990</a>)</span>
+<span class="citation">SAS (<a href="#ref-SAS_time_series" role="doc-biblioref">n.d.</a>)</span></p>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-SAS_time_series" class="csl-entry">
+SAS. n.d. <em>SAS ETS (r) 14.1 User’s Guide the TIMESERIES Procedure</em>. <a href="http://support.sas.com/documentation/cdl/en/etsug/68148/HTML/default/viewer.htm#etsug_timeseries_details08.htm">http://support.sas.com/documentation/cdl/en/etsug/68148/HTML/default/viewer.htm#etsug_timeseries_details08.htm</a>.
 </div>
-<div id="ref-Wei">
-<p>Wei, William. 1990. <em>Time Series Analysis: Univariate and Multivariate Methods</em>. Second Edition.</p>
+<div id="ref-Wei" class="csl-entry">
+Wei, William. 1990. <em>Time Series Analysis: Univariate and Multivariate Methods</em>. Second Edition.
 </div>
 </div>
 </div>
@@ -450,7 +452,7 @@ acf(sunspot.year, type = &quot;partial&quot;)</code></pre>
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();
@@ -468,7 +470,7 @@ $(document).ready(function () {
 
 $(document).ready(function () {
   $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
+    $(this).parent().toggleClass('nav-tabs-open');
   });
 });
 </script>

@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
@@ -15,22 +14,35 @@
 
 <title>Expectation Maximization Algorithm - with one example</title>
 
-<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 
-<style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
-  pre:not([class]) {
-    background-color: white;
-  }
-</style>
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
 <script type="text/javascript">
 if (window.hljs) {
   hljs.configure({languages: []});
@@ -43,32 +55,8 @@ if (window.hljs) {
 
 
 
-<style type="text/css">
-h1 {
-  font-size: 34px;
-}
-h1.title {
-  font-size: 38px;
-}
-h2 {
-  font-size: 30px;
-}
-h3 {
-  font-size: 24px;
-}
-h4 {
-  font-size: 18px;
-}
-h5 {
-  font-size: 16px;
-}
-h6 {
-  font-size: 12px;
-}
-.table th:not([align]) {
-  text-align: left;
-}
-</style>
+
+
 
 
 
@@ -78,10 +66,6 @@ h6 {
   max-width: 940px;
   margin-left: auto;
   margin-right: auto;
-}
-code {
-  color: inherit;
-  background-color: rgba(0, 0, 0, 0.04);
 }
 img {
   max-width:100%;
@@ -98,40 +82,16 @@ button.code-folding-btn:focus {
 summary {
   display: list-item;
 }
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
 </style>
 
 
 <style type="text/css">
-/* padding for bootstrap navbar */
-body {
-  padding-top: 51px;
-  padding-bottom: 40px;
-}
-/* offset scroll position for anchor links (for fixed navbar)  */
-.section h1 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h2 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h3 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h4 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h5 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h6 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
 .dropdown-submenu {
   position: relative;
 }
@@ -159,7 +119,7 @@ body {
   margin-right: -10px;
 }
 .dropdown-submenu:hover>a:after {
-  border-left-color: #ffffff;
+  border-left-color: #adb5bd;
 }
 .dropdown-submenu.pull-left {
   float: none;
@@ -171,7 +131,7 @@ body {
 }
 </style>
 
-<script>
+<script type="text/javascript">
 // manage active state of menu based on current page
 $(document).ready(function () {
   // active menu anchor
@@ -181,11 +141,28 @@ $(document).ready(function () {
     href = "index.html";
   var menuAnchor = $('a[href="' + href + '"]');
 
-  // mark it active
-  menuAnchor.parent().addClass('active');
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
 
-  // if it's got a parent navbar menu mark it active as well
-  menuAnchor.closest('li.dropdown').addClass('active');
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
 });
 </script>
 
@@ -197,7 +174,6 @@ $(document).ready(function () {
   max-height: 500px;
   min-height: 44px;
   overflow-y: auto;
-  background: white;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
@@ -233,6 +209,7 @@ $(document).ready(function () {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -263,7 +240,7 @@ $(document).ready(function () {
 <div class="navbar navbar-default  navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
@@ -276,6 +253,9 @@ $(document).ready(function () {
   <a href="index.html">Home</a>
 </li>
 <li>
+  <a href="archives.html">Archives</a>
+</li>
+<li>
   <a href="about.html">About</a>
 </li>
       </ul>
@@ -286,7 +266,7 @@ $(document).ready(function () {
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-<div class="fluid-row" id="header">
+<div id="header">
 
 
 
@@ -298,18 +278,19 @@ $(document).ready(function () {
 
 <div id="TOC">
 <ul>
-<li><a href="#general-form-of-em-algorithm-for-mixture-distribution-with-2-parts."><span class="toc-section-number">1</span> General form of EM algorithm for mixture distribution with 2 parts.</a></li>
-<li><a href="#example"><span class="toc-section-number">2</span> Example</a><ul>
-<li><a href="#example---calculation-by-r"><span class="toc-section-number">2.1</span> Example - Calculation by <code>R</code></a></li>
-<li><a href="#example---histogram"><span class="toc-section-number">2.2</span> Example - Histogram</a></li>
-<li><a href="#example---em-algorithm-as-a-classification-tool-for-mixture-probabaility-density."><span class="toc-section-number">2.3</span> Example - EM algorithm as a classification tool for mixture probabaility density.</a></li>
+<li><a href="#general-form-of-em-algorithm-for-mixture-distribution-with-2-parts." id="toc-general-form-of-em-algorithm-for-mixture-distribution-with-2-parts."><span class="toc-section-number">1</span> General form of EM algorithm for mixture distribution with 2 parts.</a></li>
+<li><a href="#example" id="toc-example"><span class="toc-section-number">2</span> Example</a>
+<ul>
+<li><a href="#example---calculation-by-r" id="toc-example---calculation-by-r"><span class="toc-section-number">2.1</span> Example - Calculation by <code>R</code></a></li>
+<li><a href="#example---histogram" id="toc-example---histogram"><span class="toc-section-number">2.2</span> Example - Histogram</a></li>
+<li><a href="#example---em-algorithm-as-a-classification-tool-for-mixture-probabaility-density." id="toc-example---em-algorithm-as-a-classification-tool-for-mixture-probabaility-density."><span class="toc-section-number">2.3</span> Example - EM algorithm as a classification tool for mixture probabaility density.</a></li>
 </ul></li>
-<li><a href="#appendix"><span class="toc-section-number">3</span> Appendix</a></li>
+<li><a href="#appendix" id="toc-appendix"><span class="toc-section-number">3</span> Appendix</a></li>
 </ul>
 </div>
 
 <p>Expectation Maximization Algorithm is a very important algorithm for mixture distribution. Here I derive the general form/step for mixture distribution with 2 distributions.</p>
-<div id="general-form-of-em-algorithm-for-mixture-distribution-with-2-parts." class="section level1">
+<div id="general-form-of-em-algorithm-for-mixture-distribution-with-2-parts." class="section level1" number="1">
 <h1><span class="header-section-number">1</span> General form of EM algorithm for mixture distribution with 2 parts.</h1>
 <p>For <span class="math inline">\(\mathbf{x} = (x_1,\dots,x_n)\)</span>, where <span class="math inline">\(x_i\)</span> is known numeric variable , with <span class="math inline">\(f_0\)</span> and <span class="math inline">\(f_1\)</span> being probability density functions. We assume that
 <span class="math display" id="eq:e1">\[\begin{equation}
@@ -342,7 +323,7 @@ L(\boldsymbol{\theta}; \mathbf{X},\mathbf{Z}) = \prod_{i=1}^{n} [\mathbf{I}(Z_i 
 \mathbf{I}(Z_i = 1 | \mathbf{X}, \boldsymbol{\theta})\pi_1 f_1(x_i)]] \\
 &amp;= \sum_{i=1}^{n} \text{log}[\mathbf{I}(Z_i = 0 | \mathbf{X}, \boldsymbol{\theta})\pi_0 f_0(x_i) +
 \mathbf{I}(Z_i = 1 | \mathbf{X}, \boldsymbol{\theta})\pi_1 f_1(x_i)] \\
-&amp;= \sum_{i=1}^{n} \mathbf{I}(Z_i = 0 | \mathbf{X}, \boldsymbol{\theta})\text{log}[\pi_0 f_0(x_i)] + 
+&amp;= \sum_{i=1}^{n} \mathbf{I}(Z_i = 0 | \mathbf{X}, \boldsymbol{\theta})\text{log}[\pi_0 f_0(x_i)] +
 \mathbf{I}(Z_i = 1 | \mathbf{X}, \boldsymbol{\theta})\text{log}[\pi_1 f_1(x_i)]
 \end{split}
 \tag{1.5}
@@ -354,23 +335,23 @@ L(\boldsymbol{\theta}; \mathbf{X},\mathbf{Z}) = \prod_{i=1}^{n} [\mathbf{I}(Z_i 
 \begin{split}
 Q(\boldsymbol{\theta} | \boldsymbol{\theta}^{(t)}) &amp; =
 E_{\mathbf{Z}|\mathbf{X}, \boldsymbol{\theta}^{(t)}}[\ell(\boldsymbol{\theta}^{(t)}; \mathbf{X},\mathbf{Z})] \\
-&amp;= E_{\mathbf{Z}|\mathbf{X}, \boldsymbol{\theta}^{(t)}} 
-[\sum_{i=1}^{n} \mathbf{I}(Z_i = 0 | \mathbf{X}, \boldsymbol{\theta}^{(t)})\text{log}[\pi_0 f_0(x_i)] + 
+&amp;= E_{\mathbf{Z}|\mathbf{X}, \boldsymbol{\theta}^{(t)}}
+[\sum_{i=1}^{n} \mathbf{I}(Z_i = 0 | \mathbf{X}, \boldsymbol{\theta}^{(t)})\text{log}[\pi_0 f_0(x_i)] +
 \mathbf{I}(Z_i = 1 | \mathbf{X}, \boldsymbol{\theta}^{(t)})\text{log}[\pi_1 f_1(x_i)]] \\
 &amp;\stackrel{(A.1)}{=}
 \sum_{i=1}^{n}E_{\mathbf{Z}|\mathbf{X}, \boldsymbol{\theta}^{(t)}}
-[\mathbf{I}(Z_i = 0 | \mathbf{X}, \boldsymbol{\theta}^{(t)})\text{log}[\pi_0 f_0(x_i)] + 
+[\mathbf{I}(Z_i = 0 | \mathbf{X}, \boldsymbol{\theta}^{(t)})\text{log}[\pi_0 f_0(x_i)] +
 \mathbf{I}(Z_i = 1 | \mathbf{X}, \boldsymbol{\theta}^{(t)})\text{log}[\pi_1 f_1(x_i)]]
 \\
 &amp;\stackrel{(A.2)}{=}
-\sum_{i=1}^{n} 
+\sum_{i=1}^{n}
 \text{log}[\pi_0 f_0(x_i)] E_{\mathbf{Z}|\mathbf{X}, \boldsymbol{\theta}^{(t)}}[\mathbf{I}(Z_i = 0 | \mathbf{X}, \boldsymbol{\theta}^{(t)})] +
 \text{log}[\pi_1 f_1(x_i)] E_{\mathbf{Z}|\mathbf{X}, \boldsymbol{\theta}^{(t)}}[\mathbf{I}(Z_i = 1 | \mathbf{X}, \boldsymbol{\theta}^{(t)})]\\
-&amp;\stackrel{(A.3)}{=} 
+&amp;\stackrel{(A.3)}{=}
 \sum_{i=1}^{n} \text{log}[\pi_0 f_0(x_i)] P(\mathbf{I}(Z_i = 0 | \mathbf{X}, \boldsymbol{\theta}^{(t)})) +
 \text{log}[\pi_1 f_1(x_i)] P(\mathbf{I}(Z_i = 1 | \mathbf{X}, \boldsymbol{\theta}^{(t)}))\\
-&amp;\stackrel{(A.4)}{=} 
-\sum_{i=1}^{n} \text{log}[\pi_0 f_0(x_i)] T_{i,0} + 
+&amp;\stackrel{(A.4)}{=}
+\sum_{i=1}^{n} \text{log}[\pi_0 f_0(x_i)] T_{i,0} +
 \text{log}[\pi_1 f_1(x_i)] T_{i,1}
 \end{split}
 \tag{1.6}
@@ -379,14 +360,14 @@ E_{\mathbf{Z}|\mathbf{X}, \boldsymbol{\theta}^{(t)}}[\ell(\boldsymbol{\theta}^{(
 <p><span class="math display" id="eq:e7">\[\begin{equation}
 \begin{split}
 
-\boldsymbol{\theta}^{(t+1)} = \text{argmax} Q(\boldsymbol{\theta} | \boldsymbol{\theta}^{(t)}) 
+\boldsymbol{\theta}^{(t+1)} = \text{argmax} Q(\boldsymbol{\theta} | \boldsymbol{\theta}^{(t)})
 
 \end{split}
 \tag{1.7}
 \end{equation}\]</span></p>
 <p>We should repeat <a href="#eq:e6">(1.6)</a> and <a href="#eq:e7">(1.7)</a> until convergence.</p>
 </div>
-<div id="example" class="section level1">
+<div id="example" class="section level1" number="2">
 <h1><span class="header-section-number">2</span> Example</h1>
 <p>This example comes from Prof.Zhao who works in Temple University and introduced me the EM algorithm. He made an good homework for EM. I decide to share the homework.</p>
 <p>Assume</p>
@@ -407,7 +388,7 @@ T^{(t)}_{0,i}
 +
 T^{(t)}_{1,i}
 \text{log}(\pi_1 \times \beta(1-x_i)^{\beta-1})\\
-&amp;\stackrel{(1.2)}{=} 
+&amp;\stackrel{(1.2)}{=}
 \sum_{i=1}^{n}
 T^{(t)}_{0,i}
 \text{log}(\pi_0 \times 1)
@@ -445,7 +426,7 @@ T^{(t)}_{0,i}}{n}
 \end{equation}\]</span></p>
 <p>Similarly, we have that</p>
 <p><span class="math display" id="eq:e12">\[\begin{equation}
-\frac{\partial Q(\boldsymbol{\theta} | \boldsymbol{\theta}^{(t)})}{\partial \beta} = 
+\frac{\partial Q(\boldsymbol{\theta} | \boldsymbol{\theta}^{(t)})}{\partial \beta} =
 \sum_{i=1}^{n}
 T^{(t)}_{1,i}
 (\frac{1}{\beta} + log(1-x_i)) = 0
@@ -458,7 +439,7 @@ T^{(t)}_{1,i}}{-\sum_{i=1}^{n}
 T^{(t)}_{1,i} log(1-x_i)}
 \tag{2.6}
 \end{equation}\]</span></p>
-<div id="example---calculation-by-r" class="section level2">
+<div id="example---calculation-by-r" class="section level2" number="2.1">
 <h2><span class="header-section-number">2.1</span> Example - Calculation by <code>R</code></h2>
 <p>Create a loop in <code>R</code> to get <span class="math inline">\(\pi_0\)</span> and <span class="math inline">\(\beta\)</span>.
 With initial value of <span class="math inline">\(0.69\)</span> and <span class="math inline">\(11\)</span>, at 32th iteration, <span class="math inline">\(\pi_0 = 0.69679\)</span> and <span class="math inline">\(\beta = 11.09328\)</span>. (Initial value are chosen on purpose so it doesn’t require too many iterations until converge).</p>
@@ -517,7 +498,7 @@ while( Delta &gt; delta ){
 ## [1] &quot;31 -th iteration: pi0= 0.69679316260856 , beta= 11.0931953168253&quot;
 ## [1] &quot;32 -th iteration: pi0= 0.696794472958494 , beta= 11.0932785722746&quot;</code></pre>
 </div>
-<div id="example---histogram" class="section level2">
+<div id="example---histogram" class="section level2" number="2.2">
 <h2><span class="header-section-number">2.2</span> Example - Histogram</h2>
 <pre class="r"><code>library(ggplot2)
 pi0 &lt;- s.new[1]
@@ -547,7 +528,7 @@ ggplot(data = df.plot, aes(x = x, y = y)) +
 <p><img src="Expectation_Maximization_Algorithm_With_Two_Example_files/figure-html/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>From the histogram, we can easily see that EM density estimation fits the real density very well. Not surprise to us, EM density estimation is a better choice comparing with Gaussian kernel density estimation for this data set.</p>
 </div>
-<div id="example---em-algorithm-as-a-classification-tool-for-mixture-probabaility-density." class="section level2">
+<div id="example---em-algorithm-as-a-classification-tool-for-mixture-probabaility-density." class="section level2" number="2.3">
 <h2><span class="header-section-number">2.3</span> Example - EM algorithm as a classification tool for mixture probabaility density.</h2>
 <p>We can classify <span class="math inline">\(x_i\)</span> to be 1st group if <span class="math inline">\(T_{0,i}=P(z_i=0|\mathbf{x};\boldsymbol{\theta}^{(\text{32th iteration})}) \stackrel{(1.8)}{=} \frac{0.69679 \times 1}{0.69679 \times 1 + (1-0.69679) \times 11.09327(1-x_i)^{(11.09327 -1)}} &gt; 0.5\)</span>.</p>
 <p>Use <code>R</code> to calculate</p>
@@ -563,7 +544,7 @@ table(pvalue$Diff)</code></pre>
 <p>The total number of false classified is <span class="math inline">\(321\)</span>. The false classified rate is <span class="math inline">\(321/(321+1679) = 0.1605\)</span>.</p>
 </div>
 </div>
-<div id="appendix" class="section level1">
+<div id="appendix" class="section level1" number="3">
 <h1><span class="header-section-number">3</span> Appendix</h1>
 <p>For <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are random variables,
 <span class="math display">\[\begin{equation}
@@ -583,13 +564,13 @@ E[\mathbf{I}_A] = P(A)
 <p>For <span class="math inline">\(Z_i\)</span> is group information, which is unknown and <span class="math inline">\(X_i\)</span> is known data and both <span class="math inline">\(Z_i\)</span> and <span class="math inline">\(X_i\)</span> are considered as random variables.</p>
 <p><span class="math display">\[\begin{equation}
 \begin{cases}
-T_{i,0} = P(Z_i = 0 | X_i = x_i; \tilde{\boldsymbol{\theta}}) = 
+T_{i,0} = P(Z_i = 0 | X_i = x_i; \tilde{\boldsymbol{\theta}}) =
 \frac{P(Z_i = 0 \cap X_i = x_i; \tilde{\boldsymbol{\theta}})}
-{ P(X_i = x_i; \tilde{\boldsymbol{\theta}})} 
+{ P(X_i = x_i; \tilde{\boldsymbol{\theta}})}
 = \frac{\pi_0 f_0(x_i)}{\pi_0 f_0(x_i) + \pi_1 f_1(x_i)} \\
-T_{i,1} = P(Z_i = 1 | X_i = x_i; \tilde{\boldsymbol{\theta}}) = 
+T_{i,1} = P(Z_i = 1 | X_i = x_i; \tilde{\boldsymbol{\theta}}) =
 \frac{P(Z_i = 1 \cap X_i = x_i; \tilde{\boldsymbol{\theta}})}
-{ P(X_i = x_i; \tilde{\boldsymbol{\theta}})} 
+{ P(X_i = x_i; \tilde{\boldsymbol{\theta}})}
 = \frac{\pi_1 f_1(x_i)}{\pi_0 f_0(x_i) + \pi_1 f_1(x_i)}
 \end{cases}
 \tag{A.4}
@@ -605,7 +586,7 @@ T_{i,1} = P(Z_i = 1 | X_i = x_i; \tilde{\boldsymbol{\theta}}) =
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();
@@ -623,7 +604,7 @@ $(document).ready(function () {
 
 $(document).ready(function () {
   $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
+    $(this).parent().toggleClass('nav-tabs-open');
   });
 });
 </script>
