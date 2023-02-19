@@ -8,3 +8,5 @@ Qingyang Liu (刘清扬)
 I am a fourth-year PhD student (ABD) in Statistics at the University of South Carolina, set to graduate in May 2023.
 
 My current research concentrates on robust statistics and modal regression models. I am enthusiastic about broadening my research by delving into Bayesian nonparametric models.
+
+[CV (updated 2023-02-19)](./files/Qingyang_Liu_Curriculum_Vitae.pdf)
