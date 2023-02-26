@@ -3,7 +3,7 @@ title: "Qingyang Liu's Website"
 ---
 Qingyang Liu (刘清扬)
 
-<img src="./files/headshot.jpg" width=15%>
+<img src="./files/headshot.jpg" width=50%>
 
 I am a fourth-year PhD student (ABD) in Statistics at the University of South Carolina, set to graduate in May 2023.
 
