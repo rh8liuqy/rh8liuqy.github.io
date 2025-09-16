@@ -13,7 +13,7 @@
 
 <title>Qingyang Liu’s Website</title>
 
-<script src="site_libs/header-attrs-2.15/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
@@ -178,8 +178,8 @@ $(document).ready(function () {
   border-radius: 4px;
 }
 
-.tabset-dropdown > .nav-tabs > li.active:before {
-  content: "";
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
   font-family: 'Glyphicons Halflings';
   display: inline-block;
   padding: 10px;
@@ -187,16 +187,9 @@ $(document).ready(function () {
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-  content: "&#xe258;";
-  border: none;
-}
-
-.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-  content: "";
+  content: "\e258";
   font-family: 'Glyphicons Halflings';
-  display: inline-block;
-  padding: 10px;
-  border-right: 1px solid #ddd;
+  border: none;
 }
 
 .tabset-dropdown > .nav-tabs > li.active {
@@ -277,13 +270,13 @@ $(document).ready(function () {
 
 <p>Qingyang Liu (刘清扬)</p>
 <p><img src="files/headshot.jpg" width=50%></p>
-<p>I am a fourth-year PhD student (ABD) in Statistics at the University
-of South Carolina, set to graduate in May 2023.</p>
-<p>My current research concentrates on robust statistics and modal
-regression models. I am enthusiastic about broadening my research by
-delving into Bayesian nonparametric models.</p>
+<p>I am a Postdoctoral Research Associate in Statistics at the
+University of Wisconsin - Madison. My research focuses on developing
+robust statistical methods and deep learning models for complex,
+non-Gaussian data, with applications in causal inference and health
+science.</p>
 <p><a href="./files/Qingyang_Liu_Curriculum_Vitae.pdf">CV (updated
-2023-02-19)</a></p>
+2025-September-16)</a></p>
 
 
 

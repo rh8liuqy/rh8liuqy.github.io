@@ -5,8 +5,6 @@ Qingyang Liu (刘清扬)
 
 <img src="./files/headshot.jpg" width=50%>
 
-I am a fourth-year PhD student (ABD) in Statistics at the University of South Carolina, set to graduate in May 2023.
+I am a Postdoctoral Research Associate in Statistics at the University of Wisconsin - Madison. My research focuses on developing robust statistical methods and deep learning models for complex, non-Gaussian data, with applications in causal inference and health science.
 
-My current research concentrates on robust statistics and modal regression models. I am enthusiastic about broadening my research by delving into Bayesian nonparametric models.
-
-[CV (updated 2023-02-19)](./files/Qingyang_Liu_Curriculum_Vitae.pdf)
+[CV (updated 2025-September-16)](./files/Qingyang_Liu_Curriculum_Vitae.pdf)
