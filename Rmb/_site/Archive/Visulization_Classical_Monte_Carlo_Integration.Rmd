@@ -1,0 +1,54 @@
+---
+title: "Data Visualization of Monte Carlo Approximation"
+author: "Kevin Liu"
+date: "5/20/2020"
+output: 
+  bookdown::html_document2:
+    toc: true
+    toc_depth: 2
+    self_contained: true
+bibliography: "bibliography.bib"
+link-citations: true
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(reticulate)
+matplotlib <- import("matplotlib")
+matplotlib$use("Agg", force = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.align='center',python = reticulate::eng_python, fig.width = 6,fig.height = 6, eval = TRUE)
+```
+
+I wrote a short webpage about [classical Monte Carlo Integration method](Classical_Monte_Carlo_Integration.html). In Example 3, I used Monte Carlo Integration method to get approximated value of $\pi$. Following plot is a visulization of how Monte Carlo method works.
+
+>Monte Carlo Approximation of $\pi$<br>
+1. Simulate n random variables from uniform(-1,1) as $X$.<br>
+2. Simulate n random variables from uniform(-1,1) as $Y$.<br>
+3. Plot scatter plot using $X$ and $Y$ with a unit circle.<br>
+4. Calculate the proportion of the number of dots falling inside unit circle.<br>
+5. $4\times\text{this proportion} \approx \pi$
+
+```{python}
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+np.random.seed(520)
+
+x = np.random.uniform(low = -1, high = 1, size = 1000)
+y = np.random.uniform(low = -1, high = 1, size = 1000)
+df_plot = pd.DataFrame({"x":x,"y":y})
+index = (((df_plot.x)**2 + (df_plot.y)**2) < 1)
+df1 = df_plot.loc[index,:]
+df2 = df_plot.loc[~index,:]
+
+circle = plt.Circle((0, 0), 1, color='b', fill=False)
+
+fig,ax = plt.subplots()
+ax.scatter(df1["x"],df1["y"],color = '#1f77b4',label = "Accept")
+ax.scatter(df2["x"],df2["y"],color = '#ff7f0e',label = "Reject")
+ax.add_artist(circle)
+ax.legend()
+plt.title("Monte Carlo Approximation of Pi")
+plt.show()
+plt.close()
+```

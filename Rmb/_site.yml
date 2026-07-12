@@ -1,10 +1,10 @@
 name: "my-website"
 navbar:
-  title: "Statistics by steps"
+  title: "Qingyang Liu's Website"
   left:
     - text: "Home"
       href: index.html
-    - text: "Archives"
-      href: archives.html
-    - text: "About"
-      href: about.html
+    - text: "Research"
+      href: Research.html
+    - text: "Teaching"
+      href: Teach.html

@@ -1,0 +1,35 @@
+---
+title: "Teaching"
+output:
+  html_document:
+    theme: flatly
+    toc: false
+---
+
+> 🚧 **Notice:** This page is currently being updated. Please check back soon.
+
+I am dedicated to making statistics accessible, intuitive, and computationally relevant for students of all backgrounds. My teaching integrates theoretical foundations with hands-on data analysis.
+
+---
+
+## **Current Teaching**
+
+### **Wake Forest University** (Fall 2026)
+
+> ### **STA 112: Introduction to Regression and Data Science**
+> *   **Role:** Instructor
+> *   An introduction to core statistical concepts, data visualization, and basic inference methods using R.
+> *   [[Course Syllabus Placeholder](#)]
+
+---
+
+## **Prior Teaching Experience**
+
+### **University of South Carolina** (Graduate Teaching Assistant)
+
+*   **STAT XXX: Course Title** (Semester Year)  
+    Brief description of your responsibilities (e.g., led recitations, held office hours, graded exams).
+
+*   **STAT XXX: Course Title** (Semester Year)  
+    Brief description of your responsibilities.
+  

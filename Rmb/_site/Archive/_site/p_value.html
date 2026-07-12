@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Kevin Liu" />
+
+
+<title>p-Value is a test statistic</title>
+
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+<style type="text/css">
+/* for pandoc --citeproc since 2.11 */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Statistics by steps</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="archives.html">Archives</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore"><span class="math inline">\(p\)</span>-Value is a test statistic</h1>
+<h4 class="author">Kevin Liu</h4>
+<h4 class="date">5/15/2020</h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#definition-of-p-value" id="toc-definition-of-p-value"><span class="toc-section-number">1</span> Definition of <span class="math inline">\(p\)</span>-value</a></li>
+<li><a href="#example-in-ordinary-least-square-regression" id="toc-example-in-ordinary-least-square-regression"><span class="toc-section-number">2</span> Example in ordinary least square regression</a></li>
+<li><a href="#references" id="toc-references">References</a></li>
+</ul>
+</div>
+
+<div id="definition-of-p-value" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> Definition of <span class="math inline">\(p\)</span>-value</h1>
+<p>A <span class="math inline">\(p\)</span>-value, <span class="math inline">\(p(\mathbf{X})\)</span>, is a <strong>test statistic</strong>, a type of random variable, satisfying <span class="math inline">\(0\le p(\mathbf{x}) \le 1\)</span> for every sample point <span class="math inline">\(\mathbf{x}\)</span>.</p>
+<p>A <span class="math inline">\(p\)</span>-value is <em>valid</em> if, <span class="math inline">\(\forall \theta \in \Theta_0\)</span> and <span class="math inline">\(0\le \alpha \le 1\)</span>.</p>
+<p><span class="math display" id="eq:e1">\[\begin{equation}
+P(p(\mathbf{X}) \le \alpha |\theta)\le \alpha
+\tag{1.1}
+\end{equation}\]</span></p>
+<p>Hence by definition, if <span class="math inline">\(H_0\)</span> is simple, such as <span class="math inline">\(H_0:\theta=\theta_0\)</span>, CDF of a valid <span class="math inline">\(p\)</span>-value is <span class="math inline">\(P(p(\mathbf{X}) \le \alpha|\theta_0) = \alpha\)</span>. Recall that a random variable <span class="math inline">\(T\)</span> follows uniform(0,1) distribution if and only if <span class="math inline">\(P(T\le t) = t, \quad \forall t\in[0,1]\)</span>. Hence when null hypothesis is simple and true, <span class="math inline">\(p\)</span>-value statistic follows uniform(0,1) distribution.</p>
+</div>
+<div id="example-in-ordinary-least-square-regression" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Example in ordinary least square regression</h1>
+<p>In ordinary least square regression</p>
+<p><span class="math display" id="eq:e2">\[\begin{equation}
+\boldsymbol{y} = \boldsymbol{X\beta} + \boldsymbol{e}
+\tag{2.1}
+\end{equation}\]</span></p>
+<p><span class="math display" id="eq:e3">\[\begin{equation}
+e_i \sim_{\text{i.i.d}} N(0,1)
+\tag{2.2}
+\end{equation}\]</span></p>
+<p><span class="math display" id="eq:e4">\[\begin{equation}
+\boldsymbol{X} =
+\begin{bmatrix}
+0 &amp; \sqrt{10}\\
+1 &amp; \sqrt{11}\\
+2 &amp; \sqrt{12}\\
+3 &amp; \sqrt{13}\\
+4 &amp; \sqrt{14}\\
+5 &amp; \sqrt{15}\\
+6 &amp; \sqrt{16}\\
+7 &amp; \sqrt{17}\\
+8 &amp; \sqrt{18}\\
+9 &amp; \sqrt{19}\\
+\end{bmatrix}
+\tag{2.3}
+\end{equation}\]</span></p>
+<p><span class="math display" id="eq:e5">\[\begin{equation}
+\boldsymbol{\beta} =
+\begin{bmatrix}
+\beta_1\\
+\beta_2
+\end{bmatrix} =
+\begin{bmatrix}
+5\\
+0
+\end{bmatrix}
+\tag{2.4}
+\end{equation}\]</span></p>
+<p>In each iteration, I simulate 100 <span class="math inline">\(e_i\)</span>, then use <a href="#eq:e2">(2.1)</a> to get <span class="math inline">\(\boldsymbol{y}\)</span>. I use <code>statsmodels</code> package to calculate <span class="math inline">\(p\)</span>-value of each <span class="math inline">\(\boldsymbol{\beta}\)</span>. I only keep <span class="math inline">\(p\)</span>-value of <span class="math inline">\(\beta_2\)</span>.</p>
+<p>I repeat same process for 5000 times, then plot the histogram based on <span class="math inline">\(p\)</span>-value of <span class="math inline">\(\beta_2\)</span>.</p>
+<p>Histogram of <span class="math inline">\(p\)</span>-value for <span class="math inline">\(\beta_2\)</span> seems to be unifrom(0,1).</p>
+<pre class="python"><code>import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+
+np.random.seed(515)
+X1 = np.array(np.arange(0,10,1))
+X2 = np.array(np.arange(10,20,1))
+X2 = np.sqrt(X2)
+X = np.column_stack((X1,X2))
+betas = np.array([5,0])
+
+pvalues = []
+for i in range(5000):
+  e = np.random.normal(size = 10)
+  Y = X @ betas + e
+  model = sm.OLS(Y,X)
+  model_fit = model.fit()
+  pvalues.append(model_fit.pvalues[1])
+
+df = pd.DataFrame(pvalues)
+plt.figure()
+fig = df.hist()
+plt.title(&quot;Histogram of p-values for beta2&quot;)
+plt.ylabel(&quot;count&quot;)
+plt.show()</code></pre>
+<p><img src="p_value_files/figure-html/unnamed-chunk-1-1.png" width="480" style="display: block; margin: auto;" /></p>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<p><span class="citation">Casella and Berger (<a href="#ref-CaseBerg:01" role="doc-biblioref">2001</a>)</span></p>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-CaseBerg:01" class="csl-entry">
+Casella, George, and Roger Berger. 2001. <em>Statistical Inference</em>. <span>Textbook Binding</span>; <span>Duxbury Resource Center</span>.
+</div>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,312 @@
+---
+title: "Finite Difference"
+author: "Kevin Liu"
+date: "5/08/2020"
+output: 
+  bookdown::html_document2:
+    toc: true
+    toc_depth: 4
+    self_contained: true
+bibliography: "bibliography.bib"
+link-citations: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.align='center')
+library(reticulate)
+```
+
+I write this page to record my study about numerical calculation of derivative, gradient, hessian matrix and jacobian matrix. Hope you find this helpful. 
+
+# Load `python` library
+
+```{python}
+import numpy as np
+```
+
+# Derivative
+
+Derivative of function $f$ at $a$ is defined as:
+
+\begin{equation}
+f^{\prime}(a)=\lim _{h \rightarrow 0} \frac{f(a+h)-f(a)}{h}
+(\#eq:e1)
+\end{equation}
+
+Finite difference is often used as an approximation of the derivative. Symetric derivative of function $f$ at point $a$ is defined as:
+
+\begin{equation}
+f^{\prime}(a)=\lim _{h \rightarrow 0} \frac{f(a+h)-f(a-h)}{2 h}
+(\#eq:e2)
+\end{equation}
+
+It is easy to find out why such approximation\@ref(eq:e2) is appropriate. 
+Taylor series of function $f(x+h)$ at point $x$ is defined as:
+
+\begin{equation}
+f(x+h)=f(x)+f^{\prime}(x) h+f^{\prime \prime}(x) \frac{h^{2}}{2}+f^{\prime \prime \prime}(x) \frac{h^{3}}{6}+\cdots
+(\#eq:e3)
+\end{equation}
+
+Similarly, Taylor series of function $f(x-h)$ at point $x$ is defined as:
+\begin{equation}
+f(x-h)=f(x)-f^{\prime}(x) h+f^{\prime \prime}(x) \frac{h^{2}}{2}-f^{\prime \prime \prime}(x) \frac{h^{3}}{6}+\cdots
+(\#eq:e4)
+\end{equation}
+
+From \@ref(eq:e3), we have the forward difference approximation:
+\begin{equation}
+f^{\prime}(x)\approx\frac{f(x+h)-f(x)}{h}
+(\#eq:e5)
+\end{equation}
+
+From \@ref(eq:e4), we get the backward difference approximation:
+\begin{equation}
+f^{\prime}(x)\approx\frac{f(x)-f(x-h)}{h}
+(\#eq:e6)
+\end{equation}
+
+Combine \@ref(eq:e3) and \@ref(eq:e4), we get the central difference approximation
+
+\begin{equation}
+f^{\prime}(x)\approx\frac{f(x+h)-f(x-h)}{2 h}
+(\#eq:e7)
+\end{equation}
+
+For example, 
+
+$$f(x) = x^2$$
+$$f^{\prime}(x) = 2x \text{, } f^{\prime}(1)=2$$ 
+
+```{python derivative}
+def derivative(func,initial,delta=1e-6):
+  f = func
+  f1 = f(initial+delta)
+  f2 = f(initial-delta)
+  output = (f1-f2)/(2*delta)
+  return output
+
+def f1(x):
+  output = x**2
+  return output
+
+derivative(f1,initial=1)
+```
+
+# Gradient
+
+The gradient of a a scalar-valued differentiable function $f$ of several variables, $f: \mathbf{R}^{n} \rightarrow \mathbf{R}$, is a vector-valued function $\nabla f: \mathbf{R}^{n} \rightarrow \mathbf{R}^{n}$, whose value at point $p$ is the vector whose components are the partial derivatives of $f$ at $p$.
+
+\begin{equation}
+\nabla f(p)=\left[\begin{array}{c}
+\frac{\partial f}{\partial x_{1}}(p) \\
+\vdots \\
+\frac{\partial f}{\partial x_{n}}(p)
+\end{array}\right]
+(\#eq:e8)
+\end{equation}
+
+Define $e_i = [I(1=i),...,I(n=i)]^T$, where $I()$ is indication function.
+
+\begin{equation}
+\nabla f(x)=\left[\begin{array}{c}
+\frac{\partial f}{\partial x_{1}}(x) \\
+\vdots \\
+\frac{\partial f}{\partial x_{n}}(x)
+\end{array}\right] \approx \frac{1}{2 h}\left[\begin{array}{c}
+f\left(x+e_{1} h\right)-f\left(x-e_{1} h\right) \\
+\vdots \\
+f\left(x+e_{n} h\right)-f\left(x-e_{n} h\right)
+\end{array}\right]
+(\#eq:e9)
+\end{equation}
+
+For example, 
+
+$$f(x,y,z)=x^2+y^2+2xyz$$
+$$\nabla f(x,y,z)=
+\left[\begin{array}{c}
+2x+2yz \\
+2y+2xz \\
+2xy
+\end{array}\right] \text{, } \nabla f(1,1,1)=
+\left[\begin{array}{c}
+4 \\
+4 \\
+2
+\end{array}\right]$$
+
+```{python gradient}
+def gradient(func, initial, delta=1e-6):
+  f = func
+  initial = np.array(initial, dtype=float)
+  n = len(initial)
+  output = np.zeros(n)
+  for i in range(n):
+    ei = np.zeros(n)
+    ei[i] = 1
+    f1 = f(initial + delta * ei)
+    f2 = f(initial - delta * ei)
+    output[i] = (f1-f2)/(2*delta)
+  output = output.reshape(n,1)
+  return output
+
+def f2(x):
+  x1 = x[0]
+  x2 = x[1]
+  x3 = x[2]
+  output = x1**2 + x2**2 + 2*x1*x2*x3
+  return output
+  
+gradient(f2,initial=[1,1,1])
+```
+
+# Hessian Matrix
+
+Hessian matrix $\mathbf{H}$ of a scalar valued function $f$ is a square $n\times n$ matrix, defined as follows:
+
+\begin{equation}
+\mathbf{H}=\left[\begin{array}{cccc}
+\frac{\partial^{2} f}{\partial x_{1}^{2}} & \frac{\partial^{2} f}{\partial x_{1} \partial x_{2}} & \cdots & \frac{\partial^{2} f}{\partial x_{1} \partial x_{n}} \\
+\frac{\partial^{2} f}{\partial x_{2} \partial x_{1}} & \frac{\partial^{2} f}{\partial x_{2}^{2}} & \cdots & \frac{\partial^{2} f}{\partial x_{2} \partial x_{n}} \\
+\vdots & \vdots & \ddots & \vdots \\
+\frac{\partial^{2} f}{\partial x_{n} \partial x_{1}} & \frac{\partial^{2} f}{\partial x_{n} \partial x_{2}} & \cdots & \frac{\partial^{2} f}{\partial x_{n}^{2}}
+\end{array}\right]
+(\#eq:e10)
+\end{equation}
+
+Equivalently, each element of hessian matrix can be defined as
+
+\begin{equation}
+\mathbf{H}_{i, j}=\frac{\partial^{2} f}{\partial x_{i} \partial x_{j}}
+(\#eq:e11)
+\end{equation}
+
+Using finite differences method, 
+
+\begin{equation}
+\frac{\partial^{2} f}{\partial x_{i} \partial x_{j}} \approx 
+\frac{f(x+e_i h + e_j h)-f(x+e_i h - e_j h)-f(x-e_i h + e_j h)+f(x-e_i h - e_j h)}{4 h^{2}}
+(\#eq:e12)
+\end{equation}
+
+For example,
+$$f(x,y,z)=x^2+y^2+xy+z+xyz$$
+$$\mathbf{H}=
+\left[\begin{array}{ccc}
+2 & 1+z & y\\
+1 + z & 2 & x\\
+y & x & 0
+\end{array}\right]\text{, }\mathbf{H}(1,1,1)=
+\left[\begin{array}{ccc}
+2 & 2 & 1\\
+2 & 2 & 1\\
+1 & 1 & 0
+\end{array}\right]$$
+
+```{python hessian}
+def hessian(func,initial,delta=1e-3):
+  f = func
+  initial = np.array(initial, dtype=float)
+  n = len(initial)
+  output = np.matrix(np.zeros(n*n))
+  output = output.reshape(n,n)
+  for i in range(n):
+    for j in range(n):
+      ei = np.zeros(n)
+      ei[i] = 1
+      ej = np.zeros(n)
+      ej[j] = 1
+      f1 = f(initial + delta * ei + delta * ej)
+      f2 = f(initial + delta * ei - delta * ej)
+      f3 = f(initial - delta * ei + delta * ej)
+      f4 = f(initial - delta * ei - delta * ej)
+      numdiff = (f1-f2-f3+f4)/(4*delta*delta)
+      output[i,j] = numdiff
+  return output
+  
+def f3(x):
+  x1 = x[0]
+  x2 = x[1]
+  x3 = x[2]
+  output = x1**2 + x2**2 + x1*x2 + x3 + x1*x2*x3
+  return output
+
+hessian(f3,[1,1,1])
+```
+
+# Jacobian Matrix
+
+Jacobian matrix $\mathbf{J}$ of a vector-valued function in several variables is the matrix of all its first-order partial derivatives.
+
+\begin{equation}
+\mathbf{J} = \left[\begin{array}{ccc}
+\frac{\partial f_{1}}{\partial x_{1}} & \cdots & \frac{\partial f_{1}}{\partial x_{n}} \\
+\vdots & \ddots & \vdots \\
+\frac{\partial f_{m}}{\partial x_{1}} & \cdots & \frac{\partial f_{m}}{\partial x_{n}}
+\end{array}\right] =
+\left[\begin{array}{c}
+\nabla f_1(x)^T\\
+\vdots\\
+\nabla f_n(x)^T
+\end{array}\right]
+(\#eq:e13)
+\end{equation}
+
+Jacobian matrix is row combination of transposed gradient of $f_1,...,f_n$. Hence its approximation can be calculated based on \@ref(eq:e9)
+
+For example
+
+$$\begin{bmatrix}
+f_1(x,y)\\
+f_2(x,y)\\
+f_3(x,y)
+\end{bmatrix}=
+\begin{bmatrix}
+x^2\\
+y^2\\
+xy
+\end{bmatrix}$$
+
+$$\mathbf{J}=
+\begin{bmatrix}
+2x & 0\\
+0 & 2y\\
+y & x
+\end{bmatrix}\text{, }
+\mathbf{J}(1,2)=
+\begin{bmatrix}
+2 & 0\\
+0 & 4\\
+2 & 1
+\end{bmatrix}$$
+
+```{python jacobian}
+def jacobian(func,initial,delta=1e-3):
+  f = func
+  nrow = len(f(initial))
+  ncol = len(initial)
+  output = np.zeros(nrow*ncol)
+  output = output.reshape(nrow,ncol)
+  for i in range(nrow):
+    for j in range(ncol):
+      ej = np.zeros(ncol)
+      ej[j] = 1
+      dij = (f(initial+ delta * ej)[i] - f(initial- delta * ej)[i])/(2*delta)
+      output[i,j] = dij
+  return output
+  
+def f4(x):
+  x1 = x[0]
+  x2 = x[1]
+  output = np.zeros(3)
+  output[0] = x[0]**2
+  output[1] = x[1]**2
+  output[2] = x[0]*x[1]
+  return output
+  
+jacobian(f4,[1,2])
+```
+
+`r if (knitr::is_html_output()) '# References {-}'`
+@finite

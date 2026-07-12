@@ -1,0 +1,35 @@
+---
+title: "Research"
+output:
+  html_document:
+    theme: flatly
+    toc: true
+    toc_float: true
+---
+
+> 🚧 **Notice:** This page is currently being updated with my full publication and software record. Please check back soon or view my CV for a complete list.
+
+My research interests lie at the intersection of robust statistical methods and deep learning models for complex, non-Gaussian data, with applications in causal inference and health science.
+
+---
+
+## **Journal Publications**
+
+*   **Paper Title**  
+    **Q. Liu**, Co-author 1, and Co-author 2.  
+    *Journal Name* (Year).  
+    [[Journal Link](#)] [[arXiv](#)] [[Code](#)]
+
+---
+
+## **Preprints & Working Papers**
+
+*   **Working Paper Title**  
+    **Q. Liu** and Co-author.  
+    *In Preparation / Under Review* (Year). [[arXiv](#)]
+
+---
+
+## **Software & Open Source**
+
+*   **`PackageName` (R/Python Package):** Brief description of what your software or package does. Available on [GitHub](#).

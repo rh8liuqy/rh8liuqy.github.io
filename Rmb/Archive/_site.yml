@@ -1,0 +1,10 @@
+name: "my-website"
+navbar:
+  title: "Statistics by steps"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "Archives"
+      href: archives.html
+    - text: "About"
+      href: about.html

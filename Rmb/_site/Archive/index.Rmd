@@ -1,0 +1,10 @@
+---
+title: "Qingyang Liu's Website"
+---
+Qingyang Liu (刘清扬)
+
+<img src="./files/headshot.jpg" width=50%>
+
+I am a Postdoctoral Research Associate in Statistics at the University of Wisconsin - Madison. My research focuses on developing robust statistical methods and deep learning models for complex, non-Gaussian data, with applications in causal inference and health science.
+
+[CV (updated 2025-September-16)](./files/Qingyang_Liu_Curriculum_Vitae.pdf)

@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Kevin Liu" />
+
+
+<title>Example for Mixed Model Equations and REML</title>
+
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+<style type="text/css">
+/* for pandoc --citeproc since 2.11 */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Statistics by steps</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="archives.html">Archives</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Example for Mixed Model Equations and REML</h1>
+<h4 class="author">Kevin Liu</h4>
+<h4 class="date">7/10/2018</h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#create-dataframe-df.bond" id="toc-create-dataframe-df.bond"><span class="toc-section-number">1</span> Create Dataframe <code>df.bond</code></a></li>
+<li><a href="#linear-mixed-model-by-maximum-likelihood-estimation" id="toc-linear-mixed-model-by-maximum-likelihood-estimation"><span class="toc-section-number">2</span> Linear mixed model by maximum likelihood estimation</a></li>
+<li><a href="#linear-mixed-model-by-reml" id="toc-linear-mixed-model-by-reml"><span class="toc-section-number">3</span> Linear mixed model by REML</a></li>
+<li><a href="#references" id="toc-references">References</a></li>
+</ul>
+</div>
+
+<p>I will use <code>bond</code> data from Chapter2 of <span class="citation">Littell et al. (<a href="#ref-Littell:2006:SMM:1205543" role="doc-biblioref">2006</a>)</span> as a example.</p>
+<p>#Load Packages</p>
+<pre class="r"><code>library(lme4)</code></pre>
+<pre><code>## Loading required package: Matrix</code></pre>
+<pre><code>## 
+## Attaching package: &#39;Matrix&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:tidyr&#39;:
+## 
+##     expand, pack, unpack</code></pre>
+<pre class="r"><code>library(optimization)</code></pre>
+<pre><code>## Loading required package: Rcpp</code></pre>
+<div id="create-dataframe-df.bond" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> Create Dataframe <code>df.bond</code></h1>
+<pre class="r"><code>df.bond &lt;- data.frame(ingot = rep(1:7,each = 3),
+                      metal = rep(c(&quot;n&quot;,&quot;i&quot;,&quot;c&quot;),7),
+                      pres = c(67,71.9,72.2,
+                               67.5,68.8,66.4,
+                               76,82.6,74.5,
+                               72.7,78.1,67.3,
+                               73.1,74.2,73.2,
+                               65.8,70.8,68.7,
+                               75.6,84.9,69))
+df.bond$ingot &lt;- factor(df.bond$ingot)
+df.bond</code></pre>
+<pre><code>##    ingot metal pres
+## 1      1     n 67.0
+## 2      1     i 71.9
+## 3      1     c 72.2
+## 4      2     n 67.5
+## 5      2     i 68.8
+## 6      2     c 66.4
+## 7      3     n 76.0
+## 8      3     i 82.6
+## 9      3     c 74.5
+## 10     4     n 72.7
+## 11     4     i 78.1
+## 12     4     c 67.3
+## 13     5     n 73.1
+## 14     5     i 74.2
+## 15     5     c 73.2
+## 16     6     n 65.8
+## 17     6     i 70.8
+## 18     6     c 68.7
+## 19     7     n 75.6
+## 20     7     i 84.9
+## 21     7     c 69.0</code></pre>
+</div>
+<div id="linear-mixed-model-by-maximum-likelihood-estimation" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Linear mixed model by maximum likelihood estimation</h1>
+<p>First we build linear mixed model by <code>lme4</code> package with MLE method. Then we compare the parameter estimations by using equations from <a href="Linear_mixed_model_equations.html">Some important proof of Mixed Model Equations and REML</a> via <code>optimization</code> package.</p>
+<pre class="r"><code>lmm.bond &lt;- lmer( pres ~ metal + (1|ingot),REML = FALSE,data = df.bond)
+summary(lmm.bond)</code></pre>
+<pre><code>## Linear mixed model fit by maximum likelihood  [&#39;lmerMod&#39;]
+## Formula: pres ~ metal + (1 | ingot)
+##    Data: df.bond
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    125.7    130.9    -57.9    115.7       16 
+## 
+## Scaled residuals: 
+##      Min       1Q   Median       3Q      Max 
+## -1.45505 -0.81901  0.08048  0.52228  1.96114 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  ingot    (Intercept) 9.812    3.132   
+##  Residual             8.890    2.982   
+## Number of obs: 21, groups:  ingot, 7
+## 
+## Fixed effects:
+##             Estimate Std. Error t value
+## (Intercept)  70.1857     1.6346  42.939
+## metali        5.7143     1.5937   3.585
+## metaln        0.9143     1.5937   0.574
+## 
+## Correlation of Fixed Effects:
+##        (Intr) metali
+## metali -0.488       
+## metaln -0.488  0.500</code></pre>
+<pre class="r"><code>anova(lmm.bond)</code></pre>
+<pre><code>## Analysis of Variance Table
+##       npar Sum Sq Mean Sq F value
+## metal    2  131.9   65.95  7.4186</code></pre>
+<p>For linear mixed model</p>
+<p><span class="math display">\[\begin{equation}
+\boldsymbol{Y} = \boldsymbol{X\beta} + \boldsymbol{Zu} + \boldsymbol{e}
+\end{equation}\]</span></p>
+<p><span class="math display">\[\begin{equation}
+\begin{pmatrix}
+\boldsymbol{u}\\
+\boldsymbol{e}
+\end{pmatrix} \sim \mathcal{N}
+\begin{pmatrix}
+\begin{pmatrix}
+\boldsymbol{0}\\
+\boldsymbol{0}
+\end{pmatrix},
+\begin{pmatrix}
+\boldsymbol{G} &amp; \boldsymbol{0}\\
+\boldsymbol{0} &amp; \boldsymbol{R}
+\end{pmatrix}
+\end{pmatrix}
+\end{equation}\]</span></p>
+<p>Design matrix <span class="math inline">\(\boldsymbol{X}\)</span> is</p>
+<pre class="r"><code>matrix.x &lt;- model.matrix(lmm.bond)
+matrix.x</code></pre>
+<pre><code>##    (Intercept) metali metaln
+## 1            1      0      1
+## 2            1      1      0
+## 3            1      0      0
+## 4            1      0      1
+## 5            1      1      0
+## 6            1      0      0
+## 7            1      0      1
+## 8            1      1      0
+## 9            1      0      0
+## 10           1      0      1
+## 11           1      1      0
+## 12           1      0      0
+## 13           1      0      1
+## 14           1      1      0
+## 15           1      0      0
+## 16           1      0      1
+## 17           1      1      0
+## 18           1      0      0
+## 19           1      0      1
+## 20           1      1      0
+## 21           1      0      0
+## attr(,&quot;assign&quot;)
+## [1] 0 1 1
+## attr(,&quot;contrasts&quot;)
+## attr(,&quot;contrasts&quot;)$metal
+## [1] &quot;contr.treatment&quot;
+## 
+## attr(,&quot;msgScaleX&quot;)
+## character(0)</code></pre>
+<p>Design matrix <span class="math inline">\(\boldsymbol{Z}\)</span> is</p>
+<pre class="r"><code>df.z &lt;- read.csv(&quot;files/Z.csv&quot;, header = FALSE)
+matrix.z &lt;- as.matrix(df.z)
+colnames(matrix.z) &lt;- paste0(&quot;ingot:&quot;,1:7)
+matrix.z</code></pre>
+<pre><code>##       ingot:1 ingot:2 ingot:3 ingot:4 ingot:5 ingot:6 ingot:7
+##  [1,]       1       0       0       0       0       0       0
+##  [2,]       1       0       0       0       0       0       0
+##  [3,]       1       0       0       0       0       0       0
+##  [4,]       0       1       0       0       0       0       0
+##  [5,]       0       1       0       0       0       0       0
+##  [6,]       0       1       0       0       0       0       0
+##  [7,]       0       0       1       0       0       0       0
+##  [8,]       0       0       1       0       0       0       0
+##  [9,]       0       0       1       0       0       0       0
+## [10,]       0       0       0       1       0       0       0
+## [11,]       0       0       0       1       0       0       0
+## [12,]       0       0       0       1       0       0       0
+## [13,]       0       0       0       0       1       0       0
+## [14,]       0       0       0       0       1       0       0
+## [15,]       0       0       0       0       1       0       0
+## [16,]       0       0       0       0       0       1       0
+## [17,]       0       0       0       0       0       1       0
+## [18,]       0       0       0       0       0       1       0
+## [19,]       0       0       0       0       0       0       1
+## [20,]       0       0       0       0       0       0       1
+## [21,]       0       0       0       0       0       0       1</code></pre>
+<p>Define matrix <span class="math inline">\(\boldsymbol{G}\)</span> as</p>
+<p><span class="math display">\[\boldsymbol{G}_{7 \times 7} = \boldsymbol{I} \sigma^2_{\text{ingot}}\]</span></p>
+<p>Define matrix <span class="math inline">\(\boldsymbol{R}\)</span> as</p>
+<p><span class="math display">\[\boldsymbol{R}_{21 \times 21} = \boldsymbol{I} \sigma^2_{\text{residual}}\]</span></p>
+<p>Use equation(4.9) and equation (6.1) from <a href="Linear_mixed_model_equations.html">Some important proof of Mixed Model Equations and REML</a></p>
+<p><span class="math display">\[\begin{equation}
+\tilde{\boldsymbol{\beta}}
+=
+(\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X})^{-1}
+\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{Y}
+\tag{4.9}
+\end{equation}\]</span></p>
+<p><span class="math display">\[\begin{equation}
+-2\ell(\boldsymbol{\theta};\boldsymbol{Y})
+=
+\text{log}|\tilde{\boldsymbol{V}}(\boldsymbol{\theta})|
++
+(\boldsymbol{Y}-\boldsymbol{X}\tilde{\boldsymbol{\beta}}(\boldsymbol{\theta}))^T
+\tilde{\boldsymbol{V}}(\boldsymbol{\theta})^{-1}
+(\boldsymbol{Y}-\boldsymbol{X}\tilde{\boldsymbol{\beta}}(\boldsymbol{\theta}))
+\tag{6.1}
+\end{equation}\]</span></p>
+<p>Estimation of covariance parameters</p>
+<pre class="r"><code>loglikef &lt;- function(x) {
+  vector.Y &lt;- as.vector(df.bond$pres)
+  matrix.G &lt;- x[1] * diag(1,nrow = 7)
+  matrix.R &lt;- x[2] * diag(1,nrow = 21)
+  matrix.V &lt;- matrix.z %*% matrix.G %*% t(matrix.z) + matrix.R
+  vector.Beta &lt;- solve(t(matrix.x) %*% solve(matrix.V) %*% matrix.x) %*% t(matrix.x) %*% solve(matrix.V) %*% vector.Y
+  loglike &lt;- log(det(matrix.V)) + t(vector.Y - matrix.x %*% vector.Beta) %*% solve(matrix.V) %*% (vector.Y - matrix.x %*% vector.Beta)
+  return(c(loglike))
+}
+
+optim_nm(fun = loglikef, k = 2, start = c(1,1),maximum= FALSE, tol = 0.0000000000001)$par</code></pre>
+<pre><code>##                   
+## 9.812383 8.889932</code></pre>
+<pre class="r"><code>hat.cov.para &lt;- optim_nm(fun = loglikef, k = 2, start = c(1,1),maximum= FALSE, tol = 0.0000000000001)$par</code></pre>
+<p>We have that</p>
+<p><span class="math display">\[\sigma^2_{\text{ingot}} = 9.812383 \text{ and } \sigma^2_{\text{residual}} = 8.889932\]</span>
+This is identical to estimations from <code>lme4</code>.</p>
+<p>Then estimate fix effect <span class="math inline">\(\boldsymbol{\beta}\)</span></p>
+<pre class="r"><code>hat.beta &lt;- function(x) {
+  vector.Y &lt;- as.vector(df.bond$pres)
+  matrix.G &lt;- x[1] * diag(1,nrow = 7)
+  matrix.R &lt;- x[2] * diag(1,nrow = 21)
+  matrix.V &lt;- matrix.z %*% matrix.G %*% t(matrix.z) + matrix.R
+  vector.Beta &lt;- solve(t(matrix.x) %*% solve(matrix.V) %*% matrix.x) %*% t(matrix.x) %*% solve(matrix.V) %*% vector.Y
+  return(vector.Beta)
+}
+round(hat.beta(x = hat.cov.para),4)</code></pre>
+<pre><code>##                [,1]
+## (Intercept) 70.1857
+## metali       5.7143
+## metaln       0.9143</code></pre>
+<p>We have that
+<span class="math display">\[\boldsymbol{\beta}
+=
+\begin{bmatrix} \beta_0\\
+\beta_1\\
+\beta_2
+\end{bmatrix} =
+\begin{bmatrix}
+70.1857\\
+5.7143\\
+0.9143
+\end{bmatrix}\]</span></p>
+<p>Again, this is identical to estimations from <code>lme4</code>.</p>
+</div>
+<div id="linear-mixed-model-by-reml" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> Linear mixed model by REML</h1>
+<p>Same as <a href="#linear-mixed-model-by-maximum-likelihood-estimation">section 3</a>, firstly we build linear mixed model by <code>lme4</code> package with REML option. Then we compare ‘hand’ calculated estimations with estimations from <code>lme4</code>.</p>
+<pre class="r"><code>relmm.bond &lt;- lmer( pres ~ metal + (1|ingot),REML = TRUE,data = df.bond)
+summary(relmm.bond)</code></pre>
+<pre><code>## Linear mixed model fit by REML [&#39;lmerMod&#39;]
+## Formula: pres ~ metal + (1 | ingot)
+##    Data: df.bond
+## 
+## REML criterion at convergence: 107.8
+## 
+## Scaled residuals: 
+##      Min       1Q   Median       3Q      Max 
+## -1.34712 -0.75825  0.07451  0.48354  1.81566 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  ingot    (Intercept) 11.45    3.383   
+##  Residual             10.37    3.220   
+## Number of obs: 21, groups:  ingot, 7
+## 
+## Fixed effects:
+##             Estimate Std. Error t value
+## (Intercept)  70.1857     1.7655  39.754
+## metali        5.7143     1.7214   3.320
+## metaln        0.9143     1.7214   0.531
+## 
+## Correlation of Fixed Effects:
+##        (Intr) metali
+## metali -0.488       
+## metaln -0.488  0.500</code></pre>
+<p>Using equation(7.3) from <a href="Linear_mixed_model_equations.html">Some important proof of Mixed Model Equations and REML</a></p>
+<p><span class="math display">\[\begin{equation}
+-2\ell_{REML}(\boldsymbol{\theta};\boldsymbol{Y}) =
+\text{log} |\tilde{\boldsymbol{V}}(\boldsymbol{\theta})|
++
+\text{log} |\boldsymbol{X}^T \tilde{\boldsymbol{V}}^{-1} \boldsymbol{X}|
++
+(\boldsymbol{Y} - \boldsymbol{X}\tilde{\boldsymbol{\beta}}(\boldsymbol{\theta}))^T
+\tilde{\boldsymbol{V}}^{-1}
+(\boldsymbol{Y} - \boldsymbol{X}\tilde{\boldsymbol{\beta}}(\boldsymbol{\theta}))
+\tag{7.3}
+\end{equation}\]</span></p>
+<pre class="r"><code>reloglikef &lt;- function(x) {
+  vector.Y &lt;- as.vector(df.bond$pres)
+  matrix.G &lt;- x[1] * diag(1,nrow = 7)
+  matrix.R &lt;- x[2] * diag(1,nrow = 21)
+  matrix.V &lt;- matrix.z %*% matrix.G %*% t(matrix.z) + matrix.R
+  vector.Beta &lt;- solve(t(matrix.x) %*% solve(matrix.V) %*% matrix.x) %*% t(matrix.x) %*% solve(matrix.V) %*% vector.Y
+  loglike &lt;- log(det(matrix.V)) + log(det(t(matrix.x) %*% solve(matrix.V) %*% matrix.x)) + t(vector.Y - matrix.x %*% vector.Beta) %*% solve(matrix.V) %*% (vector.Y - matrix.x %*% vector.Beta)
+  return(c(loglike))
+}
+
+optim_nm(fun = reloglikef, k = 2, start = c(5,6),maximum= FALSE, tol = 0.0000000000001)$par</code></pre>
+<pre><code>##                   
+## 11.44778 10.37159</code></pre>
+<p>Again, parameter estimations are close enough.</p>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<p><span class="citation">Littell et al. (<a href="#ref-Littell:2006:SMM:1205543" role="doc-biblioref">2006</a>)</span></p>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-Littell:2006:SMM:1205543" class="csl-entry">
+Littell, Ramon C., George A. Milliken, Walter W. Stroup, Russell D. Wolfinger, and Schabenberber Oliver. 2006. <em>SAS for Mixed Models, Second Edition</em>. SAS Publishing.
+</div>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

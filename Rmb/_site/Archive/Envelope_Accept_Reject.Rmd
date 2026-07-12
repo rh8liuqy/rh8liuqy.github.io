@@ -1,0 +1,54 @@
+---
+title: "The Envelope Accept/Reject Algorithm"
+author: "Kevin Liu"
+date: "5/25/2020"
+output: 
+  bookdown::html_document2:
+    toc: true
+    toc_depth: 2
+    self_contained: true
+bibliography: "bibliography.bib"
+link-citations: true
+notice: | 
+  @CaseBerg:01 @10.5555/1051451
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(reticulate)
+matplotlib <- import("matplotlib")
+matplotlib$use("Agg", force = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.align='center',python = reticulate::eng_python, fig.width = 5,fig.height = 3, eval = TRUE)
+```
+
+**The Envelope Accept/Reject Algorithm**
+
+If there exist a **density** $g_m$, a function $g_l$ and a constant M such that
+
+$$g_l(x) \le f(x) \le M g_m(x)$$
+
+then the aglorithm will generate random variables that are distributed according to **density** $f(x)$
+
+1. Generate $V \sim g_m(v)$ , $U \sim \mathcal{U}_{[0,1]}$
+2. Take $X = V$ if $U \le g_l(V)/Mg_m(V)$
+3. Otherwise, take $X = V$ if $U \le f(V)/Mg_m(V)$
+
+Proof: 
+
+From $g_l(x) \le f(x) \le M g_m(x)$, we have $\frac{g_{l}(x)}{M g_{m}(x)} \le \frac{f(x)}{M g_{m}(x)} \le 1$, hence
+
+$$\left\{U<\frac{g_{l}(X)}{M g_{m}(X)} \text { or } U<\frac{f(X)}{M g_{m}(X)}\right\} = \left\{U<\frac{f(X)}{M g_{m}(X)}\right\}$$
+
+$$
+\begin{aligned}
+P(V \leq v | \text { Accept }) &= P\left(V \leq v |\left\{U<\frac{g_{l}(V)}{M g_{m}(V)} \text { or } U<\frac{f(V)}{M g_{m}(V)}\right\}\right)\\
+&= P\left(V \leq v | U < \frac{f(V)}{M g_{m}(V)}\right) \\
+&= \frac{P\left(V \leq v , U<\frac{f(V)}{M g_{m}(V)}\right)}{P\left(  U<\frac{f(V)}{M g_{m}(V)} \right)} \\
+&= \frac{\int_{-\infty}^{v} \int_{0}^{\frac{f(v)}{M g_{m}(v)}} 1 du g_m(v)dv}{\int_{-\infty}^{\infty} \int_{0}^{\frac{f(v)}{M g_{m}(v)}} 1 du g_m(v)dv}\\
+&= \frac{(1/M) \int_{-\infty}^{v} f(v) dv}{1/M}\\
+&= P(X \le x)
+\end{aligned}$$
+
+The Envelope Accept/Reject Algorithm is a improved Accept/Reject Algorithm. When $f(x)$ is computational expensive to evaluate, we use function $g_{l}(x)$ in step 2 to save computation time. 
+
+`r if (knitr::is_html_output()) '# References {-}'`

@@ -1,0 +1,62 @@
+---
+title: "Gaussian-Markov Theorem"
+author: "Kevin Liu"
+date: "5/15/2020"
+output: 
+  bookdown::html_document2:
+    toc: true
+    toc_depth: 4
+    self_contained: true
+bibliography: "bibliography.bib"
+link-citations: true
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(reticulate)
+matplotlib <- import("matplotlib")
+matplotlib$use("Agg", force = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.align='center',python = reticulate::eng_python, fig.width = 8*0.7,fig.height = 6*0.7)
+```
+
+# Gauss-Markov Theorem
+
+If $E(\boldsymbol{y}) = \boldsymbol{X\beta}$, $\boldsymbol{X}$ has full rank and var$(\boldsymbol{y})=\sigma^2\boldsymbol{I}$, then the best linear unbiased estimator for $\boldsymbol{\beta}$ is $\hat{\boldsymbol{\beta}}=(\boldsymbol{X}^T\boldsymbol{X})^{-1}\boldsymbol{X}^T\boldsymbol{y}$.
+
+Proof:
+
+The unbised part is obivious, $E((\boldsymbol{X}^T\boldsymbol{X})^{-1}\boldsymbol{X}^T\boldsymbol{y})=(\boldsymbol{X}^T\boldsymbol{X})^{-1}\boldsymbol{X}^T\boldsymbol{X\beta}=\boldsymbol{\beta}$
+
+"Best" here means minimum variance. 
+
+Assume that there is another linear unbiased estimator $\tilde{\boldsymbol{\beta}} = a^T\boldsymbol{y}$. 
+
+We have,
+
+\begin{equation}
+E(\tilde{\boldsymbol{\beta}}) = \boldsymbol{\beta} = a^T \boldsymbol{X} \boldsymbol{\beta} \quad \text{and} \quad a^T \boldsymbol{X} = I
+(\#eq:tildebeta)
+\end{equation}
+
+\begin{equation}
+\begin{aligned}
+\text{cov}(\tilde{\boldsymbol{\beta}} - \hat{\boldsymbol{\beta}},\hat{\boldsymbol{\beta}}) &=
+\text{cov}(a^{T} \boldsymbol{y} - \left(\boldsymbol{X}^{T} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{T} \boldsymbol{y}, \left(\boldsymbol{X}^{T} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{T} \boldsymbol{y})\\
+&= \sigma^2 (a^T - \left(\boldsymbol{X}^{T} \boldsymbol{X}\right)^{-1} \boldsymbol{X}^{T})I(\boldsymbol{X}\left(\boldsymbol{X}^{T} \boldsymbol{X}\right)^{-1})\\
+&= \sigma^2 (\left(\boldsymbol{X}^{T} \boldsymbol{X}\right)^{-1} - \left(\boldsymbol{X}^{T} \boldsymbol{X}\right)^{-1})\\
+&= \mathbf{0}
+\end{aligned}
+(\#eq:cov)
+\end{equation}
+
+\begin{equation}
+\begin{aligned}
+\text{var}(\tilde{\boldsymbol{\beta}}) &= \text{var}(\tilde{\boldsymbol{\beta}} - \hat{\boldsymbol{\beta}} + \hat{\boldsymbol{\beta}})\\
+&= \text{var}(\tilde{\boldsymbol{\beta}} - \hat{\boldsymbol{\beta}}) + \text{var}(\hat{\boldsymbol{\beta}}) + 2\text{cov}(\tilde{\boldsymbol{\beta}} - \hat{\boldsymbol{\beta}},\hat{\boldsymbol{\beta}})\\
+&\ge \text{var}(\hat{\boldsymbol{\beta}}) + 2\text{cov}(\tilde{\boldsymbol{\beta}} - \hat{\boldsymbol{\beta}},\hat{\boldsymbol{\beta}}) \\
+&= \text{var}(\hat{\boldsymbol{\beta}})
+\end{aligned}
+(\#eq:minvar)
+\end{equation}
+
+Hence, $\hat{\boldsymbol{\beta}}$ is the best linear unbiased estimator(BLUE) for $\boldsymbol{\beta}$.

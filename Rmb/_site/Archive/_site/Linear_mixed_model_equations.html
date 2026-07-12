@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Kevin Liu" />
+
+
+<title>Some important proof of Mixed Model Equations and REML</title>
+
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+<style type="text/css">
+/* for pandoc --citeproc since 2.11 */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Statistics by steps</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="archives.html">Archives</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Some important proof of Mixed Model Equations and REML</h1>
+<h4 class="author">Kevin Liu</h4>
+<h4 class="date">6/14/2018</h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction" id="toc-introduction"><span class="toc-section-number">1</span> Introduction</a></li>
+<li><a href="#matrix-notation" id="toc-matrix-notation"><span class="toc-section-number">2</span> Matrix Notation</a></li>
+<li><a href="#mixed-model-equations-for-known-boldsymbolv" id="toc-mixed-model-equations-for-known-boldsymbolv"><span class="toc-section-number">3</span> Mixed Model Equations for known <span class="math inline">\(\boldsymbol{V}\)</span></a></li>
+<li><a href="#proof-of-equation-refeqmixed-equation6" id="toc-proof-of-equation-refeqmixed-equation6"><span class="toc-section-number">4</span> Proof of equation <a href="#eq:mixed-equation6">(3.9)</a></a></li>
+<li><a href="#maximum-likelihood-estimation-for-known-boldsymbolv" id="toc-maximum-likelihood-estimation-for-known-boldsymbolv"><span class="toc-section-number">5</span> Maximum Likelihood Estimation for known <span class="math inline">\(\boldsymbol{V}\)</span></a></li>
+<li><a href="#maximum-likelihood-estimation-for-unknown-boldsymbolv" id="toc-maximum-likelihood-estimation-for-unknown-boldsymbolv"><span class="toc-section-number">6</span> Maximum Likelihood Estimation for unknown <span class="math inline">\(\boldsymbol{V}\)</span></a></li>
+<li><a href="#reml-for-unknown-boldsymbolv" id="toc-reml-for-unknown-boldsymbolv"><span class="toc-section-number">7</span> REML for unknown <span class="math inline">\(\boldsymbol{V}\)</span></a>
+<ul>
+<li><a href="#beginbmatrix-boldsymbolv-1-boldsymbolx-boldsymbola-endbmatrix_n-times-n" id="toc-beginbmatrix-boldsymbolv-1-boldsymbolx-boldsymbola-endbmatrix_n-times-n"><span class="toc-section-number">7.1</span> <span class="math inline">\(\begin{bmatrix} \boldsymbol{V}^{-1} \boldsymbol{X}, \boldsymbol{A} \end{bmatrix}_{n \times n}\)</span></a></li>
+<li><a href="#boldsymbolv-1-boldsymbolv-1-boldsymbolx-boldsymbolxt-boldsymbolv-1-boldsymbolx-1-boldsymbolxt-boldsymbolv-1-boldsymbolaboldsymbolat-boldsymbolv-boldsymbola-1-boldsymbolat" id="toc-boldsymbolv-1-boldsymbolv-1-boldsymbolx-boldsymbolxt-boldsymbolv-1-boldsymbolx-1-boldsymbolxt-boldsymbolv-1-boldsymbolaboldsymbolat-boldsymbolv-boldsymbola-1-boldsymbolat"><span class="toc-section-number">7.2</span> <span class="math inline">\(\boldsymbol{V}^{-1} = \boldsymbol{V}^{-1} \boldsymbol{X} (\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X})^{-1} \boldsymbol{X}^T \boldsymbol{V}^{-1} + \boldsymbol{A}(\boldsymbol{A}^T \boldsymbol{V} \boldsymbol{A})^{-1} \boldsymbol{A}^T\)</span></a></li>
+<li><a href="#boldsymbolyt-boldsymbola-boldsymbolat-boldsymbolv-boldsymbola-1-boldsymbolat-boldsymboly-boldsymboly---boldsymbolxtildeboldsymbolbetaboldsymbolthetat-boldsymbolv-1-boldsymboly---boldsymbolxtildeboldsymbolbetaboldsymboltheta" id="toc-boldsymbolyt-boldsymbola-boldsymbolat-boldsymbolv-boldsymbola-1-boldsymbolat-boldsymboly-boldsymboly---boldsymbolxtildeboldsymbolbetaboldsymbolthetat-boldsymbolv-1-boldsymboly---boldsymbolxtildeboldsymbolbetaboldsymboltheta"><span class="toc-section-number">7.3</span> <span class="math inline">\(\boldsymbol{Y}^T \boldsymbol{A} (\boldsymbol{A}^T \boldsymbol{V} \boldsymbol{A})^{-1} \boldsymbol{A}^T \boldsymbol{Y} = (\boldsymbol{Y} - \boldsymbol{X}\tilde{\boldsymbol{\beta}}(\boldsymbol{\theta}))^T \boldsymbol{V}^{-1} (\boldsymbol{Y} - \boldsymbol{X}\tilde{\boldsymbol{\beta}}(\boldsymbol{\theta}))\)</span></a></li>
+<li><a href="#textlogboldsymbolat-boldsymbolv-boldsymbola-c-textlogboldsymbolv-textlogboldsymbolxt-boldsymbolv-1-boldsymbolx" id="toc-textlogboldsymbolat-boldsymbolv-boldsymbola-c-textlogboldsymbolv-textlogboldsymbolxt-boldsymbolv-1-boldsymbolx"><span class="toc-section-number">7.4</span> <span class="math inline">\(\text{log}|\boldsymbol{A}^T \boldsymbol{V} \boldsymbol{A}| = c + \text{log}|\boldsymbol{V}| + \text{log}|\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X}|\)</span></a></li>
+</ul></li>
+<li><a href="#appendix" id="toc-appendix"><span class="toc-section-number">8</span> Appendix</a>
+<ul>
+<li><a href="#matrix-caculus" id="toc-matrix-caculus"><span class="toc-section-number">8.1</span> Matrix Caculus</a></li>
+</ul></li>
+<li><a href="#references" id="toc-references">References</a></li>
+</ul>
+</div>
+
+<div id="introduction" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> Introduction</h1>
+<p>When I was a master student in Temple University, I spent a lot of time struggling with linear mixed model. Particularly, ML and REML estimation for linear mixed model has confused me for long time. So I decided to write this webpage as a time saver for students who are not familiar with this topic.</p>
+</div>
+<div id="matrix-notation" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Matrix Notation</h1>
+<p><span class="math display" id="eq:Matrix-Notation1">\[\begin{equation}
+\boldsymbol{Y} = \boldsymbol{X\beta} + \boldsymbol{Zu} + \boldsymbol{e}
+\tag{2.1}
+\end{equation}\]</span></p>
+<p><span class="math display" id="eq:Matrix-Notation2">\[\begin{equation}
+\begin{pmatrix}
+\boldsymbol{u}\\
+\boldsymbol{e}
+\end{pmatrix} \sim \mathcal{N}
+\begin{pmatrix}
+\begin{pmatrix}
+\boldsymbol{0}\\
+\boldsymbol{0}
+\end{pmatrix},
+\begin{pmatrix}
+\boldsymbol{G} &amp; \boldsymbol{0}\\
+\boldsymbol{0} &amp; \boldsymbol{R}
+\end{pmatrix}
+\end{pmatrix}
+\tag{2.2}
+\end{equation}\]</span></p>
+<p><span class="math inline">\(\boldsymbol{X}\)</span> and <span class="math inline">\(\boldsymbol{Z}\)</span> are <a href="https://en.wikipedia.org/wiki/Design_matrix">design matrix</a>.</p>
+<p><span class="math inline">\(\boldsymbol{\beta}\)</span> is fix effect vector.</p>
+<p><span class="math inline">\(\boldsymbol{u}\)</span> is random effect vector.</p>
+<p>For given <span class="math inline">\(\boldsymbol{u}\)</span> (consider <span class="math inline">\(\boldsymbol{u}\)</span> as constant vector),</p>
+<p><span class="math display" id="eq:y-conditional-distribution">\[\begin{equation}
+\boldsymbol{Y} | \boldsymbol{u} \sim \mathcal{N} (\boldsymbol{X\beta} +  \boldsymbol{Zu}, \boldsymbol{R})
+\tag{2.3}
+\end{equation}\]</span></p>
+<p>The distribution of <span class="math inline">\(\boldsymbol{y}\)</span> is (recall: Var<span class="math inline">\((\boldsymbol{AX}+\boldsymbol{a}) = \boldsymbol{A}\text{var}(\boldsymbol{X})\boldsymbol{A}^{T}\)</span> )</p>
+<p><span class="math display" id="eq:y-distribution">\[\begin{equation}
+\boldsymbol{Y} \sim \mathcal{N} (\boldsymbol{X\beta}, \boldsymbol{ZG}\boldsymbol{Z}^{T} + \boldsymbol{R})
+\tag{2.4}
+\end{equation}\]</span></p>
+<p>For convenience, we define</p>
+<p><span class="math display" id="eq:V">\[\begin{equation}
+\boldsymbol{V} = \boldsymbol{ZGZ}^T + \boldsymbol{R}
+\tag{2.5}
+\end{equation}\]</span></p>
+</div>
+<div id="mixed-model-equations-for-known-boldsymbolv" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> Mixed Model Equations for known <span class="math inline">\(\boldsymbol{V}\)</span></h1>
+<p>Recall that for <span class="math inline">\(\boldsymbol{y} = (y_1,y_2,\dots,y_n)^T \sim \mathcal{N}(\boldsymbol{\mu},\boldsymbol{\Sigma}_y)\)</span>, the probability density function(PDF) is</p>
+<p><span class="math display" id="eq:multivariate-normal-distribution">\[\begin{equation}
+P(\boldsymbol{y})
+= (2\pi)^{-\frac{n}{2}} |\boldsymbol{\Sigma}_y|^{-\frac{1}{2}} \text{exp}[-\frac{1}{2}(\boldsymbol{y} - \boldsymbol{\mu})^{T}\boldsymbol{\Sigma}_y^{-1}(\boldsymbol{y} - \boldsymbol{\mu})]
+\tag{3.1}
+\end{equation}\]</span></p>
+<p>Combine equation <a href="#eq:Matrix-Notation2">(2.2)</a> and equation <a href="#eq:multivariate-normal-distribution">(3.1)</a>, we have</p>
+<p><span class="math display" id="eq:likelihood">\[\begin{equation}
+\begin{split}
+P\boldsymbol{\begin{pmatrix}
+u\\
+\boldsymbol{e}
+\end{pmatrix}} &amp;= (2\pi)^{-\frac{n+g}{2}} \boldsymbol{\begin{vmatrix}
+\boldsymbol{G} &amp; \boldsymbol{0}\\
+\boldsymbol{0} &amp; \boldsymbol{R}
+\end{vmatrix}}^{-1}
+\text{exp}[-\frac{1}{2}\boldsymbol{\begin{pmatrix}
+u\\
+\boldsymbol{e}
+\end{pmatrix}}^{T}\boldsymbol{\begin{pmatrix}
+\boldsymbol{G} &amp; \boldsymbol{0}\\
+\boldsymbol{0} &amp; \boldsymbol{R}
+\end{pmatrix}}^{-1}\boldsymbol{\begin{pmatrix}
+u\\
+\boldsymbol{e}
+\end{pmatrix}}] \\
+&amp;= (2\pi)^{-\frac{n+g}{2}} \boldsymbol{\begin{vmatrix}
+\boldsymbol{G} &amp; \boldsymbol{0}\\
+\boldsymbol{0} &amp; \boldsymbol{R}
+\end{vmatrix}}^{-1}
+\text{exp}[-\frac{1}{2}\boldsymbol{\begin{pmatrix}
+u\\
+\boldsymbol{e}
+\end{pmatrix}}^{T}\boldsymbol{\begin{pmatrix}
+\boldsymbol{G}^{-1} &amp; \boldsymbol{0}\\
+\boldsymbol{0} &amp; \boldsymbol{R}^{-1}
+\end{pmatrix}}\boldsymbol{\begin{pmatrix}
+u\\
+\boldsymbol{e}
+\end{pmatrix}}]
+\end{split}
+\tag{3.2}
+\end{equation}\]</span></p>
+<p>where <span class="math inline">\(g\)</span> is the number of element of random vector <span class="math inline">\(\boldsymbol{u}\)</span></p>
+<p>Since <span class="math inline">\(\boldsymbol{V}\)</span> is known(implies that <span class="math inline">\(\boldsymbol{G} \text{ and } \boldsymbol{Q}\)</span> is known), equation <a href="#eq:likelihood">(3.2)</a> depends on <span class="math inline">\(\boldsymbol{e}\)</span> and <span class="math inline">\(\boldsymbol{u}\)</span>.</p>
+<p>Maximise <span class="math inline">\(P\boldsymbol{\begin{pmatrix} u\\ \boldsymbol{e} \end{pmatrix}}\)</span> is equivalent to minimize</p>
+<p><span class="math display" id="eq:Q">\[\begin{equation}
+Q(\boldsymbol{u}, \boldsymbol{e}) = \boldsymbol{\begin{pmatrix}
+u\\
+\boldsymbol{e}
+\end{pmatrix}}^{T}\boldsymbol{\begin{pmatrix}
+\boldsymbol{G}^{-1} &amp; \boldsymbol{0}\\
+\boldsymbol{0} &amp; \boldsymbol{R}^{-1}
+\end{pmatrix}}\boldsymbol{\begin{pmatrix}
+u\\
+\boldsymbol{e}
+\end{pmatrix}} = \boldsymbol{u}^T\boldsymbol{G}^{-1}\boldsymbol{u} + \boldsymbol{e}^T\boldsymbol{R}^{-1}\boldsymbol{e}
+\tag{3.3}
+\end{equation}\]</span></p>
+<p>Note that <span class="math inline">\(\boldsymbol{e} = \boldsymbol{e}(\boldsymbol{\beta},\boldsymbol{u}) = \boldsymbol{Y} - \boldsymbol{X\beta} - \boldsymbol{Zu}\)</span></p>
+<p>Using results from <a href="#matrix-caculus">Matrix Caculus</a>, we have</p>
+<p><span class="math display" id="eq:mixed-equation1">\[\begin{equation}
+\frac{\partial \boldsymbol{e} }{\partial \boldsymbol{\beta}} = - \boldsymbol{X}^T
+\tag{3.4}
+\end{equation}\]</span></p>
+<p><span class="math display" id="eq:mixed-equation2">\[\begin{equation}
+\frac{\partial \boldsymbol{e} }{\partial \boldsymbol{u}} = - \boldsymbol{Z}^T
+\tag{3.5}
+\end{equation}\]</span></p>
+<p>Based on equations <a href="#eq:Q">(3.3)</a>, <a href="#eq:mixed-equation1">(3.4)</a> and <a href="#eq:mixed-equation2">(3.5)</a>, we have (don’t forget chain rule from <a href="#matrix-caculus">matrix caculus</a>)</p>
+<p><span class="math display" id="eq:mixed-equation3">\[\begin{equation}
+\begin{split}
+\frac{\partial Q}{\partial \boldsymbol{\beta}} &amp;= \frac{\partial (\boldsymbol{u}^T\boldsymbol{G}^{-1}\boldsymbol{u})}{\partial \boldsymbol{\beta}} + \frac{\partial \boldsymbol{e}}{\partial \boldsymbol{\beta}}
+\frac{\partial (\boldsymbol{e}^T\boldsymbol{R}^{-1}\boldsymbol{e})}{\partial \boldsymbol{e}} \\
+&amp; = - 2\boldsymbol{X}^T \boldsymbol{R}^{-1}\boldsymbol{e}
+\end{split}
+\tag{3.6}
+\end{equation}\]</span></p>
+<p>Similarly, we have</p>
+<p><span class="math display" id="eq:mixed-equation3">\[\begin{equation}
+\begin{split}
+\frac{\partial Q}{\partial \boldsymbol{u}} &amp;= \frac{\partial (\boldsymbol{u}^T\boldsymbol{G}^{-1}\boldsymbol{u})}{\partial \boldsymbol{u}} + \frac{\partial \boldsymbol{e}}{\partial \boldsymbol{u}}
+\frac{\partial (\boldsymbol{e}^T\boldsymbol{R}^{-1}\boldsymbol{e})}{\partial \boldsymbol{e}} \\
+&amp; = 2\boldsymbol{G}^{-1}\boldsymbol{u}  - 2\boldsymbol{Z}^T \boldsymbol{R}^{-1}\boldsymbol{e}
+\end{split}
+\tag{3.6}
+\end{equation}\]</span></p>
+<p>Setting <span class="math inline">\(\frac{\partial Q}{\partial \boldsymbol{\beta}}\)</span> and <span class="math inline">\(\frac{\partial Q}{\partial \boldsymbol{u}}\)</span> to be <span class="math inline">\(\boldsymbol{0}\)</span> and replacing <span class="math inline">\(\boldsymbol{e}\)</span> with <span class="math inline">\(\boldsymbol{e} = \boldsymbol{Y} - \boldsymbol{X\beta} - \boldsymbol{Zu}\)</span>, we have</p>
+<p><span class="math display" id="eq:mixed-equation4">\[\begin{equation}
+\begin{split}
+\frac{\partial Q}{\partial \boldsymbol{\beta}} = \boldsymbol{0}
+\Leftrightarrow
+\boldsymbol{X}^T \boldsymbol{R}^{-1} \boldsymbol{X}\tilde{\boldsymbol{\beta}} + \boldsymbol{X}^T \boldsymbol{R}^{-1} \boldsymbol{Z}\tilde{\boldsymbol{u}} = \boldsymbol{X}^T \boldsymbol{R}^{-1} \boldsymbol{Y}
+\end{split}
+\tag{3.7}
+\end{equation}\]</span></p>
+<p><span class="math display" id="eq:mixed-equation5">\[\begin{equation}
+\begin{split}
+\frac{\partial Q}{\partial \boldsymbol{u}} = \boldsymbol{0}
+\Leftrightarrow
+\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{X}\tilde{\boldsymbol{\beta}} +
+
+(\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Z} +
+\boldsymbol{G}^{-1})  \tilde{\boldsymbol{u}} =
+
+\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Y}
+\end{split}
+\tag{3.8}
+\end{equation}\]</span></p>
+<p>Organizing equations <a href="#eq:mixed-equation4">(3.7)</a> and <a href="#eq:mixed-equation5">(3.8)</a>, we have famous Henderson’s mixed-model equations in matrix form.</p>
+<p><span class="math display" id="eq:mixed-equation5">\[\begin{equation}
+\begin{bmatrix}
+\boldsymbol{X}^T \boldsymbol{R}^{-1} \boldsymbol{X} &amp;
+\boldsymbol{X}^T \boldsymbol{R}^{-1} \boldsymbol{Z}\\
+\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{X} &amp;
+\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Z} +
+\boldsymbol{G}^{-1}
+\end{bmatrix}
+
+\begin{bmatrix}
+\tilde{\boldsymbol{\beta}}\\
+\tilde{\boldsymbol{u}}
+\end{bmatrix}
+
+=
+
+\begin{bmatrix}
+\boldsymbol{X}^T \boldsymbol{R}^{-1} \boldsymbol{Y}\\
+\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Y}
+\end{bmatrix}
+\tag{3.8}
+\end{equation}\]</span></p>
+<p>Solution of <a href="#eq:mixed-equation5">(3.8)</a> is</p>
+<p><span class="math display" id="eq:mixed-equation6">\[\begin{equation}
+\begin{split}
+
+\begin{bmatrix}
+\tilde{\boldsymbol{\beta}}\\
+\tilde{\boldsymbol{u}}
+\end{bmatrix}
+
+&amp;=
+
+\begin{bmatrix}
+(\boldsymbol{X}^T\boldsymbol{V}^{-1}\boldsymbol{X})^{-1}\boldsymbol{X}^{T}\boldsymbol{V}^{-1}\boldsymbol{Y} \\
+\boldsymbol{GZ}^T\boldsymbol{V}^{-1}(\boldsymbol{Y} - \boldsymbol{X}(\boldsymbol{X}^T\boldsymbol{V}^{-1}\boldsymbol{X})^{-1}\boldsymbol{X}^T\boldsymbol{V}^{-1}\boldsymbol{Y})
+\end{bmatrix}
+
+\end{split}
+\tag{3.9}
+\end{equation}\]</span></p>
+<p>Henderson and his PHD student, S.R. Sealer has proved why <a href="#eq:mixed-equation6">(3.9)</a> is true in <span class="citation">Henderson et al. (<a href="#ref-Henderson1959" role="doc-biblioref">1959</a>)</span> and <span class="citation">Henderson (<a href="#ref-Henderson1963" role="doc-biblioref">1963</a>)</span>. In next <a href="#proof-of-equation-refeqmixed-equation6">section</a>, I show this important proof step by step.</p>
+</div>
+<div id="proof-of-equation-refeqmixed-equation6" class="section level1" number="4">
+<h1><span class="header-section-number">4</span> Proof of equation <a href="#eq:mixed-equation6">(3.9)</a></h1>
+<p>Equation <a href="#eq:mixed-equation5">(3.8)</a> is equivalent to <a href="#eq:solution-proof-1">(4.1)</a> and <a href="#eq:solution-proof-2">(4.2)</a></p>
+<p><span class="math display" id="eq:solution-proof-1">\[\begin{equation}
+\boldsymbol{X}^T \boldsymbol{R}^{-1} \boldsymbol{X} \tilde{\boldsymbol{\beta}} +
+\boldsymbol{X}^T \boldsymbol{R}^{-1} \boldsymbol{Z} \tilde{\boldsymbol{u}} =
+\boldsymbol{X}^T \boldsymbol{R}^{-1} \boldsymbol{Y}
+
+\tag{4.1}
+\end{equation}\]</span></p>
+<p><span class="math display" id="eq:solution-proof-2">\[\begin{equation}
+\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{X} \tilde{\boldsymbol{\beta}} +
+(\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Z} +
+\boldsymbol{G}^{-1}) \tilde{\boldsymbol{u}} = \boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Y}
+
+\tag{4.2}
+\end{equation}\]</span></p>
+<p>Because <span class="math inline">\(\boldsymbol{R}\)</span> is positive definite and <span class="math inline">\(\boldsymbol{Z}\)</span> has independent columns, <span class="math inline">\(\boldsymbol{Z}^{T}\boldsymbol{R}^{-1}\boldsymbol{Z}\)</span> is also positive definite. All positive definite matrices are invertible.</p>
+<p>Then, equation <a href="#eq:solution-proof-2">(4.2)</a> can be transformed into <a href="#eq:solution-proof-3">(4.3)</a></p>
+<p><span class="math display" id="eq:solution-proof-3">\[\begin{equation}
+(\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Z} +
+\boldsymbol{G}^{-1})^{-1}\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{X} \tilde{\boldsymbol{\beta}} + \tilde{\boldsymbol{u}} = (\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Z} +
+\boldsymbol{G}^{-1})^{-1}\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Y}
+
+\tag{4.3}
+\end{equation}\]</span></p>
+<p>The next step is</p>
+<p><span class="math display" id="eq:solution-proof-4">\[\begin{equation}
+\boldsymbol{X}^T \boldsymbol{R}^{-1} \boldsymbol{Z}
+(\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Z} +
+\boldsymbol{G}^{-1})^{-1}
+\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{X} \tilde{\boldsymbol{\beta}} +
+\boldsymbol{X}^T \boldsymbol{R}^{-1} \boldsymbol{Z} \tilde{\boldsymbol{u}} =
+\boldsymbol{X}^T \boldsymbol{R}^{-1} \boldsymbol{Z}
+(\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Z} +
+\boldsymbol{G}^{-1})^{-1}\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Y}
+
+\tag{4.4}
+\end{equation}\]</span></p>
+<p>Combining <a href="#eq:solution-proof-1">(4.1)</a> <a href="#eq:solution-proof-4">(4.4)</a>, we can eliminate <span class="math inline">\(\tilde{\boldsymbol{u}}\)</span></p>
+<p><span class="math display" id="eq:solution-proof-5">\[\begin{equation}
+\boldsymbol{X}^T
+(\boldsymbol{R}^{-1} - \boldsymbol{R}^{-1} \boldsymbol{Z}
+(\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Z} +
+\boldsymbol{G}^{-1})^{-1}
+\boldsymbol{Z}^T \boldsymbol{R}^{-1})
+\boldsymbol{X} \tilde{\boldsymbol{\beta}}
+=
+\boldsymbol{X}^T
+(\boldsymbol{R}^{-1} - \boldsymbol{R}^{-1} \boldsymbol{Z}
+(\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Z} +
+\boldsymbol{G}^{-1})^{-1}
+\boldsymbol{Z}^T \boldsymbol{R}^{-1})
+\boldsymbol{Y}
+\tag{4.5}
+\end{equation}\]</span></p>
+<p>For convenience, we define <span class="math inline">\(\boldsymbol{W} = \boldsymbol{R}^{-1} - \boldsymbol{R}^{-1} \boldsymbol{Z} (\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Z} + \boldsymbol{G}^{-1})^{-1} \boldsymbol{Z}^T \boldsymbol{R}^{-1}\)</span>, then <a href="#eq:solution-proof-5">(4.5)</a> becomes</p>
+<p><span class="math display" id="eq:solution-proof-6">\[\begin{equation}
+\boldsymbol{X}^T \boldsymbol{W} \boldsymbol{X}\tilde{\boldsymbol{\beta}}
+=
+\boldsymbol{X}^T \boldsymbol{W} \boldsymbol{Y}
+
+\tag{4.6}
+\end{equation}\]</span></p>
+<p>Then
+<span class="math display" id="eq:solution-proof-7">\[\begin{equation}
+\tilde{\boldsymbol{\beta}}
+=
+(\boldsymbol{X}^T \boldsymbol{W} \boldsymbol{X})^{-1}
+\boldsymbol{X}^T \boldsymbol{W} \boldsymbol{Y}
+\tag{4.7}
+\end{equation}\]</span></p>
+<p>If we can prove that <span class="math inline">\(\boldsymbol{W} = \boldsymbol{V}^{-1}\)</span>, then we have completed the proof for <span class="math inline">\(\tilde{\boldsymbol{\beta}}\)</span> in <a href="#eq:mixed-equation6">(3.9)</a>.</p>
+<p><span class="math display" id="eq:solution-proof-8">\[\begin{equation}
+\begin{split}
+\boldsymbol{VW}
+&amp;=
+(\boldsymbol{R} + \boldsymbol{ZGZ}^T)(\boldsymbol{R}^{-1} - \boldsymbol{R}^{-1} \boldsymbol{Z} (\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Z} + \boldsymbol{G}^{-1})^{-1} \boldsymbol{Z}^T \boldsymbol{R}^{-1})\\
+&amp;=
+\boldsymbol{I} + \boldsymbol{ZGZ}^T\boldsymbol{R}^{-1}
+-
+\boldsymbol{Z} (\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Z} + \boldsymbol{G}^{-1})^{-1} \boldsymbol{Z}^T \boldsymbol{R}^{-1}
+-
+\boldsymbol{ZGZ}^T \boldsymbol{R}^{-1} \boldsymbol{Z} (\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Z} + \boldsymbol{G}^{-1})^{-1} \boldsymbol{Z}^T \boldsymbol{R}^{-1}\\
+&amp;=
+\boldsymbol{I} + \boldsymbol{ZGZ}^T\boldsymbol{R}^{-1}
+-
+\boldsymbol{Z}
+((\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Z} + \boldsymbol{G}^{-1})^{-1} + \boldsymbol{GZ}^{T} \boldsymbol{R}^{-1} \boldsymbol{Z} (\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Z} + \boldsymbol{G}^{-1})^{-1})
+\boldsymbol{Z}^T \boldsymbol{R}^{-1}\\
+&amp;=
+\boldsymbol{I} + \boldsymbol{ZGZ}^T\boldsymbol{R}^{-1}
+-
+\boldsymbol{Z}(\boldsymbol{I} + \boldsymbol{GZ}^{T} \boldsymbol{R}^{-1}\boldsymbol{Z})(\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Z} + \boldsymbol{G}^{-1})^{-1}
+\boldsymbol{Z}^T \boldsymbol{R}^{-1} \\
+&amp;=
+\boldsymbol{I} + \boldsymbol{ZGZ}^T\boldsymbol{R}^{-1}
+-
+\boldsymbol{Z}\boldsymbol{G}(\boldsymbol{G}^{-1} + \boldsymbol{Z}^{T} \boldsymbol{R}^{-1}\boldsymbol{Z})(\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Z} + \boldsymbol{G}^{-1})^{-1}
+\boldsymbol{Z}^T \boldsymbol{R}^{-1}\\
+&amp;=
+\boldsymbol{I} + \boldsymbol{ZGZ}^T\boldsymbol{R}^{-1}
+-
+\boldsymbol{Z}\boldsymbol{G}\boldsymbol{Z}^T \boldsymbol{R}^{-1}\\
+&amp;=
+\boldsymbol{I}
+\end{split}
+\tag{4.8}
+\end{equation}\]</span></p>
+<p>Now replace <span class="math inline">\(\boldsymbol{W}\)</span> with <span class="math inline">\(\boldsymbol{V}^{-1}\)</span>, <a href="#eq:solution-proof-7">(4.7)</a> becomes</p>
+<p><span class="math display" id="eq:solution-proof-9">\[\begin{equation}
+\tilde{\boldsymbol{\beta}}
+=
+(\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X})^{-1}
+\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{Y}
+\tag{4.9}
+\end{equation}\]</span></p>
+<p>Here we complete the proof for <span class="math inline">\(\tilde{\boldsymbol{\beta}}\)</span> in <a href="#eq:mixed-equation6">(3.9)</a>.</p>
+<p>The proof for <span class="math inline">\(\tilde{\boldsymbol{u}}\)</span> is much easier. Subtract <span class="math inline">\(\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{X} \tilde{\boldsymbol{\beta}}\)</span> in both side of <a href="#eq:solution-proof-2">(4.2)</a>. We have</p>
+<p><span class="math display" id="eq:solution-proof-10">\[\begin{equation}
+(\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Z} +
+\boldsymbol{G}^{-1})
+\tilde{\boldsymbol{u}}
+=
+\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Y}
+-
+\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{X} \tilde{\boldsymbol{\beta}}
+\tag{4.10}
+\end{equation}\]</span></p>
+<p>Then</p>
+<p><span class="math display" id="eq:solution-proof-11">\[\begin{equation}
+\begin{split}
+\tilde{\boldsymbol{u}}
+&amp;=
+(\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Z} + \boldsymbol{G}^{-1})^{-1}
+(\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Y}
+-
+\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{X} \tilde{\boldsymbol{\beta}})\\
+&amp;=
+(\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Z} + \boldsymbol{G}^{-1})^{-1}
+\boldsymbol{Z}^T\boldsymbol{R}^{-1}
+(\boldsymbol{Y} - \boldsymbol{X} \tilde{\boldsymbol{\beta}})\\
+&amp;=
+(\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Z} + \boldsymbol{G}^{-1})^{-1}
+\boldsymbol{Z}^T\boldsymbol{R}^{-1}
+\boldsymbol{V}\boldsymbol{V}^{-1}
+(\boldsymbol{Y} - \boldsymbol{X} \tilde{\boldsymbol{\beta}})\\
+&amp;=
+(\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Z} + \boldsymbol{G}^{-1})^{-1}
+\boldsymbol{Z}^T\boldsymbol{R}^{-1}
+(\boldsymbol{ZGZ}^T + \boldsymbol{R})
+\boldsymbol{V}^{-1}
+(\boldsymbol{Y} - \boldsymbol{X} \tilde{\boldsymbol{\beta}})\\
+&amp;=
+(\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Z} + \boldsymbol{G}^{-1})^{-1}
+(\boldsymbol{Z}^T\boldsymbol{R}^{-1}\boldsymbol{ZGZ}^T + \boldsymbol{Z}^T)
+\boldsymbol{V}^{-1}
+(\boldsymbol{Y} - \boldsymbol{X} \tilde{\boldsymbol{\beta}})\\
+&amp;=
+(\boldsymbol{Z}^T \boldsymbol{R}^{-1} \boldsymbol{Z} + \boldsymbol{G}^{-1})^{-1}
+(\boldsymbol{Z}^T\boldsymbol{R}^{-1}\boldsymbol{Z} + \boldsymbol{G}^{-1})
+\boldsymbol{G}\boldsymbol{Z}^T
+\boldsymbol{V}^{-1}
+(\boldsymbol{Y} - \boldsymbol{X} \tilde{\boldsymbol{\beta}})\\
+&amp;=
+\boldsymbol{G}\boldsymbol{Z}^T
+\boldsymbol{V}^{-1}
+(\boldsymbol{Y} - \boldsymbol{X} \tilde{\boldsymbol{\beta}})
+\end{split}
+\tag{4.11}
+\end{equation}\]</span></p>
+<p>Replace <span class="math inline">\(\tilde{\boldsymbol{\beta}}\)</span> of <a href="#eq:solution-proof-11">(4.11)</a> with <span class="math inline">\((\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X})^{-1} \boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{Y}\)</span>, we have</p>
+<p><span class="math display" id="eq:solution-proof-12">\[\begin{equation}
+\tilde{\boldsymbol{u}}
+=
+\boldsymbol{G}\boldsymbol{Z}^T
+\boldsymbol{V}^{-1}
+(\boldsymbol{Y} - \boldsymbol{X}
+(\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X})^{-1} \boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{Y}
+)
+\tag{4.12}
+\end{equation}\]</span></p>
+<p>Here we complete the proof for <span class="math inline">\(\tilde{\boldsymbol{u}}\)</span> in <a href="#eq:mixed-equation6">(3.9)</a>.</p>
+</div>
+<div id="maximum-likelihood-estimation-for-known-boldsymbolv" class="section level1" number="5">
+<h1><span class="header-section-number">5</span> Maximum Likelihood Estimation for known <span class="math inline">\(\boldsymbol{V}\)</span></h1>
+<p>From <a href="#eq:y-distribution">(2.4)</a> ,<a href="#eq:V">(2.5)</a> and <a href="#eq:multivariate-normal-distribution">(3.1)</a> we have that</p>
+<p><span class="math display" id="eq:MLE-1">\[\begin{equation}
+f_{\boldsymbol{Y}}(y_1,\dots,y_n) = \frac{\text{exp}(-\frac{1}{2} (\boldsymbol{Y} - \boldsymbol{X\beta})^{T} \boldsymbol{V}^{-1}(\boldsymbol{Y} - \boldsymbol{X\beta}))}{\sqrt{(2\pi)^n |\boldsymbol{V}|}}
+\tag{5.1}
+\end{equation}\]</span></p>
+<p>Then we have log-likelihood as</p>
+<p><span class="math display" id="eq:MLE-2">\[\begin{equation}
+\begin{split}
+-2\ell(\boldsymbol{\beta};\boldsymbol{Y})
+&amp;=
+-2\text{log}(f_{\boldsymbol{Y}}(y_1,\dots,y_n))\\
+&amp;=
+\text{log}|\boldsymbol{V}| + (\boldsymbol{Y} - \boldsymbol{X\beta})^{T} \boldsymbol{V}^{-1}(\boldsymbol{Y} - \boldsymbol{X\beta}) + c
+\end{split}
+\tag{5.2}
+\end{equation}\]</span>
+where <span class="math inline">\(c\)</span> is <span class="math inline">\(n\text{log}(2\pi)\)</span></p>
+</div>
+<div id="maximum-likelihood-estimation-for-unknown-boldsymbolv" class="section level1" number="6">
+<h1><span class="header-section-number">6</span> Maximum Likelihood Estimation for unknown <span class="math inline">\(\boldsymbol{V}\)</span></h1>
+<p>Practically, <span class="math inline">\(\boldsymbol{V}\)</span> is unknown for most cases.</p>
+<p>Since <span class="math inline">\(\boldsymbol{V}\)</span> is determined by <span class="math inline">\(\boldsymbol{G}\)</span> and <span class="math inline">\(\boldsymbol{R}\)</span>, <span class="math inline">\(\tilde{\boldsymbol{V}} = \tilde{\boldsymbol{V}}(\tilde{\boldsymbol{G}},\tilde{\boldsymbol{R}})\)</span>. Similarly we have that <span class="math inline">\(\tilde{\boldsymbol{\beta}}\)</span>, shown in <a href="#eq:mixed-equation6">(3.9)</a>, is also determined by <span class="math inline">\(\tilde{\boldsymbol{G}}\)</span> and <span class="math inline">\(\tilde{\boldsymbol{R}}\)</span>, <span class="math inline">\(\tilde{\boldsymbol{\beta}} = \tilde{\boldsymbol{\beta}}(\tilde{\boldsymbol{G}},\tilde{\boldsymbol{R}})\)</span>.</p>
+<p>For convenience, we define covariance parameter as <span class="math inline">\(\boldsymbol{\theta}\)</span>, for matrix <span class="math inline">\(\boldsymbol{G}\)</span> and <span class="math inline">\(\boldsymbol{R}\)</span>.</p>
+<p>Changing <span class="math inline">\(\boldsymbol{V}\)</span> with <span class="math inline">\(\tilde{\boldsymbol{V}}(\boldsymbol{\theta})\)</span> and <span class="math inline">\(\boldsymbol{\beta}\)</span> with <span class="math inline">\(\tilde{\boldsymbol{\beta}}(\boldsymbol{\theta})\)</span>, we have log-likelihood function from <a href="#eq:MLE-2">(5.2)</a> becomes a function of <span class="math inline">\(\boldsymbol{\theta}\)</span>.</p>
+<p><span class="math display" id="eq:UMLE-1">\[\begin{equation}
+-2\ell(\boldsymbol{\theta};\boldsymbol{Y})
+=
+\text{log}|\tilde{\boldsymbol{V}}(\boldsymbol{\theta})|
++
+(\boldsymbol{Y}-\boldsymbol{X}\tilde{\boldsymbol{\beta}}(\boldsymbol{\theta}))^T
+\tilde{\boldsymbol{V}}(\boldsymbol{\theta})^{-1}
+(\boldsymbol{Y}-\boldsymbol{X}\tilde{\boldsymbol{\beta}}(\boldsymbol{\theta}))
+\tag{6.1}
+\end{equation}\]</span></p>
+<p>From <a href="#eq:UMLE-1">(6.1)</a>, we can see that <span style="color:Tomato"><b>the key of MLE of linear mixed model is to estimate covariance matrix <span class="math inline">\(\tilde{\boldsymbol{V}}(\boldsymbol{\theta})\)</span>, equivalently <span class="math inline">\(\boldsymbol{\theta}\)</span>.</b></span></p>
+</div>
+<div id="reml-for-unknown-boldsymbolv" class="section level1" number="7">
+<h1><span class="header-section-number">7</span> REML for unknown <span class="math inline">\(\boldsymbol{V}\)</span></h1>
+<p>It is widely known that ML estimation has trend to under-estimate covariance parameters and hence is biased. The detailed proof can be found in page 749 of <span class="citation">Littell et al. (<a href="#ref-Littell:2006:SMM:1205543" role="doc-biblioref">2006</a>)</span>. Following is the equation, from <em>SAS for Mixed Model (Second Edition)</em>, that shows MLE of covariance is biased.</p>
+<p><span class="math display">\[E(\hat{\sigma}_{MLE} - \sigma^2) = \frac{-1}{n}\sigma^2\]</span>
+Here I will focus on how to derive commonly used REML log-likelihood.</p>
+<p>The first step of REML is about removing parameter <span class="math inline">\(\boldsymbol{\beta}\)</span> from log-likelihood by creating a matrix <span class="math inline">\(\boldsymbol{A}^T\)</span> such as</p>
+<p><span class="math display" id="eq:REML-1">\[\begin{equation}
+\boldsymbol{A}^T \boldsymbol{Y} \sim \mathcal{N}(\boldsymbol{0}, \boldsymbol{A}^T\tilde{\boldsymbol{V}}(\boldsymbol{\theta})\boldsymbol{A})
+\tag{7.1}
+\end{equation}\]</span></p>
+<p>The direct log-likelihood of REML:</p>
+<p><span class="math display" id="eq:REML-2">\[\begin{equation}
+-2\ell_{REML}(\boldsymbol{\theta};\boldsymbol{A}^T\boldsymbol{Y}) =
+\text{log}|\boldsymbol{A}^T \tilde{\boldsymbol{V}}(\boldsymbol{\theta}) \boldsymbol{A}| + \boldsymbol{Y}^T\boldsymbol{A}
+(\boldsymbol{A}^T \tilde{\boldsymbol{V}}(\boldsymbol{\theta}) \boldsymbol{A})^{-1}
+\boldsymbol{A}^T\boldsymbol{Y}
+\tag{7.2}
+\end{equation}\]</span></p>
+<p>However, this is only a theoretical likelihood. It is very common that <span class="math inline">\(\boldsymbol{A}^T \tilde{\boldsymbol{V}}(\boldsymbol{\theta}) \boldsymbol{A}\)</span> is singular matrix hence <span class="math inline">\(\text{log}|\boldsymbol{A}^T \tilde{\boldsymbol{V}}(\boldsymbol{\theta}) \boldsymbol{A}| \rightarrow - \infty\)</span>.</p>
+<p>A better method/log-likelihood is needed for practical calculation.</p>
+<p><span class="math display" id="eq:REML-3">\[\begin{equation}
+-2\ell_{REML}(\boldsymbol{\theta};\boldsymbol{Y}) =
+\text{log} |\tilde{\boldsymbol{V}}(\boldsymbol{\theta})|
++
+\text{log} |\boldsymbol{X}^T \tilde{\boldsymbol{V}}^{-1} \boldsymbol{X}|
++
+(\boldsymbol{Y} - \boldsymbol{X}\tilde{\boldsymbol{\beta}}(\boldsymbol{\theta}))^T
+\tilde{\boldsymbol{V}}^{-1}
+(\boldsymbol{Y} - \boldsymbol{X}\tilde{\boldsymbol{\beta}}(\boldsymbol{\theta}))
+\tag{7.3}
+\end{equation}\]</span>
+The substitute REML log-likelihood, <a href="#eq:REML-3">(7.3)</a>, was first derived by <span class="citation">Patterson and Thompson (<a href="#ref-Patterson1971" role="doc-biblioref">1971</a>)</span> then derived in a Bayesian way by <span class="citation">Harville (<a href="#ref-Harville1974" role="doc-biblioref">1974</a>)</span>. This equation shows that <span class="math inline">\(\boldsymbol{A}^T\)</span> , from <a href="#eq:REML-1">(7.1)</a>, <strong>has no influence on REML log-likelihood</strong>.</p>
+<p>However, both papers, <span class="citation">Patterson and Thompson (<a href="#ref-Patterson1971" role="doc-biblioref">1971</a>)</span> and <span class="citation">Harville (<a href="#ref-Harville1974" role="doc-biblioref">1974</a>)</span>, are very difficult to understand. In <span class="citation">Harville (<a href="#ref-Harville1974" role="doc-biblioref">1974</a>)</span>, REML log-likelihood substitute was derived in a equation less than 4 lines! Reader must have substantial knowledge in linear algebra and probability theory to understand Harville’s equations. A detailed explanation of Harville’s method, <em>A Tutorial on Restricted Maximum Likelihood Estimation
+in Linear Regression and Linear Mixed-Effects Model by Xiuming Zhang</em>, could be found <a href="http://people.csail.mit.edu/xiuming/docs/tutorials/reml.pdf">here</a>.</p>
+<p>The best derivation of the REML log-likelihood in <a href="#eq:REML-3">(7.3)</a> I can find is <span class="citation">LaMotte (<a href="#ref-LaMotte2007" role="doc-biblioref">2007</a>)</span>. Following are essential steps to derive REML log-likelihood in <a href="#eq:REML-3">(7.3)</a>.</p>
+<ul>
+<li>Essential Steps. Detailed proof are shown in following subsections. (To save time in typing, I use <span class="math inline">\(\boldsymbol{V}\)</span> instead of <span class="math inline">\(\tilde{\boldsymbol{V}}\)</span>)
+<ol style="list-style-type: decimal">
+<li>Proof: <span class="math inline">\(\begin{bmatrix} \boldsymbol{V}^{-1} \boldsymbol{X}, \boldsymbol{A} \end{bmatrix}_{n \times n}\)</span> is nonsingular.</li>
+<li>Proof: <span class="math inline">\(\boldsymbol{V}^{-1} = \boldsymbol{V}^{-1} \boldsymbol{X} (\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X})^{-1} \boldsymbol{X}^T \boldsymbol{V}^{-1} + \boldsymbol{A}(\boldsymbol{A}^T \boldsymbol{V} \boldsymbol{A})^{-1} \boldsymbol{A}^T\)</span></li>
+<li>Proof: <span class="math inline">\(\boldsymbol{Y}^T \boldsymbol{A} (\boldsymbol{A}^T \boldsymbol{V} \boldsymbol{A})^{-1} \boldsymbol{A}^T \boldsymbol{Y} = (\boldsymbol{Y} - \boldsymbol{X}\tilde{\boldsymbol{\beta}}(\boldsymbol{\theta}))^T \boldsymbol{V}^{-1} (\boldsymbol{Y} - \boldsymbol{X}\tilde{\boldsymbol{\beta}}(\boldsymbol{\theta}))\)</span></li>
+<li>Proof: <span class="math inline">\(\text{log}|\boldsymbol{A}^T \boldsymbol{V} \boldsymbol{A}| = c + \text{log}|\boldsymbol{V}| + \text{log}|\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X}|\)</span> where <span class="math inline">\(c\)</span> is some constant.</li>
+</ol></li>
+</ul>
+<div id="beginbmatrix-boldsymbolv-1-boldsymbolx-boldsymbola-endbmatrix_n-times-n" class="section level2" number="7.1">
+<h2><span class="header-section-number">7.1</span> <span class="math inline">\(\begin{bmatrix} \boldsymbol{V}^{-1} \boldsymbol{X}, \boldsymbol{A} \end{bmatrix}_{n \times n}\)</span></h2>
+<p>To prove that <span class="math inline">\(\begin{bmatrix} \boldsymbol{V}^{-1} \boldsymbol{X}, \boldsymbol{A} \end{bmatrix}_{n \times n}\)</span> is nonsingular, we need to define matrix <span class="math inline">\(\boldsymbol{S}\)</span> and know the relationship between <span class="math inline">\(\boldsymbol{A}\)</span> and <span class="math inline">\(\boldsymbol{S}\)</span>.</p>
+<p>Define <span class="math inline">\(\boldsymbol{S}\)</span> as
+<span class="math display" id="eq:REML-4">\[\begin{equation}
+\boldsymbol{S} = \boldsymbol{I} - \boldsymbol{X}(\boldsymbol{X}^T\boldsymbol{X})^{-1}\boldsymbol{X}^T
+\tag{7.4}
+\end{equation}\]</span></p>
+<p><span class="math inline">\(\boldsymbol{A}\)</span> should not only match <a href="#eq:REML-1">(7.1)</a> and but also match</p>
+<p><span class="math display" id="eq:REML-5">\[\begin{equation}
+\boldsymbol{S} = \boldsymbol{A} \boldsymbol{A}^T
+\tag{7.5}
+\end{equation}\]</span></p>
+<p>More about <span class="math inline">\(\boldsymbol{A}_{n \times (n-p)}\)</span></p>
+<p><span class="math display" id="eq:REML-6">\[\begin{equation}
+\boldsymbol{A}^T \boldsymbol{A} = \boldsymbol{I}
+\tag{7.6}
+\end{equation}\]</span></p>
+<p><a href="https://en.wikipedia.org/wiki/Determinant#Block_matrices">Block matrices’ determinant</a>, for invertible <span class="math inline">\(\boldsymbol{A}_{22}\)</span></p>
+<p><span class="math display" id="eq:REML-7">\[\begin{equation}
+\text{det}
+\begin{bmatrix}
+\boldsymbol{A}_{11} &amp; \boldsymbol{A}_{12}\\
+\boldsymbol{A}_{21} &amp; \boldsymbol{A}_{22}
+\end{bmatrix}
+=
+\text{det}
+\begin{bmatrix}
+\boldsymbol{A}_{22}
+\end{bmatrix}
+\text{det}
+\begin{bmatrix}
+\boldsymbol{A}_{11} - \boldsymbol{A}_{12} \boldsymbol{A}^{-1}_{22}\boldsymbol{A}_{21}
+\end{bmatrix}
+\tag{7.7}
+\end{equation}\]</span></p>
+<p>To prove that <span class="math inline">\(\begin{bmatrix} \boldsymbol{V}^{-1} \boldsymbol{X}, \boldsymbol{A} \end{bmatrix}\)</span> is nonsingular is equivalent to prove that <span class="math inline">\(\text{det}\begin{bmatrix} \boldsymbol{V}^{-1} \boldsymbol{X}, \boldsymbol{A} \end{bmatrix} \ne 0\)</span>, which is also equivalent to <span class="math inline">\(\text{det}(\begin{bmatrix} \boldsymbol{V}^{-1} \boldsymbol{X}, \boldsymbol{A} \end{bmatrix}^T \begin{bmatrix} \boldsymbol{V}^{-1} \boldsymbol{X}, \boldsymbol{A} \end{bmatrix}) \ne 0\)</span>.</p>
+<p>Now a long derivation begins,</p>
+<p><span class="math display" id="eq:REML-8">\[\begin{equation}
+\begin{split}
+\begin{bmatrix} \boldsymbol{V}^{-1} \boldsymbol{X}, \boldsymbol{A} \end{bmatrix}^T
+\begin{bmatrix} \boldsymbol{V}^{-1} \boldsymbol{X}, \boldsymbol{A} \end{bmatrix}
+&amp;=
+\begin{bmatrix}
+\boldsymbol{X}^T \boldsymbol{V}^{-1}\\
+\boldsymbol{A}^T
+\end{bmatrix}
+\begin{bmatrix} \boldsymbol{V}^{-1} \boldsymbol{X}, \boldsymbol{A} \end{bmatrix}\\
+&amp;=
+\begin{bmatrix}
+\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{V}^{-1} \boldsymbol{X} &amp; \boldsymbol{X}^T \boldsymbol{V}^{-1}\boldsymbol{A}\\ \boldsymbol{A}^T \boldsymbol{V}^{-1} \boldsymbol{X} &amp; \boldsymbol{A}^T \boldsymbol{A}
+\end{bmatrix}\\
+&amp; \stackrel{(7.6)}{=}
+\begin{bmatrix}
+\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{V}^{-1} \boldsymbol{X} &amp; \boldsymbol{X}^T \boldsymbol{V}^{-1}\boldsymbol{A}\\ \boldsymbol{A}^T \boldsymbol{V}^{-1} \boldsymbol{X} &amp; \boldsymbol{I}
+\end{bmatrix}
+\end{split}
+\tag{7.8}
+\end{equation}\]</span></p>
+<p>Then</p>
+<p><span class="math display" id="eq:REML-9">\[\begin{equation}
+\begin{split}
+\text{det}(\begin{bmatrix} \boldsymbol{V}^{-1} \boldsymbol{X}, \boldsymbol{A} \end{bmatrix}^T \begin{bmatrix} \boldsymbol{V}^{-1} \boldsymbol{X}, \boldsymbol{A} \end{bmatrix})
+&amp; =
+\text{det}\begin{bmatrix}
+\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{V}^{-1} \boldsymbol{X} &amp; \boldsymbol{X}^T \boldsymbol{V}^{-1}\boldsymbol{A}\\ \boldsymbol{A}^T \boldsymbol{V}^{-1} \boldsymbol{X} &amp; \boldsymbol{I}
+\end{bmatrix}\\
+&amp; \stackrel{(7.7)}{=}
+\text{det} \begin{bmatrix} \boldsymbol{I} \end{bmatrix}
+\text{det} \begin{bmatrix} \boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{V}^{-1} \boldsymbol{X}
+-
+\boldsymbol{X}^T \boldsymbol{V}^{-1}\boldsymbol{A}
+\boldsymbol{I}^{-1}
+\boldsymbol{A}^T \boldsymbol{V}^{-1} \boldsymbol{X}
+\end{bmatrix} \\
+&amp; = \text{det} \begin{bmatrix}
+\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{V}^{-1} \boldsymbol{X}
+-
+\boldsymbol{X}^T \boldsymbol{V}^{-1}\boldsymbol{A}
+\boldsymbol{A}^T \boldsymbol{V}^{-1} \boldsymbol{X}
+\end{bmatrix}\\
+&amp; \stackrel{(7.5)}{=}
+\text{det} \begin{bmatrix}
+\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{V}^{-1} \boldsymbol{X}
+-
+\boldsymbol{X}^T \boldsymbol{V}^{-1}\boldsymbol{S} \boldsymbol{V}^{-1} \boldsymbol{X}
+\end{bmatrix} \\
+&amp;=
+\text{det} \begin{bmatrix}
+\boldsymbol{X}^T \boldsymbol{V}^{-1}
+(
+\boldsymbol{I} -
+\boldsymbol{S}
+)
+\boldsymbol{V}^{-1} \boldsymbol{X}
+\end{bmatrix} \\
+&amp; \stackrel{(7.4)}{=}
+\text{det} \begin{bmatrix}
+\boldsymbol{X}^T \boldsymbol{V}^{-1}
+\boldsymbol{X}(\boldsymbol{X}^T\boldsymbol{X})^{-1}\boldsymbol{X}^T
+\boldsymbol{V}^{-1} \boldsymbol{X}
+\end{bmatrix} \\
+&amp; =
+\text{det}
+\begin{bmatrix}  
+\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X}
+\end{bmatrix}
+\text{det}
+\begin{bmatrix}  
+(\boldsymbol{X}^T\boldsymbol{X})^{-1}
+\end{bmatrix}
+\text{det}
+\begin{bmatrix}  
+\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X}
+\end{bmatrix}
+\end{split}
+\tag{7.9}
+\end{equation}\]</span></p>
+<p>Since <span class="math inline">\(\boldsymbol{X}\)</span> has independent columns and <span class="math inline">\(\boldsymbol{V}\)</span> is positive definite matrix, <span class="math inline">\(\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X}\)</span> is positive definite that can be proved by positive definite matrix’s definition (hint: <span class="math inline">\(\boldsymbol{y}^T \boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X} \boldsymbol{y} &gt; 0\)</span> for arbitrary non-zero vector <span class="math inline">\(\boldsymbol{y}\)</span>. <span class="math inline">\(\boldsymbol{Xy} = \boldsymbol{0}\)</span> if and only <span class="math inline">\(\boldsymbol{y} = \boldsymbol{0}\)</span>). Overall, <span class="math inline">\(\text{det} \begin{bmatrix}\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X} \end{bmatrix} &gt; 0\)</span>.</p>
+<p>Since the inverse matrix of <span class="math inline">\(\boldsymbol{X}^T\boldsymbol{X}\)</span> exists, <span class="math inline">\(\text{det}(\boldsymbol{X}^T\boldsymbol{X})^{-1} \ne 0\)</span>.</p>
+<p><span class="math inline">\(\text{det}(\begin{bmatrix} \boldsymbol{V}^{-1} \boldsymbol{X}, \boldsymbol{A} \end{bmatrix}^T \begin{bmatrix} \boldsymbol{V}^{-1} \boldsymbol{X}, \boldsymbol{A} \end{bmatrix}) \ne 0 \Leftrightarrow \begin{bmatrix} \boldsymbol{V}^{-1} \boldsymbol{X}, \boldsymbol{A} \end{bmatrix}\)</span> is nonsingular</p>
+</div>
+<div id="boldsymbolv-1-boldsymbolv-1-boldsymbolx-boldsymbolxt-boldsymbolv-1-boldsymbolx-1-boldsymbolxt-boldsymbolv-1-boldsymbolaboldsymbolat-boldsymbolv-boldsymbola-1-boldsymbolat" class="section level2" number="7.2">
+<h2><span class="header-section-number">7.2</span> <span class="math inline">\(\boldsymbol{V}^{-1} = \boldsymbol{V}^{-1} \boldsymbol{X} (\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X})^{-1} \boldsymbol{X}^T \boldsymbol{V}^{-1} + \boldsymbol{A}(\boldsymbol{A}^T \boldsymbol{V} \boldsymbol{A})^{-1} \boldsymbol{A}^T\)</span></h2>
+<p>Screenshot from <span class="citation">LaMotte (<a href="#ref-LaMotte2007" role="doc-biblioref">2007</a>)</span>.</p>
+<p><img src="files/Proof_Scrrenshot_LaMotte2007.png" /></p>
+<p>Equivalently,</p>
+<p><span class="math display" id="eq:REML-10">\[\begin{equation}
+\boldsymbol{A}(\boldsymbol{A}^T \boldsymbol{V} \boldsymbol{A})^{-1} \boldsymbol{A}^T
+=
+\boldsymbol{V}^{-1}
+-
+\boldsymbol{V}^{-1} \boldsymbol{X} (\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X})^{-1} \boldsymbol{X}^T
+\tag{7.10}
+\end{equation}\]</span></p>
+</div>
+<div id="boldsymbolyt-boldsymbola-boldsymbolat-boldsymbolv-boldsymbola-1-boldsymbolat-boldsymboly-boldsymboly---boldsymbolxtildeboldsymbolbetaboldsymbolthetat-boldsymbolv-1-boldsymboly---boldsymbolxtildeboldsymbolbetaboldsymboltheta" class="section level2" number="7.3">
+<h2><span class="header-section-number">7.3</span> <span class="math inline">\(\boldsymbol{Y}^T \boldsymbol{A} (\boldsymbol{A}^T \boldsymbol{V} \boldsymbol{A})^{-1} \boldsymbol{A}^T \boldsymbol{Y} = (\boldsymbol{Y} - \boldsymbol{X}\tilde{\boldsymbol{\beta}}(\boldsymbol{\theta}))^T \boldsymbol{V}^{-1} (\boldsymbol{Y} - \boldsymbol{X}\tilde{\boldsymbol{\beta}}(\boldsymbol{\theta}))\)</span></h2>
+<p>First, we need to prove that <span class="math inline">\(\boldsymbol{X}^T \boldsymbol{V}^{-1}(\boldsymbol{Y}-\boldsymbol{X}\tilde{\boldsymbol{\beta}})=0\)</span></p>
+<p><span class="math display" id="eq:REML-11">\[\begin{equation}
+\begin{split}
+\boldsymbol{X}^T\boldsymbol{V}^{-1}(\boldsymbol{Y}-\boldsymbol{X}\tilde{\boldsymbol{\beta}})
+&amp;=
+\boldsymbol{X}^T\boldsymbol{V}^{-1}\boldsymbol{Y}
+-
+\boldsymbol{X}^T\boldsymbol{V}^{-1}\boldsymbol{X}\tilde{\boldsymbol{\beta}}\\
+&amp;\stackrel{(4.9)}{=}
+\boldsymbol{X}^T\boldsymbol{V}^{-1}\boldsymbol{Y}
+-
+\boldsymbol{X}^T\boldsymbol{V}^{-1}\boldsymbol{X}
+(\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X})^{-1}
+\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{Y}\\
+&amp;=
+\boldsymbol{X}^T\boldsymbol{V}^{-1}\boldsymbol{Y}
+-
+\boldsymbol{X}^T\boldsymbol{V}^{-1}\boldsymbol{Y}\\
+&amp;=\boldsymbol{0}
+\end{split}
+\tag{7.11}
+\end{equation}\]</span></p>
+<p>Equivalently,
+<span class="math display" id="eq:REML-12">\[\begin{equation}
+\begin{split}
+\tilde{\boldsymbol{\beta}}^T\boldsymbol{X}^T\boldsymbol{V}^{-1}(\boldsymbol{Y}-\boldsymbol{X}\tilde{\boldsymbol{\beta}}) = 0
+\end{split}
+\tag{7.12}
+\end{equation}\]</span></p>
+<p>Obviously,</p>
+<p><span class="math display" id="eq:REML-13">\[\begin{equation}
+\begin{split}
+\boldsymbol{Y}^T \boldsymbol{A} (\boldsymbol{A}^T \boldsymbol{V} \boldsymbol{A})^{-1} \boldsymbol{A}^T \boldsymbol{Y}
+&amp;\stackrel{(7.10)}{=}
+\boldsymbol{Y}^T
+(\boldsymbol{V}^{-1}
+-
+\boldsymbol{V}^{-1} \boldsymbol{X} (\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X})^{-1} \boldsymbol{X}^T)
+\boldsymbol{Y}\\
+&amp;=
+\boldsymbol{Y}^T
+(\boldsymbol{V}^{-1}\boldsymbol{Y}
+-
+\boldsymbol{V}^{-1} \boldsymbol{X} (\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X})^{-1} \boldsymbol{X}^T\boldsymbol{Y})\\
+&amp;\stackrel{(4.9)}{=}
+\boldsymbol{Y}^T
+(\boldsymbol{V}^{-1}\boldsymbol{Y}
+-
+\boldsymbol{V}^{-1} \boldsymbol{X}
+\tilde{\boldsymbol{\beta}}
+)\\
+&amp;=
+\boldsymbol{Y}^T\boldsymbol{V}^{-1}
+(\boldsymbol{Y}
+-
+\boldsymbol{X}
+\tilde{\boldsymbol{\beta}}
+)
+-
+0\\
+&amp;\stackrel{(7.12)}{=}
+\boldsymbol{Y}^T\boldsymbol{V}^{-1}
+(\boldsymbol{Y}
+-
+\boldsymbol{X}
+\tilde{\boldsymbol{\beta}}
+)
+-
+\tilde{\boldsymbol{\beta}}^T\boldsymbol{X}^T\boldsymbol{V}^{-1}(\boldsymbol{Y}-\boldsymbol{X}\tilde{\boldsymbol{\beta}})\\
+&amp;= (\boldsymbol{Y}
+-
+\boldsymbol{X}
+\tilde{\boldsymbol{\beta}})^T \boldsymbol{V}^{-1} (\boldsymbol{Y}
+-
+\boldsymbol{X}
+\tilde{\boldsymbol{\beta}}
+)
+\end{split}
+\tag{7.13}
+\end{equation}\]</span>
+Here, the proof completes.</p>
+</div>
+<div id="textlogboldsymbolat-boldsymbolv-boldsymbola-c-textlogboldsymbolv-textlogboldsymbolxt-boldsymbolv-1-boldsymbolx" class="section level2" number="7.4">
+<h2><span class="header-section-number">7.4</span> <span class="math inline">\(\text{log}|\boldsymbol{A}^T \boldsymbol{V} \boldsymbol{A}| = c + \text{log}|\boldsymbol{V}| + \text{log}|\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X}|\)</span></h2>
+<p>Define</p>
+<p><span class="math display" id="eq:REML-14">\[\begin{equation}
+\frac{\partial \boldsymbol{V}}{\partial \theta_i} = \boldsymbol{V}_i
+\tag{7.14}
+\end{equation}\]</span></p>
+<p>Define</p>
+<p><span class="math display" id="eq:REML-15">\[\begin{equation}
+\boldsymbol{W}
+=
+\boldsymbol{A}(\boldsymbol{A}^T \boldsymbol{V} \boldsymbol{A})^{-1} \boldsymbol{A}^T
+=
+\boldsymbol{V}^{-1}
+-
+\boldsymbol{V}^{-1} \boldsymbol{X} (\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X})^{-1} \boldsymbol{X}^T \boldsymbol{V}^{-1}
+\tag{7.15}
+\end{equation}\]</span></p>
+<p>We will use <a href="#eq:matrix-4">(8.4)</a>,<a href="#eq:matrix-5">(8.5)</a>,<a href="#eq:matrix-6">(8.6)</a> and <a href="#eq:matrix-7">(8.7)</a> for this proof.</p>
+<p>First, we have that</p>
+<p><span class="math display" id="eq:REML-16">\[\begin{equation}
+\begin{split}
+\frac{\partial \text{log} |\boldsymbol{A}^T \boldsymbol{VA}|}{\partial \theta_i}
+&amp;\stackrel{(8.4)}{=}
+\text{tr}((\boldsymbol{A}^T \boldsymbol{VA})^{-1}
+\frac{\partial \boldsymbol{A}^T \boldsymbol{VA}}{\partial \theta_i}) \\
+&amp;\stackrel{(8.5)}{=}
+\text{tr}((\boldsymbol{A}^T \boldsymbol{VA})^{-1}
+\boldsymbol{A}^T\frac{\partial \boldsymbol{V}}{\partial \theta_i}\boldsymbol{A})\\
+&amp;\stackrel{(7.14)}{=}
+\text{tr}((\boldsymbol{A}^T \boldsymbol{VA})^{-1}
+\boldsymbol{A}^T \boldsymbol{V}_{i} \boldsymbol{A})\\
+&amp;\stackrel{(8.7)}{=}
+\text{tr}(\boldsymbol{A}(\boldsymbol{A}^T \boldsymbol{VA})^{-1}
+\boldsymbol{A}^T \boldsymbol{V}_{i})\\
+&amp;\stackrel{(7.15)}{=}
+\text{tr}(\boldsymbol{W} \boldsymbol{V}_{i})
+\end{split}
+\tag{7.16}
+\end{equation}\]</span></p>
+<p>Second, we have that</p>
+<p><span class="math display" id="eq:REML-17">\[\begin{equation}
+\begin{split}
+\frac{\partial (\text{log} |\boldsymbol{V}| + \text{log} |\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X}|)}{\partial \theta_i}
+&amp;=
+\frac{\partial \text{log} |\boldsymbol{V}|}{\partial \theta_i}
++
+\frac{\partial \text{log} |\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X}|}{{\partial \theta_i}}\\
+&amp;\stackrel{(8.4)}{=} \text{tr}(\boldsymbol{V}^{-1} \frac{\partial \boldsymbol{V}}{\partial \theta_i})
++
+\text{tr}((\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X})^{-1}
+\frac{\partial \boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X}}{\partial \theta_i}) \\
+&amp;\stackrel{(7.14)}{=}
+\text{tr}(\boldsymbol{V}^{-1} \boldsymbol{V}_i)
++
+\text{tr}((\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X})^{-1}
+\frac{\partial \boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X}}{\partial \theta_i})\\
+&amp;\stackrel{(8.5)}{=}
+\text{tr}(\boldsymbol{V}^{-1} \boldsymbol{V}_i)
++
+\text{tr}((\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X})^{-1}
+\boldsymbol{X}^T \frac{\partial\boldsymbol{V}^{-1}}{\partial \theta_i} \boldsymbol{X})\\
+&amp;\stackrel{(8.6)}{=}
+\text{tr}(\boldsymbol{V}^{-1} \boldsymbol{V}_i)
+-
+\text{tr}((\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X})^{-1}
+\boldsymbol{X}^T \boldsymbol{V}^{-1} \frac{\partial\boldsymbol{V}}{\partial \theta_i} \boldsymbol{V}^{-1} \boldsymbol{X})\\
+&amp;\stackrel{(7.14)}{=}
+\text{tr}(\boldsymbol{V}^{-1} \boldsymbol{V}_i)
+-
+\text{tr}((\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X})^{-1}
+\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{V}_i \boldsymbol{V}^{-1} \boldsymbol{X})\\
+&amp;\stackrel{(8.7)}{=}
+\text{tr}(\boldsymbol{V}^{-1} \boldsymbol{V}_i)
+-
+\text{tr}(\boldsymbol{V}^{-1} \boldsymbol{X} (\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X})^{-1}
+\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{V}_i) \\
+&amp;\stackrel{(8.8)}{=}
+\text{tr}(\boldsymbol{V}^{-1} \boldsymbol{V}_i - \boldsymbol{V}^{-1} \boldsymbol{X} (\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X})^{-1}
+\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{V}_i)\\
+&amp;=
+\text{tr}((\boldsymbol{V}^{-1} - \boldsymbol{V}^{-1} \boldsymbol{X} (\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X})^{-1}
+\boldsymbol{X}^T \boldsymbol{V}^{-1})\boldsymbol{V}_i)\\
+&amp;\stackrel{(7.15)}{=}
+\text{tr}(\boldsymbol{WV}_i)
+\end{split}
+\tag{7.17}
+\end{equation}\]</span></p>
+<p>From <a href="#eq:REML-16">(7.16)</a> and <a href="#eq:REML-17">(7.17)</a>, we have that <span class="math inline">\(\frac{\partial \text{log} |\boldsymbol{A}^T \boldsymbol{VA}|}{\partial \theta_i} = \frac{\partial (\text{log} |\boldsymbol{V}| + \text{log} |\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X}|)}{\partial \theta_i}\)</span>. This implies</p>
+<p><span class="math display">\[\text{log}|\boldsymbol{A}^T \boldsymbol{V} \boldsymbol{A}| = c + \text{log}|\boldsymbol{V}| + \text{log}|\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X}|, \text{ where } c \text{ is a constant number}\]</span>
+Here, the proof completes.</p>
+</div>
+</div>
+<div id="appendix" class="section level1" number="8">
+<h1><span class="header-section-number">8</span> Appendix</h1>
+<div id="matrix-caculus" class="section level2" number="8.1">
+<h2><span class="header-section-number">8.1</span> Matrix Caculus</h2>
+<p>Following formula can be found in <a href="https://en.wikipedia.org/wiki/Matrix_calculus">Wikipedia</a></p>
+<p><span class="math display" id="eq:matrix-1">\[\begin{equation}
+\frac{\partial \boldsymbol{Ax}}{\partial \boldsymbol{x}} = \boldsymbol{A}^T\text{ , where } \boldsymbol{x} \text{ is vector  and } \boldsymbol{A} \text{ is a matrix}
+\tag{8.1}
+\end{equation}\]</span></p>
+<p>and</p>
+<p><span class="math display" id="eq:matrix-2">\[\begin{equation}
+\frac{\partial \boldsymbol{x}^T \boldsymbol{A} \boldsymbol{x}}{\partial \boldsymbol{x}} = 2 \boldsymbol{A} \boldsymbol{x} \text{ , where } \boldsymbol{x} \text{ is vector  and } \boldsymbol{A} = \boldsymbol{A}^T
+\tag{8.2}
+\end{equation}\]</span></p>
+<p>Chain rule</p>
+<p><span class="math display" id="eq:matrix-3">\[\begin{equation}
+\frac{\partial g(\boldsymbol{u})}{\partial \boldsymbol{x}} = \frac{\partial \boldsymbol{u} }{\partial \boldsymbol{x}} \frac{\partial g(\boldsymbol{u})}{ \partial \boldsymbol{u}} \text{ where } \boldsymbol{u} = \boldsymbol{u}(\boldsymbol{x})
+\tag{8.3}
+\end{equation}\]</span></p>
+<p>For <span class="math inline">\(\boldsymbol{U} = \boldsymbol{U}(x)\)</span>, we have</p>
+<p><span class="math display" id="eq:matrix-4">\[\begin{equation}
+\begin{split}
+\frac{\partial \text{ln} |\boldsymbol{U}|}{\partial x}
+=\text{tr}
+(\boldsymbol{U}^{-1} \frac{\partial \boldsymbol{U}}{\partial x})
+\end{split}
+\tag{8.4}
+\end{equation}\]</span></p>
+<p><span class="math inline">\(\boldsymbol{A},\boldsymbol{B}\)</span> are not function of <span class="math inline">\(x\)</span>, <span class="math inline">\(\boldsymbol{U} = \boldsymbol{U}(x)\)</span>
+<span class="math display" id="eq:matrix-5">\[\begin{equation}
+\frac{\partial \boldsymbol{AUB}}{\partial x} = \boldsymbol{A} \frac{\partial \boldsymbol{U}}{\partial x} \boldsymbol{B}
+\tag{8.5}
+\end{equation}\]</span></p>
+<p>For <span class="math inline">\(\boldsymbol{U} = \boldsymbol{U}(x)\)</span>, we have</p>
+<p><span class="math display" id="eq:matrix-6">\[\begin{equation}
+\frac{\partial \boldsymbol{U}^{-1}}{\partial x}
+=
+-\boldsymbol{U}^{-1}
+\frac{\partial \boldsymbol{U}}{\partial x}
+\boldsymbol{U}^{-1}
+\tag{8.6}
+\end{equation}\]</span></p>
+<p>Trace of matrix</p>
+<p><span class="math display" id="eq:matrix-7">\[\begin{equation}
+\text{tr}(\boldsymbol{ABCD}) =
+\text{tr}(\boldsymbol{BCDA}) =
+\text{tr}(\boldsymbol{CDAB}) =
+\text{tr}(\boldsymbol{DABC})
+\tag{8.7}
+\end{equation}\]</span></p>
+<p>Summation of trace
+<span class="math display" id="eq:matrix-8">\[\begin{equation}
+\text{tr}(\boldsymbol{A} + \boldsymbol{B}) =
+\text{tr}(\boldsymbol{A}) + \text{tr}(\boldsymbol{B})
+\tag{8.8}
+\end{equation}\]</span></p>
+</div>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<p><span class="citation">Henderson et al. (<a href="#ref-Henderson1959" role="doc-biblioref">1959</a>)</span>
+<span class="citation">Henderson (<a href="#ref-Henderson1963" role="doc-biblioref">1963</a>)</span>
+<span class="citation">Littell et al. (<a href="#ref-Littell:2006:SMM:1205543" role="doc-biblioref">2006</a>)</span>
+<span class="citation">Searle (<a href="#ref-SEARLE1997291" role="doc-biblioref">1997</a>)</span>
+<span class="citation">Harville (<a href="#ref-Harville1974" role="doc-biblioref">1974</a>)</span>
+<span class="citation">Patterson and Thompson (<a href="#ref-Patterson1971" role="doc-biblioref">1971</a>)</span>
+<span class="citation">LaMotte (<a href="#ref-LaMotte2007" role="doc-biblioref">2007</a>)</span></p>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-Harville1974" class="csl-entry">
+Harville, David A. 1974. <span>“Bayesian Inference for Variance Components Using Only Error Contrasts.”</span> <em>Biometrika</em> 61 (2): 383–85. <a href="http://www.jstor.org/stable/2334370">http://www.jstor.org/stable/2334370</a>.
+</div>
+<div id="ref-Henderson1963" class="csl-entry">
+Henderson, C. R. 1963. <span>“Selection Index and Expected Genetic Advance.”</span> <em>Statistical Genetics and Plant Breeding</em>, 141–63.
+</div>
+<div id="ref-Henderson1959" class="csl-entry">
+Henderson, C. R., Oscar Kempthorne, S. R. Searle, and C. M. von Krosigk. 1959. <span>“The Estimation of Environmental and Genetic Trends from Records Subject to Culling.”</span> <em>Biometrics</em> 15 (2): 192–218. <a href="http://www.jstor.org/stable/2527669">http://www.jstor.org/stable/2527669</a>.
+</div>
+<div id="ref-LaMotte2007" class="csl-entry">
+LaMotte, Lynn Roy. 2007. <span>“A Direct Derivation of the REML Likelihood Function.”</span> <em>Statistical Papers</em> 48 (2): 321–27. <a href="https://doi.org/10.1007/s00362-006-0335-6">https://doi.org/10.1007/s00362-006-0335-6</a>.
+</div>
+<div id="ref-Littell:2006:SMM:1205543" class="csl-entry">
+Littell, Ramon C., George A. Milliken, Walter W. Stroup, Russell D. Wolfinger, and Schabenberber Oliver. 2006. <em>SAS for Mixed Models, Second Edition</em>. SAS Publishing.
+</div>
+<div id="ref-Patterson1971" class="csl-entry">
+Patterson, H. D., and R. Thompson. 1971. <span>“Recovery of Inter-Block Information When Block Sizes Are Unequal.”</span> <em>Biometrika</em> 58 (3): 545–54. <a href="http://www.jstor.org/stable/2334389">http://www.jstor.org/stable/2334389</a>.
+</div>
+<div id="ref-SEARLE1997291" class="csl-entry">
+Searle, Shayle R. 1997. <span>“The Matrix Handling of BLUE and BLUP in the Mixed Linear Model.”</span> <em>Linear Algebra and Its Applications</em> 264: 291–311. <a href="https://doi.org/10.1016/S0024-3795(96)00400-4">https://doi.org/10.1016/S0024-3795(96)00400-4</a>.
+</div>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

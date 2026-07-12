@@ -1,0 +1,211 @@
+---
+title: "Example for Mixed Model Equations and REML"
+author: "Kevin Liu"
+date: "7/10/2018"
+output: 
+  bookdown::html_document2:
+    toc: true
+    toc_depth: 4
+    self_contained: true
+bibliography: "bibliography.bib"
+link-citations: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.align='center')
+```
+
+I will use `bond` data from Chapter2 of @Littell:2006:SMM:1205543 as a example.
+
+#Load Packages
+```{r}
+library(lme4)
+library(optimization)
+```
+
+# Create Dataframe `df.bond`
+
+```{r}
+df.bond <- data.frame(ingot = rep(1:7,each = 3),
+                      metal = rep(c("n","i","c"),7),
+                      pres = c(67,71.9,72.2,
+                               67.5,68.8,66.4,
+                               76,82.6,74.5,
+                               72.7,78.1,67.3,
+                               73.1,74.2,73.2,
+                               65.8,70.8,68.7,
+                               75.6,84.9,69))
+df.bond$ingot <- factor(df.bond$ingot)
+df.bond
+```
+
+# Linear mixed model by maximum likelihood estimation
+
+First we build linear mixed model by `lme4` package with MLE method. Then we compare the parameter estimations by using equations from [Some important proof of Mixed Model Equations and REML](Linear_mixed_model_equations.html) via `optimization` package.
+
+```{r}
+lmm.bond <- lmer( pres ~ metal + (1|ingot),REML = FALSE,data = df.bond)
+summary(lmm.bond)
+anova(lmm.bond)
+```
+
+For linear mixed model
+
+\begin{equation}
+\boldsymbol{Y} = \boldsymbol{X\beta} + \boldsymbol{Zu} + \boldsymbol{e}
+\end{equation}
+
+\begin{equation}
+\begin{pmatrix}
+\boldsymbol{u}\\
+\boldsymbol{e}
+\end{pmatrix} \sim \mathcal{N}
+\begin{pmatrix}
+\begin{pmatrix}
+\boldsymbol{0}\\
+\boldsymbol{0}
+\end{pmatrix},
+\begin{pmatrix}
+\boldsymbol{G} & \boldsymbol{0}\\
+\boldsymbol{0} & \boldsymbol{R}
+\end{pmatrix}
+\end{pmatrix}
+\end{equation}
+
+Design matrix $\boldsymbol{X}$ is
+
+```{r}
+matrix.x <- model.matrix(lmm.bond)
+matrix.x
+```
+
+Design matrix $\boldsymbol{Z}$ is 
+
+```{r}
+df.z <- read.csv("files/Z.csv", header = FALSE)
+matrix.z <- as.matrix(df.z)
+colnames(matrix.z) <- paste0("ingot:",1:7)
+matrix.z
+```
+
+Define matrix $\boldsymbol{G}$ as
+
+$$\boldsymbol{G}_{7 \times 7} = \boldsymbol{I} \sigma^2_{\text{ingot}}$$
+
+Define matrix $\boldsymbol{R}$ as
+
+$$\boldsymbol{R}_{21 \times 21} = \boldsymbol{I} \sigma^2_{\text{residual}}$$
+
+Use equation(4.9) and equation (6.1) from [Some important proof of Mixed Model Equations and REML](Linear_mixed_model_equations.html)
+
+\begin{equation}
+\tilde{\boldsymbol{\beta}} 
+= 
+(\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{X})^{-1} 
+\boldsymbol{X}^T \boldsymbol{V}^{-1} \boldsymbol{Y}
+\tag{4.9}
+\end{equation}
+
+\begin{equation}
+-2\ell(\boldsymbol{\theta};\boldsymbol{Y})
+=
+\text{log}|\tilde{\boldsymbol{V}}(\boldsymbol{\theta})| 
++ 
+(\boldsymbol{Y}-\boldsymbol{X}\tilde{\boldsymbol{\beta}}(\boldsymbol{\theta}))^T
+\tilde{\boldsymbol{V}}(\boldsymbol{\theta})^{-1}
+(\boldsymbol{Y}-\boldsymbol{X}\tilde{\boldsymbol{\beta}}(\boldsymbol{\theta}))
+\tag{6.1}
+\end{equation}
+
+
+Estimation of covariance parameters
+```{r}
+loglikef <- function(x) {
+  vector.Y <- as.vector(df.bond$pres)
+  matrix.G <- x[1] * diag(1,nrow = 7)
+  matrix.R <- x[2] * diag(1,nrow = 21)
+  matrix.V <- matrix.z %*% matrix.G %*% t(matrix.z) + matrix.R
+  vector.Beta <- solve(t(matrix.x) %*% solve(matrix.V) %*% matrix.x) %*% t(matrix.x) %*% solve(matrix.V) %*% vector.Y
+  loglike <- log(det(matrix.V)) + t(vector.Y - matrix.x %*% vector.Beta) %*% solve(matrix.V) %*% (vector.Y - matrix.x %*% vector.Beta)
+  return(c(loglike))
+}
+
+optim_nm(fun = loglikef, k = 2, start = c(1,1),maximum= FALSE, tol = 0.0000000000001)$par
+hat.cov.para <- optim_nm(fun = loglikef, k = 2, start = c(1,1),maximum= FALSE, tol = 0.0000000000001)$par
+```
+
+We have that 
+
+$$\sigma^2_{\text{ingot}} = 9.812383 \text{ and } \sigma^2_{\text{residual}} = 8.889932$$
+This is identical to estimations from `lme4`.
+
+Then estimate fix effect $\boldsymbol{\beta}$
+
+```{r}
+hat.beta <- function(x) {
+  vector.Y <- as.vector(df.bond$pres)
+  matrix.G <- x[1] * diag(1,nrow = 7)
+  matrix.R <- x[2] * diag(1,nrow = 21)
+  matrix.V <- matrix.z %*% matrix.G %*% t(matrix.z) + matrix.R
+  vector.Beta <- solve(t(matrix.x) %*% solve(matrix.V) %*% matrix.x) %*% t(matrix.x) %*% solve(matrix.V) %*% vector.Y
+  return(vector.Beta)
+}
+round(hat.beta(x = hat.cov.para),4)
+```
+
+We have that 
+$$\boldsymbol{\beta}
+=
+\begin{bmatrix} \beta_0\\
+\beta_1\\
+\beta_2
+\end{bmatrix} =
+\begin{bmatrix}
+70.1857\\
+5.7143\\
+0.9143
+\end{bmatrix}$$
+
+Again, this is identical to estimations from `lme4`.
+
+# Linear mixed model by REML
+
+Same as [section 3][Linear mixed model by maximum likelihood estimation], firstly we build linear mixed model by `lme4` package with REML option. Then we compare 'hand' calculated estimations with estimations from `lme4`.
+
+```{r}
+relmm.bond <- lmer( pres ~ metal + (1|ingot),REML = TRUE,data = df.bond)
+summary(relmm.bond)
+```
+
+Using equation(7.3) from [Some important proof of Mixed Model Equations and REML](Linear_mixed_model_equations.html)
+
+\begin{equation}
+-2\ell_{REML}(\boldsymbol{\theta};\boldsymbol{Y}) = 
+\text{log} |\tilde{\boldsymbol{V}}(\boldsymbol{\theta})|
++
+\text{log} |\boldsymbol{X}^T \tilde{\boldsymbol{V}}^{-1} \boldsymbol{X}| 
++
+(\boldsymbol{Y} - \boldsymbol{X}\tilde{\boldsymbol{\beta}}(\boldsymbol{\theta}))^T
+\tilde{\boldsymbol{V}}^{-1}
+(\boldsymbol{Y} - \boldsymbol{X}\tilde{\boldsymbol{\beta}}(\boldsymbol{\theta}))
+\tag{7.3}
+\end{equation}
+
+```{r}
+reloglikef <- function(x) {
+  vector.Y <- as.vector(df.bond$pres)
+  matrix.G <- x[1] * diag(1,nrow = 7)
+  matrix.R <- x[2] * diag(1,nrow = 21)
+  matrix.V <- matrix.z %*% matrix.G %*% t(matrix.z) + matrix.R
+  vector.Beta <- solve(t(matrix.x) %*% solve(matrix.V) %*% matrix.x) %*% t(matrix.x) %*% solve(matrix.V) %*% vector.Y
+  loglike <- log(det(matrix.V)) + log(det(t(matrix.x) %*% solve(matrix.V) %*% matrix.x)) + t(vector.Y - matrix.x %*% vector.Beta) %*% solve(matrix.V) %*% (vector.Y - matrix.x %*% vector.Beta)
+  return(c(loglike))
+}
+
+optim_nm(fun = reloglikef, k = 2, start = c(5,6),maximum= FALSE, tol = 0.0000000000001)$par
+```
+
+Again, parameter estimations are close enough. 
+
+`r if (knitr::is_html_output()) '# References {-}'`
+@Littell:2006:SMM:1205543
