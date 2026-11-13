@@ -1,0 +1,337 @@
+---
+title: 'STA 112: Final Project - Paper Helicopter Experiment'
+author: "Your Name"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: cerulean
+    toc: true
+    toc_float:
+      collapsed: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, include = TRUE)
+```
+
+## Student Information
+
+**Name:**
+
+**Course/Section:**
+
+**Date:**
+
+**Academic Integrity:** Generative AI tools are prohibited for this final project. Verified unauthorized use will result in a grade of zero for the final project, subject to university academic-integrity procedures.
+
+## Data Import and Setup
+
+```{r}
+# Type your codes here
+```
+
+## Question 01: Data Preparation and Exploratory Data Analysis (10 Points)
+
+### (a) Data Count and Variable Types (3 Points)
+
+```{r}
+# Type your codes here
+```
+
+**Answer:**
+
+
+### (b) Exploratory Plots (5 Points)
+
+**Plot 1:**
+
+```{r, fig.width=5.5, fig.height=5.5, fig.align='center'}
+# Type your codes here
+```
+
+**Plot 2:**
+
+```{r, fig.width=5.5, fig.height=5.5, fig.align='center'}
+# Type your codes here
+```
+
+**Answer:**
+
+
+### (c) Summary Statistics (2 Points)
+
+```{r}
+# Type your codes here
+```
+
+**Answer:**
+
+
+## Question 02: Height and Simple Linear Regression (10 Points)
+
+### (a) Model Fitting and Regression Equation (3 Points)
+
+```{r}
+# Type your codes here
+```
+
+**Answer:**
+
+
+### (b) Parameter Interpretation (3 Points)
+
+**Answer:**
+
+
+### (c) Hypothesis Test (2 Points)
+
+```{r}
+# Type your codes here
+```
+
+**Answer:**
+
+
+### (d) Model Fit (2 Points)
+
+```{r}
+# Type your codes here
+```
+
+**Answer:**
+
+
+## Question 03: Paper Clips (8 Points)
+
+### (a) Group Comparison (2 Points)
+
+```{r}
+# Type your codes here
+```
+
+**Answer:**
+
+
+### (b) Adjusted Regression (3 Points)
+
+```{r}
+# Type your codes here
+```
+
+**Answer:**
+
+
+### (c) Significance and Interpretation (3 Points)
+
+```{r}
+# Type your codes here
+```
+
+**Answer:**
+
+
+## Question 04: Paper Type and ANOVA (10 Points)
+
+### (a) One-Way ANOVA (4 Points)
+
+```{r}
+# Type your codes here
+```
+
+**Answer:**
+
+
+### (b) Adjusted Paper-Type Test (4 Points)
+
+```{r}
+# Type your codes here
+```
+
+**Answer:**
+
+
+### (c) Comparison and Interpretation (2 Points)
+
+**Answer:**
+
+
+## Question 05: Interaction Effects (17 Points)
+
+### (a) Height and Clips Interaction (3 Points)
+
+```{r}
+# Type your codes here
+```
+
+**Answer:**
+
+
+### (b) Height and Paper-Type Interaction (4 Points)
+
+```{r}
+# Type your codes here
+```
+
+**Answer:**
+
+
+### (c) Clips and Paper-Type Interaction (3 Points)
+
+```{r}
+# Type your codes here
+```
+
+**Answer:**
+
+
+### (d) Interaction Plots (4 Points)
+
+**Plot 1:**
+
+```{r, fig.width=5.5, fig.height=5.5, fig.align='center'}
+# Type your codes here
+```
+
+**Plot 2:**
+
+```{r, fig.width=5.5, fig.height=5.5, fig.align='center'}
+# Type your codes here
+```
+
+**Answer:**
+
+
+### (e) Interaction Coefficients and Slopes (3 Points)
+
+```{r}
+# Type your codes here
+```
+
+**Answer:**
+
+
+## Question 06: Required Final Regression Model (11 Points)
+
+### (a) Model Fit and Equation (4 Points)
+
+```{r}
+# Type your codes here
+```
+
+**Answer:**
+
+
+### (b) Model Comparisons (4 Points)
+
+```{r}
+# Type your codes here
+```
+
+**Answer:**
+
+
+### (c) Model Structure and Interpretation (3 Points)
+
+**Answer:**
+
+
+## Question 07: Model Diagnostics (9 Points)
+
+### (a) Residual and Q-Q Plots (3 Points)
+
+**Plot 1:**
+
+```{r, fig.width=5.5, fig.height=5.5, fig.align='center'}
+# Type your codes here
+```
+
+**Plot 2:**
+
+```{r, fig.width=5.5, fig.height=5.5, fig.align='center'}
+# Type your codes here
+```
+
+**Answer:**
+
+
+### (b) Regression Assumptions (3 Points)
+
+**Answer:**
+
+
+### (c) Visual Assessment of Unusual Observations (3 Points)
+
+```{r}
+# Type your codes here
+```
+
+**Answer:**
+
+
+## Question 08: Coefficient Confidence Intervals (7 Points)
+
+### (a) 95% Confidence Interval Table (2 Points)
+
+```{r}
+# Type your codes here
+```
+
+**Answer:**
+
+
+### (b) Interpretation of Intervals (3 Points)
+
+**Answer:**
+
+
+### (c) Intervals and Statistical Tests (2 Points)
+
+**Answer:**
+
+
+## Question 09: Prediction at 1.45 Meters (8 Points)
+
+### (a) Point Prediction (2 Points)
+
+```{r}
+# Type your codes here
+```
+
+**Answer:**
+
+
+### (b) Confidence Interval for Mean Response (2 Points)
+
+```{r}
+# Type your codes here
+```
+
+**Answer:**
+
+
+### (c) Prediction Interval for Individual Response (2 Points)
+
+```{r}
+# Type your codes here
+```
+
+**Answer:**
+
+
+### (d) Comparison of Intervals (2 Points)
+
+**Answer:**
+
+
+## Question 10: Scientific Conclusions and Limitations (5 Points)
+
+### (a) Results Summary (3 Points)
+
+**Answer:**
+
+
+### (b) Limitations and Recommendations (2 Points)
+
+**Answer:**
+
+
