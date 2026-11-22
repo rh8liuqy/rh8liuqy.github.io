@@ -1,0 +1,468 @@
+---
+title: "STA 112: Lab 05 — The Coke Taste Test"
+subtitle: "Fall 2026 | Student Copy"
+author: "Your Name"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output:
+  html_document:
+    theme: cerulean
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: true
+      smooth_scroll: true
+    self_contained: true
+    anchor_sections: true
+    mathjax: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+```
+
+## Introduction
+
+It turned out to be hard to predict which Coke a taster would prefer. I tried many models with our survey data, and adding more predictors did little to improve the predictions. I chose a simple model based on the sweetness rating so we can focus on learning logistic regression.
+
+**Reporting your results.** The eight questions are worth **100 points**. Show your R code and output, then interpret your results in complete sentences. Use $\alpha = 0.05$ for tests and 95% confidence for intervals. Report $p$-values to four decimal places and use the unrounded values to make decisions.
+
+Replace **Your Name** in the header. Run the chunks in order and write your responses under **Answer**. For a commented line containing `___`, fill in each blank before removing the leading `#`. Run any additional commented lines you need, then use **Knit** in RStudio to create your report.
+
+## The taste-test data
+
+Place `coke_taste_data.xlsx` in the same R project folder as this lab file. One row represents one survey response. Each taster rated the relative sweetness of Mexican Coke and US Regular Coke, then recorded a taste preference or selected “Neutral or No Preference.”
+
+| Variable | Meaning |
+|:--|:--|
+| `ts` | Time the survey response was recorded |
+| `reg_soda` | Drinks non-diet soft drinks at least once or twice a week (No/Yes) |
+| `daily_caff` | Consumes caffeine daily (No/Yes) |
+| `soda_type` | Usually buys diet/zero or regular soda, or rarely drinks soda |
+| `hrs_fasted` | Hours since the taster last ate |
+| `seek_cane` | Actively seeks cane sugar over corn syrup when shopping (No/Yes) |
+| `sweet_comp` | Which Coke tasted sweeter, and by how much |
+| `taste_pref` | Which Coke the taster preferred based strictly on taste |
+
+### Importing and cleaning the data
+
+Run the complete data-management code below. Keep `df_coke_raw` for the first vote count. Use `df_coke` for the two-choice analysis.
+
+```{r import-data}
+library(tidyverse)
+library(readxl)
+
+df_coke_raw <- read_xlsx("./coke_taste_data.xlsx")
+new_col_names <- c(
+  "ts", "reg_soda", "daily_caff", "soda_type",
+  "hrs_fasted", "seek_cane", "sweet_comp", "taste_pref"
+)
+colnames(df_coke_raw) <- new_col_names
+
+df_coke <- df_coke_raw |>
+  filter(taste_pref != "Neutral or No Preference")
+```
+
+```{r code-survey-responses}
+# "No" is the reference level for each yes/no predictor.
+df_coke$reg_soda   <- factor(df_coke$reg_soda,   levels = c("No", "Yes"))
+df_coke$daily_caff <- factor(df_coke$daily_caff, levels = c("No", "Yes"))
+df_coke$seek_cane  <- factor(df_coke$seek_cane,  levels = c("No", "Yes"))
+
+# Keep the usual soda type categorical. The first level is the reference.
+df_coke$soda_type <- factor(
+  df_coke$soda_type,
+  levels = c("Rarely or Never drink soft drinks",
+             "Diet or Zero Sugar",
+             "Regular Sugar")
+)
+
+# Code relative sweetness from 1 (US much sweeter) to 5 (Mexican much sweeter).
+df_coke$sweet_comp <- factor(
+  df_coke$sweet_comp,
+  levels = c("US Regular Coke is much sweeter",
+             "US Regular Coke is slightly sweeter",
+             "Both taste equally sweet",
+             "Mexican Coke is slightly sweeter",
+             "Mexican Coke is much sweeter")
+)
+df_coke$sweet_score <- as.numeric(df_coke$sweet_comp)
+
+# With a two-level response, glm() models the probability of the second level.
+df_coke$taste_pref <- factor(
+  df_coke$taste_pref,
+  levels = c("Prefer US Regular Coke (Corn Syrup)",
+             "Prefer Mexican Coke (Cane Sugar)")
+)
+df_coke$pref_mex <- as.integer(
+  df_coke$taste_pref == "Prefer Mexican Coke (Cane Sugar)"
+)
+```
+
+**Sanity check.** Run the following two lines. The score should range from 1 to 5, and Mexican Coke should appear as the second preference level.
+
+```{r check-coding}
+range(df_coke$sweet_score)
+levels(df_coke$taste_pref)
+```
+
+For the regression questions, $Y=1$ means the taster preferred **Mexican Coke**, and $Y=0$ means the taster preferred **US Regular Coke**. As in the handout, write $\pi=P(Y=1)$ for the probability of preferring Mexican Coke. Our regression data contain the tasters who expressed a preference.
+
+## Question 01. Which Coke won the taste test? (10 points)
+
+**(a) All survey responses (5 points).** Using `df_coke_raw`, report the count and proportion for each of the three preference categories. What fraction of everyone who responded chose Mexican Coke?
+
+*Hint.* `table()` counts the votes in each category. Add all three counts with `sum()` to get the number of survey responses, including neutral responses. Divide each count by that total. The three proportions should add to 1 before rounding.
+
+```{r all-votes}
+all_votes <- table(df_coke_raw$taste_pref)
+all_votes
+total_responses <- sum(all_votes)
+total_responses
+
+# Divide all three counts by the total number of responses.
+# all_proportions <- all_votes / ___
+# round(all_proportions, 4)
+```
+
+**Answer**
+
+**(b) Tasters who chose a Coke (5 points).** Using `df_coke`, calculate the count and proportion for **each** Coke. Give the denominator and explain why the Mexican Coke proportion changes from part (a).
+
+*Hint.* In `df_coke`, `pref_mex` is 0 for US Regular Coke and 1 for Mexican Coke. The first two lines below count the tasters in each group. Add the two counts to get the new denominator. Compare the Mexican Coke count and the denominator with what you found in (a).
+
+```{r two-choice-votes}
+n_us  <- sum(df_coke$pref_mex == 0)
+n_mex <- sum(df_coke$pref_mex == 1)
+n_us
+n_mex
+total_votes <- n_us + n_mex
+total_votes
+
+# Use the same denominator for both Cokes.
+# n_us / ___
+# n_mex / ___
+```
+
+**Answer**
+
+## Question 02. What does the null model know? (15 points)
+
+**(a) From votes to odds (4 points).** Use the two counts from Question 01(b) to calculate the sample proportion, odds, and natural log-odds of preferring Mexican Coke. Explain the odds in terms of Mexican Coke votes per US Regular Coke vote.
+
+*Hint.* Suppose 8 tasters choose lemon soda and 4 choose lime. Lemon's proportion is $8/(8+4)$, its odds are $8/4$, and its log-odds are $\log(8/4)$. Repeat those three operations for Mexican Coke. Read the odds as “about ___ Mexican Coke votes for each US Regular Coke vote.”
+
+```{r empirical-odds}
+# Use the counts you saved in Question 01(b).
+p_eda <- n_mex / total_votes
+p_eda
+# odds_eda <- n_mex / ___
+# log_odds_eda <- log(___)
+# odds_eda
+# log_odds_eda
+```
+
+**Answer**
+
+**(b) Fit the intercept-only model (6 points).** Run the model below and report its intercept. Write the fitted model in **logit form** and **probability form**, substituting the estimated intercept into both equations.
+
+*Hint.* The `1` in `taste_pref ~ 1` fits a single intercept. Read the `Estimate` in the `(Intercept)` row of `summary(m0_null)`. Substitute it for $\hat{\beta}_0$ in both $\operatorname{logit}(\hat{\pi})=\hat{\beta}_0$ and $\hat{\pi}=\exp(\hat{\beta}_0)/[1+\exp(\hat{\beta}_0)]$.
+
+```{r fit-null}
+m0_null <- glm(taste_pref ~ 1, data = df_coke,
+               family = binomial(link = "logit"))
+summary(m0_null)
+```
+
+**Answer**
+
+**(c) Connect regression to EDA (5 points).** Put your EDA and null-model results side by side on three scales. Compare the sample log-odds with the intercept, the sample odds with the exponentiated intercept, and the sample proportion with the fitted probability. Why does every taster receive the same probability?
+
+*Hint.* Fill in the vote-count column using part (a). For the null model, the intercept `b0` gives the log-odds and `exp(b0)` gives the odds. Divide the odds by one plus the odds to get the probability. This is the same as `1 / (1 + exp(-b0))`.
+
+```{r compare-null-to-eda}
+b0 <- coef(m0_null)[1]
+b0               # fitted log-odds
+exp(b0)          # fitted odds
+p_null <- 1 / (1 + exp(-b0))
+p_null           # fitted probability for every taster
+```
+
+| Scale | From the vote counts | From the null model |
+|:--|--:|--:|
+| Log-odds | | |
+| Odds | | |
+| Probability | | |
+
+**Answer**
+
+## Question 03. Does perceived sweetness predict preference? (12 points)
+
+Let $X$ denote `sweet_score`. A higher score means the taster found Mexican Coke sweeter relative to US Regular Coke. As in the handout's GPA example, we use one quantitative predictor. The linear predictor is $\eta=\beta_0+\beta_1 X$.
+
+The **logit form** gives the log-odds of preferring Mexican Coke,
+
+$$
+\operatorname{logit}(\pi)=\log\left(\frac{\pi}{1-\pi}\right)=\beta_0+\beta_1 X.
+$$
+
+The **probability form** gives the probability of preferring Mexican Coke,
+
+$$
+\pi=\frac{\exp(\beta_0+\beta_1 X)}{1+\exp(\beta_0+\beta_1 X)}
+   =\frac{\exp(\eta)}{1+\exp(\eta)}.
+$$
+
+A one-point increase in $X$ changes the log-odds by $\beta_1$. Put hats on $\pi$, $\eta$, and the coefficients when you use estimates from the fitted model.
+
+**(a) Fit the sweetness model (3 points).** Fit the simple logistic regression model below. Print its `summary()` and report the estimated intercept and slope.
+
+*Hint.* In `summary()`, look under **Coefficients**, in the **Estimate** column. The `(Intercept)` row gives $\hat{\beta}_0$ and the `sweet_score` row gives $\hat{\beta}_1$. Keep the signs and use the unrounded coefficients in later calculations.
+
+```{r fit-sweetness}
+m1_sweet <- glm(taste_pref ~ sweet_score, data = df_coke,
+                family = binomial(link = "logit"))
+summary(m1_sweet)
+# coef(m1_sweet) gives the two estimates directly.
+```
+
+**Answer**
+
+**(b) Write the fitted model (5 points).** Use the estimated intercept and slope to write the fitted model in both **logit form** and **probability form**. Include the numerical coefficients and the predictor $X$ in both equations.
+
+*Hint.* First write $\hat{\eta}=\hat{\beta}_0+\hat{\beta}_1 X$ using your two estimates. For the logit form put that expression on the right of $\operatorname{logit}(\hat{\pi})$. For the probability form put the **entire expression** in both exponentials of $\exp(\hat{\eta})/[1+\exp(\hat{\eta})]$. Leave $X$ in both equations.
+
+**Answer**
+
+**(c) Interpret the slope (4 points).** Consider a taster who rated the Cokes equally sweet ($X=3$) and one who rated Mexican Coke slightly sweeter ($X=4$). Compare their fitted log-odds and their fitted **odds** of preferring Mexican Coke. Report the odds ratio with its direction.
+
+*Hint.* Write down the fitted log-odds at $X=4$ and $X=3$ and subtract the second from the first. The intercept cancels. Exponentiate the difference to get the odds at score 4 divided by the odds at score 3. Describe the result using “times the odds.”
+
+```{r sweetness-odds-ratio}
+slope <- coef(m1_sweet)[2]  # the sweetness slope
+log_odds_change <- slope * (4 - 3)
+log_odds_change
+# odds_ratio <- exp(___)
+# odds_ratio
+```
+
+**Answer**
+
+## Question 04. Coke preference by daily caffeine use (10 points)
+
+In Question 02, all tasters who chose a Coke contributed to one set of odds. Now split those votes by `daily_caff`. The survey counted caffeine from coffee, tea, energy drinks, or soda. A “No” answer means the taster did not report consuming caffeine every day.
+
+**(a) Start with the votes (4 points).** Make one row for each value of `daily_caff` (`No` and `Yes`). In each row, report the Mexican Coke and US Regular Coke vote counts. Use those counts to calculate the observed probability (sample proportion), odds, and natural log-odds of preferring Mexican Coke within that group.
+
+*Hint.* Let $M$ and $U$ be the Mexican Coke and US Regular Coke counts in **one group**. The proportion is $M/(M+U)$, the odds are $[M/(M+U)]/[U/(M+U)] = M/U$, and the log-odds are $\log(M/U)$. Use `df_coke`, which contains only tasters who chose one of the two Cokes.
+
+```{r caffeine-votes}
+caff_votes <- df_coke |>
+  group_by(daily_caff) |>
+  summarise(mex = sum(pref_mex == 1),
+            us  = sum(pref_mex == 0))
+caff_votes
+
+# Complete these lines to add the three quantities to your table.
+# caff_eda <- caff_votes |>
+#   mutate(probability = mex / (mex + us),
+#          odds = mex / ___,
+#          log_odds = log(___))
+# caff_eda
+```
+
+**Answer**
+
+**(b) Recover the two rows with logistic regression (6 points).** Fit `taste_pref ~ daily_caff` with `No` as the reference group. Write the fitted model in logit and probability form using the indicator function $\mathbb{I}_D$ with $\mathbb{I}_D = 0$ for `No` and $\mathbb{I}_D = 1$ for `Yes` in `daily_caff`. For each group, compare its fitted log-odds, odds, and probability with part (a). Explain how the intercept and slope reproduce the two rows. What does $\exp(\hat{\beta}_1)$ tell you about the odds for `Yes` compared with `No`?
+
+*Hint.* Substitute 0 and then 1 into $\hat{\eta}=\hat{\beta}_0+\hat{\beta}_1 \times \mathbb{I}_D$. Exponentiating $\hat{\eta}$ gives the odds, and $\exp(\hat{\eta})/[1+\exp(\hat{\eta})]$ gives the probability. In R, `type = "link"` returns log-odds and `type = "response"` returns probabilities. Try subtracting the “No” log-odds in (a) from the “Yes” log-odds. Which coefficient do you get?
+
+```{r caffeine-model}
+m2_caff <- glm(taste_pref ~ daily_caff, data = df_coke,
+               family = binomial(link = "logit"))
+coef(m2_caff)
+
+# One prediction for each group, in the same order as the vote table.
+caff_fit <- select(caff_votes, daily_caff)
+caff_fit$log_odds <- predict(m2_caff, newdata = caff_fit, type = "link")
+# caff_fit$odds <- exp(___)
+# caff_fit$probability <- predict(m2_caff, newdata = caff_fit, type = "___")
+# caff_fit
+# exp(coef(m2_caff)["daily_caffYes"])
+```
+
+**Answer**
+
+## Question 05. Test the sweetness slope and build its interval (15 points)
+
+Return to the sweetness model, `m1_sweet`, from Question 03.
+
+**(a) Two-sided Wald $z$-test (8 points).** State $H_0$ and $H_1$ for the sweetness slope. Using its estimate and standard error, calculate $z$ and the two-sided $p$-value. Check both against `summary(m1_sweet)`. Give your decision at $\alpha=0.05$ and a conclusion about taste preference.
+
+*Hint.* Test the population slope $\beta_1$. A two-sided alternative allows either sign. Compute $z=\hat{\beta}_1/SE(\hat{\beta}_1)$ and use both tails of the standard normal distribution. In the `sweet_score` row, check your results against `z value` and `Pr(>|z|)`. Compare the unrounded $p$-value with 0.05 before writing your conclusion.
+
+```{r wald-test}
+coef_table <- summary(m1_sweet)$coefficients
+coef_table
+# Read across the sweet_score row for the estimate and its standard error.
+b1  <- coef_table["sweet_score", "Estimate"]
+se1 <- coef_table["sweet_score", "Std. Error"]
+z_obs <- b1 / se1
+z_obs
+# Replace the blank with the z statistic you just calculated.
+# p_wald <- 2 * pnorm(-abs(___))
+# p_wald
+```
+
+**Answer**
+
+**(b) A 95% confidence interval (7 points).** Calculate the Wald interval $\hat\beta_1 \pm z^* SE(\hat\beta_1)$ using `qnorm()`. Verify it with `confint.default()`. Interpret the endpoints on the log-odds scale for a one-point increase in score. How does the interval support your decision in part (a)?
+
+*Hint.* Compute one margin of error, $z^*\times SE(\hat{\beta}_1)$. Subtract it from the slope for the lower endpoint and add it for the upper endpoint. In your interpretation, name the one-point change in sweetness and the change in **log-odds**. Check where zero falls relative to your two endpoints.
+
+```{r wald-interval}
+z_star <- qnorm(1 - 0.05 / 2)
+margin <- z_star * se1
+# c(lower = b1 - ___, upper = b1 + ___)
+# After your manual calculation, run this check.
+# confint.default(m1_sweet, parm = "sweet_score", level = 0.95)
+```
+
+**Answer**
+
+## Question 06. Does the grocery aisle add information? (16 points)
+
+One taster buys regular soda. Another looks for cane sugar on the label. Do those habits tell us more than the taste rating? Fit the following two models to the same `df_coke` rows. In `m3_add_habit`, the reference group for `soda_type` is tasters who rarely or never drink soft drinks.
+
+```{r fit-habit-models}
+m3_add_habit <- glm(taste_pref ~ sweet_score + soda_type, data = df_coke,
+                    family = binomial(link = "logit"))
+m4_habit_behav <- glm(taste_pref ~ seek_cane + reg_soda, data = df_coke,
+                      family = binomial(link = "logit"))
+```
+
+**(a) Does sweetness improve the null model? (5 points).** Use a nested likelihood ratio test to compare `m0_null` (reduced) with `m1_sweet` (full). State the hypotheses. Report the reduction in deviance $G$, degrees of freedom, $p$-value, and decision at 0.05.
+
+*Hint.* The models differ by one sweetness slope. What value of that slope would make the full model reduce to the null model? In the second row of `anova()`, read `Df`, `Deviance`, and `Pr(>Chi)`. Check the sign of $G$ by subtracting the full model's deviance from the reduced model's deviance.
+
+```{r lrt-sweetness}
+lrt_sweet <- anova(m0_null, m1_sweet, test = "Chisq")
+lrt_sweet
+# Check the entry in the Deviance column.
+# G <- deviance(m0_null) - deviance(___)
+```
+
+**Answer**
+
+**(b) Does usual soda type help after accounting for sweetness? (6 points).** Compare `m1_sweet` (reduced) with `m3_add_habit` (full) using a nested likelihood ratio test. State the **joint** null and alternative hypotheses for the added soda-type coefficients. Explain the degrees of freedom, report $G$ and the $p$-value, and give a contextual conclusion.
+
+*Hint.* Both models already contain `sweet_score`. Use `levels()` to identify the reference soda type and `coef(m3_add_habit)` to see the added coefficients. The joint null sets every added coefficient to zero. Count those coefficients for the degrees of freedom. Read the second row of the new test table.
+
+```{r lrt-soda-type}
+levels(df_coke$soda_type)
+coef(m3_add_habit)
+# Supply the model that includes sweet_score and soda_type.
+# anova(m1_sweet, ___, test = "Chisq")
+```
+
+**Answer**
+
+**(c) Compare four candidates using AIC (5 points).** Report the AIC for the four candidates in the code below and select one using the handout's AIC rule. Explain how that choice compares with the decision in part (a).
+
+*Hint.* Each row of the R output represents one model. Read down the `AIC` column and find the model with the smallest value. For the comparison with part (a), identify what each method uses to make its decision. The test compares a $p$-value with 0.05. AIC balances improvement in fit against a penalty for extra coefficients.
+
+```{r compare-aic}
+AIC(m0_null, m1_sweet, m3_add_habit, m4_habit_behav)
+```
+
+**Answer**
+
+## Question 07. Predict two tasters' choices (8 points)
+
+Use `m1_sweet` for the remaining questions. The first taster says **US Regular Coke is much sweeter**. The second says **Mexican Coke is slightly sweeter**.
+
+**(a) Predict on two scales (4 points).** Identify each sweetness score. Use `predict()` to report the predicted log-odds and predicted probability of preferring Mexican Coke for each taster.
+
+*Hint.* Run the first line below to match each rating to its score. Enter the two scores in the same order as the tasters in the question. The new data frame must use the predictor name `sweet_score`. In `predict()`, `"link"` returns fitted log-odds ($\hat{\eta}$) and `"response"` returns fitted probability ($\hat{\pi}$).
+
+```{r two-predictions}
+data.frame(sweet_score = 1:5, rating = levels(df_coke$sweet_comp))
+# new_tasters <- data.frame(sweet_score = c(___, ___))
+# new_tasters$log_odds <- predict(m1_sweet, newdata = new_tasters, type = "link")
+# new_tasters$probability <- predict(m1_sweet, newdata = new_tasters, type = "response")
+# new_tasters
+```
+
+**Answer**
+
+**(b) Make the call (4 points).** For the second taster, show how to convert the predicted log-odds into a probability by hand. Classify **both** tasters using the rule “predict Mexican Coke when $\hat\pi \ge 0.5$.” Name the Coke you would predict for each.
+
+*Hint.* Take the second taster's `log_odds` value from (a) and substitute it for $\hat{\eta}$ in $\exp(\hat{\eta})/[1+\exp(\hat{\eta})]$. Check that it agrees with the second `probability` value. For classification, compare **each probability** with 0.5, then translate the 0/1 predictions back to Coke names.
+
+**Answer**
+
+## Question 08. Which tasters do the models classify correctly? (14 points)
+
+Use the same 0.5 cutoff and evaluate predictions on the tasters used to fit `m1_sweet`. Mexican Coke is the **positive** class.
+
+**(a) Construct the confusion matrix (4 points).** Put observed choices in the rows and predicted choices in the columns. Show the four counts, keeping US Regular Coke coded 0 and Mexican Coke coded 1.
+
+*Hint.* Read a cell as [observed, predicted]. For example, `conf_mat["0", "1"]` counts actual US Regular Coke voters whom the model calls Mexican Coke. The two diagonal cells count correct predictions. The four cells together should sum to the number of tasters in Question 01(b).
+
+```{r confusion-matrix}
+pi_hat <- predict(m1_sweet, type = "response")
+predicted_class <- ifelse(pi_hat >= 0.5, 1, 0)
+conf_mat <- table(
+  Observed = factor(df_coke$pref_mex, levels = c(0, 1)),
+  Predicted = factor(predicted_class, levels = c(0, 1))
+)
+conf_mat
+```
+
+**Answer**
+
+**(b) Calculate three classification measures (6 points).** Report **accuracy**, **sensitivity**, and **specificity**. For each measure, give its numerator and denominator and explain what it measures for these tasters.
+
+*Hint.* Use your counts from Question 01(b). Accuracy uses all tasters (`total_votes`). Sensitivity uses the actual Mexican Coke voters (`n_mex`), and specificity uses the actual US Regular Coke voters (`n_us`). In each case, the numerator counts the correct predictions in that group.
+
+```{r classification-measures}
+correct_mex <- conf_mat["1", "1"]
+correct_us  <- conf_mat["0", "0"]
+accuracy <- (correct_mex + correct_us) / total_votes
+accuracy
+# sensitivity <- correct_mex / ___
+# specificity <- correct_us / ___
+# sensitivity
+# specificity
+```
+
+**Answer**
+
+**(c) Compare the two prediction rules (4 points).** Use the null model from Question 02 to explain why it predicts Mexican Coke for every taster at a cutoff of 0.5. Does the sweetness model correctly classify more tasters? Report each model's accuracy. For each model, give the number of Mexican Coke voters and US Regular Coke voters it misclassifies.
+
+*Hint.* Compare the null model's fitted probability with 0.5. If every prediction is Mexican Coke, how many of the `n_mex` Mexican Coke voters and `n_us` US Regular Coke voters are classified correctly? For the sweetness model, read the two error counts from part (a). The rows tell you which Coke those tasters actually chose.
+
+```{r compare-classifiers}
+p_null              # common fitted probability from Question 02(c)
+conf_mat            # sweetness model from part (a)
+
+# Divide the number of correct null-model predictions by all two-choice votes.
+# null_accuracy <- n_mex / ___
+# null_accuracy
+accuracy            # sweetness model from part (b)
+```
+
+**Answer**
+
+## Point summary
+
+| Question | Topic | Points |
+|:--|:--|--:|
+| 01 | Preference proportions | 10 |
+| 02 | Null model, odds, and log-odds | 15 |
+| 03 | Fitted sweetness model | 12 |
+| 04 | Group vote counts and logistic regression by daily caffeine use | 10 |
+| 05 | Wald test and confidence interval | 15 |
+| 06 | Nested likelihood ratio tests and AIC | 16 |
+| 07 | Prediction | 8 |
+| 08 | Classification | 14 |
+| **Total** | | **100** |
